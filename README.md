@@ -1,12 +1,14 @@
-# Memory graph scaffold
+# Know Thyself
 
-A portable method for turning Claude's memory of you into a structured graph —
+A portable method for turning an LLM's memory of you into a structured graph —
 one that separates observations from interpretations, flags which claims are
 load-bearing, and surfaces insights that only appear at the intersection of
 multiple patterns.
 
 Built on [Patrick McCarthy's open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph)
 schema, adapted for personal memory rather than scientific claims.
+
+Narrative companion essay: **[Know Thyself: a schema for personal memory in LLM conversations](https://parrik.com/essays/know-thyself/)**.
 
 ---
 
