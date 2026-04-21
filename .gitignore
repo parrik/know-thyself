@@ -1,0 +1,4 @@
+.venv/
+case-study/
+*.pyc
+__pycache__/

@@ -1,0 +1,342 @@
+# ==============================================================================
+# example-graph.yaml — a small fictional example demonstrating the schema
+#
+# This is a composite persona (not a real person) designed to show every node
+# type and evidence type in use. Use it as a reference when building your own
+# graph. Your graph will be larger, more specific, and will include things this
+# example doesn't cover.
+#
+# Persona: "Alex," mid-40s, recently moved to a new city after a long career in
+# publishing, managing the transition while raising a teenage child.
+# ==============================================================================
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  REFERENCES — biographical facts
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: R01-origin
+  type: reference
+  name: "Grew up in a small town in the Pacific Northwest"
+  statement: |
+    Born and raised in a town of ~8,000 people. Rural, close-knit community.
+    Left at 18 for university in a large city.
+  provenance:
+    attribution: { source: "Alex, self-report", date: "2025" }
+    evidence: { type: self-report }
+    derivation: { from: [], method: "direct" }
+
+- id: R02-career
+  type: reference
+  name: "20 years in publishing — editor then senior editor"
+  statement: |
+    Career arc: trade publishing 2005-2015, then academic publishing
+    2015-2024. Senior editor at the last role, managing a small team.
+  provenance:
+    attribution: { source: "Alex, self-report + LinkedIn", date: "2025" }
+    evidence: { type: external-record }
+    derivation: { from: [], method: "direct" }
+
+- id: R03-family
+  type: reference
+  name: "Single parent; teenage child (age 14)"
+  statement: |
+    Divorced 2019. Primary caregiver for a 14-year-old. Ex-partner lives
+    in the previous city; shared custody is possible but practically rare.
+  provenance:
+    attribution: { source: "Alex, self-report", date: "2025" }
+    evidence: { type: self-report }
+    derivation: { from: [], method: "direct" }
+
+- id: R04-move
+  type: reference
+  name: "Moved to a new city in August 2024 for a new job"
+  statement: |
+    Relocated ~800 miles for a director-level role at a smaller publishing
+    house. The move involved selling the old house, renting in the new city,
+    enrolling the child in a new school.
+  provenance:
+    attribution: { source: "Alex, self-report", date: "2025" }
+    evidence: { type: self-report }
+    derivation: { from: [], method: "direct" }
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  OBSERVATIONS — specific episodes
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: O01-first-three-months
+  type: observation
+  name: "First three months in new city — isolation and overwhelm"
+  statement: |
+    Sep-Nov 2024: Alex describes the first three months in the new city
+    as the hardest stretch. Working long hours at the new job, child
+    struggling at the new school, no friends yet. Minimal sleep. Stopped
+    the running routine that had been daily for years.
+  provenance:
+    attribution: { source: "Alex, self-report", date: "2024-12" }
+    evidence: { type: self-report }
+    derivation: { from: [R04-move], method: "direct" }
+
+- id: O02-running-group
+  type: observation
+  name: "Joined a local running group December 2024"
+  statement: |
+    Dec 2024: Alex joined a small Sunday running group through a
+    community app. First weeks felt awkward. By week four had a regular
+    conversation with two members. The routine restarted naturally around
+    the social anchor.
+  provenance:
+    attribution: { source: "Alex, self-report", date: "2025-01" }
+    evidence: { type: self-report }
+    derivation: { from: [O01-first-three-months], method: "direct; causal relation to prior state" }
+
+- id: O03-therapist-referral
+  type: observation
+  name: "Started seeing a therapist Feb 2025"
+  statement: |
+    Feb 2025: Alex began seeing a therapist weekly. Referred by a colleague
+    at the new job. First month described as "mostly just talking"; by
+    month three, beginning to notice repeating patterns in own reactions.
+    HANDLING: Alex is private about the content of therapy. Do not ask
+    about session specifics unless Alex raises them.
+  provenance:
+    attribution: { source: "Alex, self-report", date: "2025-05" }
+    evidence: { type: self-report }
+    derivation: { from: [], method: "direct" }
+
+- id: O04-daughter-grades-recovered
+  type: observation
+  name: "Child's grades recovered in spring semester"
+  statement: |
+    Spring 2025: child's grades, which had dropped in the fall after the
+    move, recovered to pre-move levels by April. Alex attributes this to
+    (a) a specific teacher the child connected with, and (b) more stability
+    at home as Alex's own routine re-established.
+  provenance:
+    attribution: { source: "Alex, self-report + report cards", date: "2025-05" }
+    evidence: { type: external-record }
+    derivation: { from: [R03-family, R04-move], method: "direct" }
+
+- id: O05-workplace-conflict
+  type: observation
+  name: "Conflict with a senior colleague, March 2025"
+  statement: |
+    March 2025: disagreement with a senior colleague over an acquisitions
+    decision. Alex held the position, eventually persuaded the rest of the
+    team, but the colleague has remained cool since. Alex reported feeling
+    "stretched but not wrong."
+  provenance:
+    attribution: { source: "Alex, self-report", date: "2025-04" }
+    evidence: { type: self-report }
+    derivation: { from: [R02-career], method: "direct" }
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  OVERLAPS — patterns grounded by 2+ independent episodes
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: P01-routine-as-regulation
+  type: overlap
+  name: "Physical routine is load-bearing for Alex's stability"
+  statement: |
+    When Alex's physical routine (running, sleep) breaks down, other
+    things deteriorate proportionally — work hours extend, child's needs
+    are harder to respond to, mood lowers. When it returns, the other
+    things stabilize. This is not a preference — it appears to be
+    structural.
+  provenance:
+    attribution: { source: "Pattern across episodes" }
+    evidence:
+      type: pattern-across-cases
+      references: [O01-first-three-months, O02-running-group, O04-daughter-grades-recovered]
+      description: "Three independent instances: routine-breakdown in Sep-Nov produced overwhelm; routine-restart in Dec produced stability return; child's recovery coincided with Alex's routine re-establishing"
+    derivation:
+      from: [O01-first-three-months, O02-running-group, O04-daughter-grades-recovered]
+      method: "induction across independent instances"
+
+- id: P02-holds-positions-in-work
+  type: overlap
+  name: "Alex holds positions in work even when costly"
+  statement: |
+    In work contexts, Alex is willing to hold a minority position and
+    persuade toward it, rather than yielding for social ease. This has
+    both positive outcomes (successful acquisitions, team respect) and
+    costs (cooled relationships with those overruled).
+  provenance:
+    attribution: { source: "Pattern across episodes" }
+    evidence:
+      type: pattern-across-cases
+      references: [R02-career, O05-workplace-conflict]
+      description: "The march 2025 conflict is one instance; the career history references multiple similar stretches"
+    derivation:
+      from: [R02-career, O05-workplace-conflict]
+      method: "induction; note: only two episodes detailed, so promotion to overlap is marginal"
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  NOVEL — single-derivation interpretations. TENTATIVE.
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: N01-isolation-is-early-warning
+  type: novel
+  tentative: true
+  name: "Isolation is an early warning signal, not a neutral state"
+  statement: |
+    PROPOSED: for Alex, extended periods without meaningful social contact
+    don't simply feel neutral or quiet — they appear to be upstream of
+    physical-routine breakdown and downstream effects. The first-three-
+    months episode is the clearest case.
+  provenance:
+    attribution: { source: "Surfaced in conversation May 2025" }
+    evidence:
+      type: derived-inference
+      description: "Derived from a single detailed episode (O01) plus general theoretical framing"
+      references: [O01-first-three-months]
+    derivation:
+      from: [O01-first-three-months]
+      method: "inductive from one case; no counterfactual on record"
+  caveats: |
+    Could be wrong because:
+    (1) O01 conflates isolation with several other changes (new job
+        pressure, child's struggles, house move) — isolation may not be
+        the driver.
+    (2) Only one detailed episode; needs a second independent instance.
+    (3) Alex might be describing a general stretch of difficulty, with
+        isolation as a coincident feature rather than cause.
+
+- id: N02-therapy-as-pattern-finding
+  type: novel
+  tentative: true
+  name: "Therapy is functioning as pattern-finding, not emotional processing"
+  statement: |
+    PROPOSED: Alex's description of therapy ("noticing repeating patterns
+    in own reactions") suggests it is being used primarily as a cognitive
+    tool for self-observation, rather than as emotional processing of
+    specific events. This may be appropriate for Alex's current stage or
+    may be a way of staying at one remove.
+  provenance:
+    attribution: { source: "Surfaced May 2025" }
+    evidence:
+      type: derived-inference
+      references: [O03-therapist-referral]
+    derivation:
+      from: [O03-therapist-referral]
+      method: "interpretive; single source"
+  caveats: |
+    This is speculative. Alex has been private about session content
+    (see O03 HANDLING) so the interpretation relies on brief described
+    framing only. Should not be propagated until Alex confirms or
+    disconfirms directly.
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  EMERGENT — produced by intersection
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: E01-child-stability-depends-on-alex-stability
+  type: emergent
+  name: "Child's stability in the new city depends on Alex's routine stability"
+  statement: |
+    Emerges from intersection of routine-as-regulation (P01) and the
+    observation that the child's grade recovery (O04) coincided with Alex
+    re-establishing physical routine. Neither alone produces the claim;
+    together they do. Operational consequence: prioritizing Alex's
+    routine is not self-indulgence — it's direct parenting infrastructure.
+  provenance:
+    attribution: { source: "Surfaced May 2025" }
+    evidence:
+      type: derived-inference
+      description: "Intersection-produced — not present in P01 alone or O04 alone"
+      references: [P01-routine-as-regulation, O04-daughter-grades-recovered]
+    derivation:
+      from: [P01-routine-as-regulation, O04-daughter-grades-recovered]
+      method: "Intersection: P01 alone says 'routine is load-bearing for Alex'; O04 alone says 'child's grades recovered'; together they say the downstream effect of Alex's routine extends to the child"
+  edges:
+    - to: P01-routine-as-regulation
+      relation: emergent_from
+      provenance:
+        evidence:
+          type: derived-inference
+          description: "This node is produced by the intersection of P01 and O04"
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  EQUIVALENCY — bridges to external theoretical frameworks (optional)
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: EQ01-scaffolding-through-ritual
+  type: equivalency
+  name: "Routine as structural scaffolding (external-theory bridge)"
+  statement: |
+    Alex is familiar with the concept of "ritual structure" from
+    contemplative literature — the idea that repeated physical practice
+    maintains the internal conditions for clarity. P01 (routine-as-
+    regulation) is a personal instance of this broader framework. The
+    equivalency is informational, not prescriptive — it names a thing
+    Alex already has vocabulary for.
+  provenance:
+    attribution:
+      source: "General philosophical/contemplative literature on practice and ritual"
+    evidence:
+      type: external-record
+      description: "Framework is external and well-documented; the link to Alex's case is interpretive"
+    derivation:
+      from: []
+      method: "External framework bridged to P01"
+  edges:
+    - to: P01-routine-as-regulation
+      relation: grounds
+      provenance:
+        attribution: { source: "Interpretive link made in conversation" }
+        evidence:
+          type: derived-inference
+          description: "The external framework provides grounding vocabulary for P01"
+        derivation:
+          method: "External framework bridged to P01"
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  PRACTICES — operating rules derived from descriptive claims (optional)
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: PR01-protect-sunday-run
+  type: practice
+  name: "Sunday 8–10am is protected for the running group"
+  statement: |
+    Operating rule adopted after the pattern clarified: no work events,
+    no family scheduling Sunday 8–10am. The routine is upstream of
+    everything else, and the child's stability indexes off it, so
+    protecting it is not self-indulgence but operational infrastructure.
+  provenance:
+    attribution: { source: "Alex, self-articulated rule", date: "2025-05" }
+    evidence:
+      type: pattern-across-cases
+      references: [P01-routine-as-regulation, E01-child-stability-depends-on-alex-stability]
+      description: "Rule derives from the established pattern + the intersection node that makes its stakes legible"
+    derivation:
+      from: [P01-routine-as-regulation, E01-child-stability-depends-on-alex-stability]
+      method: "normative rule derived from overlap + emergent node"
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  OPEN QUESTIONS
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: OQ01-long-term-plan
+  type: open
+  name: "Is the move a 2-3 year plan or a permanent relocation?"
+  statement: |
+    Alex has not said. The question matters for several downstream
+    decisions (child's schooling, buying vs. renting, depth of community
+    investment). Do not let this get quietly absorbed into an assumed
+    answer — Alex should decide explicitly.
+  provenance:
+    attribution: { source: "Open as of May 2025" }
+    evidence: { type: derived-inference }
+    derivation: { from: [R04-move], method: "unresolved" }
+
+- id: OQ02-relationship-with-ex
+  type: open
+  name: "Is the cool relationship with ex-partner stable or in drift?"
+  statement: |
+    The practical constraints of distance have produced less contact
+    than formal custody anticipates. Unclear whether this is a stable
+    equilibrium or a slow drift toward a more distant arrangement that
+    Alex has feelings about but has not named.
+  provenance:
+    attribution: { source: "Open as of May 2025" }
+    evidence: { type: derived-inference }
+    derivation: { from: [R03-family], method: "unresolved" }
