@@ -1,0 +1,543 @@
+# Alex — fictional case study for the Know Thyself schema
+# A teachable example showing every node type in use.
+# Nothing here maps to a real person. The scenario is deliberately
+# generic: a mid-career engineer weighing whether to leave a stable
+# senior IC role for a seed-stage startup.
+
+version: 2026-04-23
+owner: alex
+license: CC0 — this file is an illustrative example, reuse freely.
+
+# ─────────────────────────────────────────────────────────────
+# NOW — the top-of-stack entry point
+# ─────────────────────────────────────────────────────────────
+
+nodes:
+
+- id: NOW
+  type: now
+  name: Deciding by May 15
+  statement: |
+    Offer letter from Harbor.ai on the table since Apr 9. Verbal
+    deadline is May 15. Three moves open this week:
+      1. Second call with the two co-founders — push on runway math.
+      2. Reference calls with the last two engineers who left.
+      3. Sit-down with partner on Sunday to revisit the family
+         side of the tradeoff now that numbers are concrete.
+    Not optimizing for the offer. Optimizing for a decision I can
+    still defend in 18 months whether it works or not.
+  related_to: [O01-harbor-offer, OP01-startup-fit, OT01-partner-buyin, P01-decision-log]
+
+# ─────────────────────────────────────────────────────────────
+# REFERENCES — factual, single-source, no interpretation
+# ─────────────────────────────────────────────────────────────
+
+- id: R01-current-role
+  type: reference
+  name: Current role — Staff Engineer at Meridian
+  statement: |
+    Joined Meridian in Jun 2020 as Senior SWE, promoted to Staff
+    Sep 2023. Total comp at last refresh (Feb 2026): $385k
+    (base $215k, equity $140k RSU, bonus target 15%). Remote with
+    quarterly on-sites. Reporting to same skip-level for 4 years.
+
+- id: R02-family
+  type: reference
+  name: Family structure
+  statement: |
+    Partner (Sam) works part-time as a clinical psychologist since
+    kid was born. One child, age 4, starting school Fall 2026.
+    Joint monthly burn ~$11.8k (mortgage $4.1k, daycare $2.2k,
+    other $5.5k). Liquid savings: 14 months at current burn.
+
+- id: R03-harbor-terms
+  type: reference
+  name: Harbor.ai offer terms
+  statement: |
+    Seed-stage, $6M raised Nov 2025, post-money $28M. Role:
+    Founding Engineer #4. Offer: $185k base, 1.2% equity
+    4-yr vest 1-yr cliff, no bonus, health covered. Runway per
+    CFO deck: 22 months at current burn. Two co-founders, both
+    ex-Meridian (different org than mine), known since 2022.
+
+- id: R04-past-offer-2022
+  type: reference
+  name: Declined offer — Ripple (Mar 2022)
+  statement: |
+    Series-A fintech. Offered Senior Staff, $240k base,
+    0.4% equity. Declined mainly because partner was 7mo pregnant
+    and I didn't want to add job change to that period. Company
+    raised a down round in 2024, still operating, reportedly flat.
+
+- id: R05-layoff-2019
+  type: reference
+  name: Layoff at Crestline (Jan 2019)
+  statement: |
+    Part of a 12% RIF at Crestline after the Series-C fell
+    through. Severance: 8 weeks. Found Meridian role in 11 weeks.
+    This was before kid, before mortgage.
+
+- id: R06-canary-engagement
+  type: reference
+  subcategory: canary
+  name: Canary — engagement decline as burnout leading indicator
+  statement: |
+    Maslach & Leiter (2016, World Psychiatry) find cynicism and
+    reduced professional efficacy predict burnout 6–12 months
+    before exhaustion peaks. Operationally: if I notice I'm
+    reflexively declining design-review invites for >3 weeks,
+    that's my early warning, not "I feel tired."
+  citation: "Maslach & Leiter, World Psychiatry 15(2), 2016"
+
+- id: R07-canary-sleep
+  type: reference
+  subcategory: canary
+  name: Canary — sleep-onset latency >30 min
+  statement: |
+    Sleep-onset latency above 30 minutes for more than two weeks
+    is a validated marker of rumination load (Harvey 2002; Espie
+    2006). For me this has preceded every bad call I remember
+    making. Not a mood check — a timer check.
+  citation: "Harvey, Behav Res Ther 40(8), 2002"
+
+- id: R08-canary-partner-affect
+  type: reference
+  subcategory: canary
+  name: Canary — partner volunteers concern unprompted
+  statement: |
+    Gottman's work on bids (1999) suggests that when the
+    non-stressed partner spontaneously raises the stressor,
+    the system is already stressed enough to be visible from
+    outside. If Sam brings up work without me bringing it up
+    first, the water is already boiling.
+  citation: "Gottman, The Seven Principles..., 1999"
+
+- id: R09-lens-circuit-breaker
+  type: reference
+  subcategory: lens
+  name: Lens — circuit breakers (from distributed systems)
+  statement: |
+    A circuit breaker trips on *rate of failure*, not a single
+    failure, and stays open long enough to let the downstream
+    recover. Applied to decisions: don't reverse a stance on
+    one bad data point; but if three independent signals flip
+    within a short window, trip the breaker and stop, don't
+    "push through."
+
+- id: R10-lens-optimal-stopping
+  type: reference
+  subcategory: lens
+  name: Lens — optimal stopping (37% rule)
+  statement: |
+    Secretary problem: sample ~37% of candidates, then take
+    the first that beats everything seen so far. Applied loosely
+    to job search: I've now been in-market for ~3 months of a
+    nominal 8-month window. Too early to commit to the first
+    strong offer unless it clearly dominates — and Harbor doesn't
+    clearly dominate yet.
+  citation: "Christian & Griffiths, Algorithms to Live By, 2016"
+
+- id: R11-lens-lindy
+  type: reference
+  subcategory: lens
+  name: Lens — Lindy effect on founder chemistry
+  statement: |
+    Lindy: the future life expectancy of a non-perishable thing
+    is proportional to its current age. Applied to the co-founder
+    relationship: they've been building together for 3 years,
+    survived one pivot. That's real Lindy signal vs. a newly-
+    formed founding team.
+
+# ─────────────────────────────────────────────────────────────
+# OBSERVATIONS — single timestamped data points
+# ─────────────────────────────────────────────────────────────
+
+- id: O01-harbor-offer
+  type: observation
+  date: 2026-04-09
+  name: Received Harbor offer letter
+  statement: |
+    Offer arrived by email 11:42am. Noticed I read it twice
+    before feeling anything, then felt a narrow kind of
+    excitement — not broad. Equity math: if Harbor hits a
+    $250M outcome in 5 years, my stake nets roughly $1.9M
+    pre-tax at current dilution assumptions.
+
+- id: O02-cofounder-dinner
+  type: observation
+  date: 2026-03-28
+  name: Dinner with Harbor co-founders
+  statement: |
+    3-hour dinner. Noted: they disagreed twice in front of me
+    and resolved both cleanly. Neither interrupted the other.
+    When I asked about their biggest mistake, they named the
+    same one without conferring. Drove home feeling calmer
+    than I went in — unusual for a recruitment dinner.
+
+- id: O03-manager-1on1
+  type: observation
+  date: 2026-04-14
+  name: 1:1 with manager — told him I was looking
+  statement: |
+    Told Priya I was considering an outside offer. She asked
+    one clarifying question then said, "What would make you
+    stay?" I did not have a crisp answer. That absence felt
+    more informative than anything she said.
+
+- id: O04-sleep-log
+  type: observation
+  date: 2026-04-18
+  name: Sleep-onset latency tracked this week
+  statement: |
+    Average sleep-onset latency Mon–Fri: 42 minutes. Baseline
+    in Q1 was 18 minutes. Matches R07 threshold.
+
+- id: O05-sam-raised-it
+  type: observation
+  date: 2026-04-20
+  name: Sam brought up Harbor unprompted over breakfast
+  statement: |
+    Sunday morning. I hadn't mentioned Harbor since Thursday.
+    Sam said, "Are we actually going to talk about this or
+    are you going to decide it in your head?" Tone was soft,
+    not loaded. Matches R08 signal.
+
+- id: O06-skip-declined-reviews
+  type: observation
+  date: 2026-04-12
+  name: Noticed I've declined 4 of 5 design reviews this month
+  statement: |
+    Pulled calendar. Declined 4 of 5 design-review invites in
+    Apr. Q1 I declined 2 of 22. This is the R06 signal
+    firing, distinct from workload — workload is actually
+    down this quarter.
+
+- id: O07-imposter-spike
+  type: observation
+  date: 2026-04-16
+  name: Imposter-flavor anxiety spike after reading TechCrunch piece
+  statement: |
+    Read a TC piece about a peer Staff eng who raised $12M.
+    Spent 20 minutes feeling small. Noticed the feeling,
+    logged it, did not act on it. Passed in about 90 minutes.
+
+# ─────────────────────────────────────────────────────────────
+# OVERLAPS — interpretive, grounded in multiple observations
+# ─────────────────────────────────────────────────────────────
+
+- id: OT01-partner-buyin
+  type: overlap
+  name: I take career risk well only when partner actively buys in
+  statement: |
+    Crestline (2019) — Sam was all-in on me taking the risk,
+    landed fine. Ripple (2022) — partner was late-pregnancy,
+    I declined and it was right. Meridian promotion (2023) —
+    Sam pushed me to ask, it worked. Pattern: when I move
+    against partner energy, outcomes skew negative regardless
+    of the decision's own merits. Buy-in isn't a veto, it's
+    load-bearing.
+  grounded_by: [R04-past-offer-2022, R05-layoff-2019, O05-sam-raised-it]
+  related_to: [E01-startup-fit, OP01-startup-fit]
+
+- id: OT02-narrow-excitement-means-ego
+  type: overlap
+  name: Narrow excitement at offers means I'm reading status, not fit
+  statement: |
+    Every time I've felt that specific *narrow* excitement — the
+    one that lives behind the sternum, not in the chest — I've
+    later found the offer didn't actually match what I wanted.
+    Broad calm excitement has been more predictive. O01 showed
+    narrow. O02 showed broad. Split signal.
+  grounded_by: [O01-harbor-offer, O02-cofounder-dinner, O07-imposter-spike]
+
+- id: OT03-absence-of-stay-answer
+  type: overlap
+  name: If I can't articulate why I'd stay, I've already left
+  statement: |
+    Crestline (2018, pre-layoff) — couldn't articulate why I'd
+    stay 6 months before the RIF. Previous role before Crestline —
+    same pattern 4 months before I resigned. O03 is the third
+    instance. Not a reason to leave yet, but a reason to stop
+    pretending the decision is open.
+  grounded_by: [O03-manager-1on1, R05-layoff-2019]
+
+- id: OT04-burnout-signals-stacked
+  type: overlap
+  name: Three burnout canaries are firing simultaneously
+  statement: |
+    R06 (engagement) fired per O06. R07 (sleep) fired per O04.
+    R08 (partner affect) fired per O05. Per R09 lens: three
+    independent signals in a short window = trip the breaker.
+    This doesn't tell me where to go. It tells me the current
+    state isn't stable no matter what I decide about Harbor.
+  grounded_by: [R06-canary-engagement, R07-canary-sleep, R08-canary-partner-affect, O04-sleep-log, O05-sam-raised-it, O06-skip-declined-reviews]
+  related_to: [R09-lens-circuit-breaker]
+
+# ─────────────────────────────────────────────────────────────
+# NOVEL — single-derivation interpretation, tentative
+# ─────────────────────────────────────────────────────────────
+
+- id: N01-staying-is-the-active-choice
+  type: novel
+  tentative: true
+  name: Staying at Meridian would be the active decision now, not the passive one
+  statement: |
+    Default framing: leaving = action, staying = inertia. But
+    given OT03 (I've already partially left mentally) and OT04
+    (burnout canaries firing), staying would require *rebuilding*
+    the role — new scope, new manager possibly, explicit reset.
+    That's arguably more active work than taking Harbor. Tentative
+    because I've only thought this for 3 days and haven't
+    stress-tested it with anyone.
+  grounded_by: [OT03-absence-of-stay-answer, OT04-burnout-signals-stacked]
+
+- id: N02-equity-is-a-red-herring
+  type: novel
+  tentative: true
+  name: The equity number is emotionally load-bearing but decision-irrelevant
+  statement: |
+    I've run the $1.9M number in my head ~8 times. But at a
+    realistic base-rate of seed-stage outcomes (~15% reach a
+    material exit per Correlation Ventures 2024), expected value
+    is ~$285k over 5 years, less than the comp delta I'd give up.
+    The number is doing emotional work, not financial work.
+    Tentative — base rate is broad and Harbor may not be average.
+  grounded_by: [R03-harbor-terms, R01-current-role]
+
+# ─────────────────────────────────────────────────────────────
+# EMERGENT — precipitates from intersection; high speculation
+# ─────────────────────────────────────────────────────────────
+
+- id: E01-startup-fit
+  type: emergent
+  tentative: true
+  name: Startup fit = intersection of mission pull, founder chemistry, and liquidity tolerance
+  statement: |
+    For me, a startup is "worth it" only when three things co-occur:
+    (1) mission I'd still care about if equity went to zero,
+    (2) founder chemistry that survives the first real disagreement,
+    (3) household liquidity runway ≥ 12 months. Any two without
+    the third has produced regret historically. All three present
+    = move. Emergent because it names a shape I hadn't articulated
+    until I saw R04, OT01, and O02 on the same page.
+  precipitates_from: [R04-past-offer-2022, OT01-partner-buyin, O02-cofounder-dinner, R02-family]
+
+- id: E02-stable-from-outside-unstable-from-inside
+  type: emergent
+  tentative: true
+  name: My current role is outwardly stable and inwardly already destabilized
+  statement: |
+    Comp, title, and team are stable. Engagement, sleep, and
+    partner read are not. An outside observer would call Meridian
+    the safe choice; the internal instrument panel says the safe
+    choice is already gone. The decision isn't stable-vs-risky,
+    it's *which* instability to accept.
+  precipitates_from: [OT04-burnout-signals-stacked, N01-staying-is-the-active-choice, R01-current-role]
+
+# ─────────────────────────────────────────────────────────────
+# EQUIVALENCY — two things the same under a transform
+# ─────────────────────────────────────────────────────────────
+
+- id: Q01-harbor-equals-ripple-modulo-founders
+  type: equivalency
+  name: Harbor ≡ Ripple-2022 under the transform "swap founders, swap family stage"
+  statement: |
+    Structurally: both are Series Seed/A, both ~1% equity at
+    similar dilution, both required a ~20% base cut. The
+    differences that matter: founder chemistry (Harbor >> Ripple
+    per O02 vs. no equivalent 2022 datapoint), and family phase
+    (Ripple was 7mo-pregnant; Harbor is stable 4yo + part-time
+    partner). If I accept that the 2022 "no" was correct,
+    symmetry says the 2026 answer flips *only if* founder signal
+    and family stability are both real — not one without the other.
+  related_to: [R03-harbor-terms, R04-past-offer-2022, O02-cofounder-dinner, R02-family]
+
+# ─────────────────────────────────────────────────────────────
+# OPEN — unresolved threads
+# ─────────────────────────────────────────────────────────────
+
+- id: OP01-startup-fit
+  type: open
+  name: Have I actually tested founder chemistry under stress?
+  statement: |
+    O02 was a good dinner, not a disagreement. Lindy (R11) helps
+    but is secondhand signal. I want one interaction where we
+    disagree about something technical and resolve it before
+    I sign. Action: propose a design review of their current
+    architecture next week, take a contrary position on one thing
+    and watch how it goes.
+  related_to: [O02-cofounder-dinner, R11-lens-lindy, E01-startup-fit]
+
+- id: OP02-meridian-counter
+  type: open
+  name: Do I want a Meridian counter-offer, and would I even believe it?
+  statement: |
+    Priya didn't float a counter in O03 but the door isn't closed.
+    Honest read: even a $50k bump wouldn't change OT04. A scope
+    change might. Haven't articulated what scope would make
+    staying genuinely appealing, which per OT03 is itself telling.
+  related_to: [O03-manager-1on1, OT03-absence-of-stay-answer]
+
+- id: OP03-kid-school-timing
+  type: open
+  name: Does kid starting school Fall 2026 change the math?
+  statement: |
+    New school, new routine, possibly new neighborhood friend
+    group for Sam. Adding a job change to that quarter could
+    compound stress, or the fresh start could absorb it — both
+    directions plausible, haven't seen anyone reason cleanly
+    about this. Ask Sam Sunday.
+  related_to: [R02-family, OT01-partner-buyin]
+
+- id: OP04-what-if-i-hate-it
+  type: open
+  name: What's my exit plan if Harbor is wrong at month 4?
+  statement: |
+    Most considered-leaving-too-early regret I've seen is "I
+    knew by month 3 but told myself month 12." Commitment: if
+    I take Harbor, write a pre-mortem now (see X01), re-read it
+    at month 4, and treat a match against it as signal, not noise.
+  related_to: [X01-premortem, R05-layoff-2019]
+
+# ─────────────────────────────────────────────────────────────
+# PRACTICE — operating methods
+# ─────────────────────────────────────────────────────────────
+
+- id: P01-decision-log
+  type: practice
+  name: Decision log before signing anything irreversible
+  statement: |
+    Before any decision with >6 month reversal cost, I write a
+    one-page doc with: (1) what I expect to be true in 12 months
+    if I decide yes, (2) same for no, (3) what would make me
+    reverse, (4) who I'd tell first if I were reversing. Reviewed
+    at 30/90/180 days. Introduced after the 2019 layoff, refined
+    after 2022.
+
+- id: P02-two-day-rule
+  type: practice
+  name: Two-day rule on emotionally loaded comms
+  statement: |
+    Any message sent while SOL > 30min (per R07) or after an
+    imposter-flavor spike (per O07-family) waits 48 hours
+    before sending. Has killed more regrettable emails than
+    any other single habit.
+
+- id: P03-partner-decision-protocol
+  type: practice
+  name: Never finalize a career move without explicit partner sign-off
+  statement: |
+    Not just "Sam knows" — an explicit sit-down, numbers on the
+    table, 48 hours between first conversation and final
+    commitment. Codified after OT01 pattern became visible
+    around 2023. This is a hard rule, not a soft one.
+
+# ─────────────────────────────────────────────────────────────
+# EXPERIMENTS — runnable methods with evidence base
+# ─────────────────────────────────────────────────────────────
+
+- id: X01-premortem
+  type: reference
+  subcategory: experiment
+  name: Experiment — pre-mortem (Klein 2007)
+  statement: |
+    Imagine it's 12 months from now and the Harbor decision went
+    badly. Write the 3 most likely reasons in order. Klein (Harvard
+    Business Review, 2007) reports pre-mortem increases identification
+    of project risks by ~30% vs. standard forecasting. Running this
+    Thursday before the Sunday family sit-down.
+  citation: "Klein, HBR Sep 2007"
+  related_to: [OP04-what-if-i-hate-it, P01-decision-log]
+
+- id: X02-implementation-intentions
+  type: reference
+  subcategory: experiment
+  name: Experiment — implementation intentions for counter-offer conversation
+  statement: |
+    Gollwitzer (1999): if-then planning roughly doubles follow-
+    through on intentions. Concrete plan: "If Priya offers a
+    counter, then I will say 'thank you, I need 48 hours and
+    the answer depends on scope not comp.'" Pre-committed because
+    I know my in-moment self will negotiate on comp reflexively.
+  citation: "Gollwitzer, American Psychologist 54(7), 1999"
+  related_to: [OP02-meridian-counter, P02-two-day-rule]
+
+# ─────────────────────────────────────────────────────────────
+# FILTERS — anti-patterns / bad-choice avoidance
+# ─────────────────────────────────────────────────────────────
+
+- id: F01-filter-comp-anchor
+  type: reference
+  subcategory: filter
+  name: Filter — do not let base-comp delta be the headline number
+  statement: |
+    Anti-pattern observed in past self and 4+ peers: letting the
+    base-comp delta dominate the narrative, then retrofitting
+    justifications. Filter: if the first thing I'd tell a friend
+    about the decision is a dollar figure, I haven't actually
+    decided yet.
+
+- id: F02-filter-asymmetric-timeline
+  type: reference
+  subcategory: filter
+  name: Filter — refuse startup offers with <18 months runway
+  statement: |
+    Learned the hard way at Crestline: <18 months runway means
+    the founders will be raising during your first year, which
+    means you'll be underwritten by their fundraise not your
+    work. Harbor at 22 months clears this bar, barely. Would
+    decline at 15.
+
+# ─────────────────────────────────────────────────────────────
+# FORECASTS — time-horizon inferences
+# ─────────────────────────────────────────────────────────────
+
+- id: E03-forecast-1-month
+  type: reference
+  subcategory: forecast
+  horizon: 1 month
+  name: Forecast — where this is by May 23
+  statement: |
+    Base case (60%): decision made, one direction. Either signing
+    at Harbor with explicit partner sign-off, or having had an
+    honest counter-offer conversation at Meridian with a real
+    scope change on paper. Off case (25%): dragged into a second
+    extension from Harbor, which I should read as avoidance.
+    Tail (15%): third option appears that I haven't modeled yet.
+
+- id: E04-forecast-1-year
+  type: reference
+  subcategory: forecast
+  horizon: 1 year
+  name: Forecast — where this is by Apr 2027
+  statement: |
+    If Harbor: I've shipped something real or I know I'm leaving
+    — the middle state (still there, unclear) is the warning
+    sign, treat month-10 as the review point. If Meridian: either
+    the reset worked and I'm in a new scope, or OT03 fired again
+    and I'm in-market with more clarity than I had this round.
+
+- id: E05-forecast-5-year
+  type: reference
+  subcategory: forecast
+  horizon: 5 year
+  name: Forecast — where this is by Apr 2031
+  statement: |
+    Low confidence but worth writing. Kid is 9, in school,
+    household less liquidity-constrained. The specific choice
+    I make now will matter less than whether I kept the
+    decision log honest through the 5-year window. Most
+    likely: I'm not at Harbor or Meridian — I'm somewhere
+    chosen with the instruments I'm tuning this month.
+
+- id: E06-forecast-10-year
+  type: reference
+  subcategory: forecast
+  horizon: 10 year
+  name: Forecast — what I'd want the 10-year version of me to say about April 2026
+  statement: |
+    "That was the month I stopped pretending the comfortable
+    option was the safe one." Whether or not I took Harbor,
+    the test is whether I acted on OT04 rather than waiting
+    for it to resolve itself. If I'm still using that framing
+    in 2036, this graph did its job.

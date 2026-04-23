@@ -80,9 +80,69 @@ for talking to a human who knows you.
 | `START_HERE.md` | The prompt to paste into Claude |
 | `SCHEMA.md` | Formal specification of node types and edges |
 | `RELATED_FRAMEWORKS.md` | Survey of adjacent schemas (PROV-O, Toulmin, Zettelkasten, epistemic status, PKG) and what this scaffold borrows from each |
-| `example-graph.yaml` | A small fictional example showing the schema |
+| `example-graph.yaml` | A small fictional example showing the core schema |
+| `example-graph-extended.yaml` | A richer fictional example demonstrating sub-categories, a NOW node, and forecast horizons |
+| `example-graph-extended.html` | Self-contained interactive mandala viewer for the extended example |
 | `render.py` | Generate a graphviz diagram from your YAML |
 | `printable.py` | Generate a multi-page printable PDF |
+
+---
+
+## Sub-categories (added April 2026)
+
+After several weeks of building with the schema on a real graph, five patterns
+emerged as useful **sub-categories of `reference`** — not new node types.
+Extending the core type list is fragile (see "Schema depreciation" below);
+extending by descriptive prefix keeps the schema small while making common
+roles legible.
+
+| Prefix / role | What it is | Example |
+|---|---|---|
+| `R-canary-*` | Evidence-backed leading indicator, cites research | *Sleep-onset latency >30 min for 3 nights predicts relapse (Gates 2016)* |
+| `R-lens-*` | Mental-model frame applied to other nodes | *Circuit breakers (Nygard)*, *Ulysses pact (Elster)*, *Chesterton's Fence* |
+| `R-experiment-*` | Runnable method with an evidence base | *Implementation intentions (Gollwitzer, d=.65 meta-analysis)* |
+| `R-filter-*` | Anti-pattern or bad-choice frame for a decision domain | *Revenue-line reverse interview* for job selection |
+| `type: forecast` | Time-horizon inference, flagged tentative | 1 month · 90 days · 1 year · 10 years · 30 years |
+
+Plus:
+
+- **`NOW`** — a single node with `type: now` at the graph's center containing
+  current priorities and pointers. First thing you read when the graph is
+  open. Prevents the "where do I start?" problem that plagues typed graphs
+  (see Dan Shipper on Roam below).
+
+The extended example (`example-graph-extended.yaml`) demonstrates these.
+
+---
+
+## Schema depreciation (honest)
+
+In every reviewed case of a typed knowledge graph whose practitioner wrote
+an honest retrospective, the *typed structure* depreciated faster than the
+*raw notes*:
+
+- **Niklas Luhmann** (90,000 cards, 40 years) gave up on proximity-based
+  organization by ~card 20,000 and reframed it as "serendipity."
+- **Andy Matuschak** has not released his evergreen-notes tooling, citing
+  "maintenance burden and conceptual debt" as the note count grows.
+- **Roam Research** users, per Dan Shipper's retrospective, found
+  bidirectional links created placement anxiety without producing revisit.
+- **Gordon Brander's Subconscious** (decentralized notes protocol, 2020-2024)
+  shut down because "if I want to amplify my intelligence today, I reach
+  for Claude" — LLM-in-loop reset the hypothesis space the typed-graph
+  protocol was answering.
+- **Simon Willison's TIL** (zero schema, 576 entries over 6 years) has
+  outlasted every typed-graph project in this comparison.
+
+Implications baked into this scaffold's usage guidance:
+
+1. **Resist minting new node types.** Extend via sub-categories as above.
+2. **Measure revisit, not growth.** A NOW node + an auto-render loop
+   creates a daily revisit surface.
+3. **LLM-in-the-loop is what makes this worth doing now.** Brander's
+   shutdown is the counter-example that proves the frame.
+4. **Flat markdown is the honest fallback.** If the schema stops being
+   fun to maintain, Willison-style TILs are an acceptable regression.
 
 ---
 
