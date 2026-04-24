@@ -84,6 +84,7 @@ for talking to a human who knows you.
 | `example-graph-extended.yaml` | A richer fictional example demonstrating sub-categories, a NOW node, and forecast horizons |
 | `example-graph-extended.html` | Self-contained interactive mandala viewer for the extended example |
 | `render.py` | Generate a graphviz diagram from your YAML |
+| `render_mandala.py` | Generate a concentric-ring "mandala" view plus a "risk corridor" view that highlights everything downstream of a chosen pivot node. Also emits 1200×630 OG crops suitable for link previews. Requires `matplotlib` (`pip install matplotlib`). |
 | `printable.py` | Generate a multi-page printable PDF |
 
 ---
