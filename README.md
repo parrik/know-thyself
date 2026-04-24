@@ -62,12 +62,31 @@ for talking to a human who knows you.
    accumulated. (If you don't, this scaffold will be thin; come back after
    a month or two of real use.)
 3. Paste the contents of `START_HERE.md` into that conversation.
+   (Claude Code users: the `skill.md` file registers a `/know-thyself`
+   slash command that does the same thing.)
 4. Claude will walk you through the construction. Expect it to take 20–45 minutes
    of back-and-forth. Push back on anything that doesn't fit.
-5. When Claude produces your YAML graph, save it. Use `render.py` to generate
-   a visual, or `printable.py` for a printable PDF.
+5. When Claude produces your YAML graph, save it. Render it with one of the
+   scripts below (see **Dependencies**).
 6. Come back to the graph when new events happen. The graph should
    grow — cautiously, with new evidence explicitly tied to existing nodes.
+
+---
+
+## Dependencies
+
+All scripts are Python 3. Install what you need for the renderer you want:
+
+```
+pip install pyyaml               # required by every script
+pip install graphviz             # render.py, printable.py
+apt-get install graphviz         # system `dot` binary (or brew install graphviz)
+pip install matplotlib           # render_mandala.py
+pip install pypdf                # printable.py (multi-page PDF assembly)
+```
+
+Every script prints a helpful `pip install ...` message if a dep is missing.
+`render_dashboard.py` needs only `pyyaml` — no graphviz, no matplotlib.
 
 ---
 
@@ -80,12 +99,17 @@ for talking to a human who knows you.
 | `START_HERE.md` | The prompt to paste into Claude |
 | `SCHEMA.md` | Formal specification of node types and edges |
 | `RELATED_FRAMEWORKS.md` | Survey of adjacent schemas (PROV-O, Toulmin, Zettelkasten, epistemic status, PKG) and what this scaffold borrows from each |
-| `example-graph.yaml` | A small fictional example showing the core schema |
-| `example-graph-extended.yaml` | A richer fictional example demonstrating sub-categories, a NOW node, and forecast horizons |
+| `skill.md` | Claude Code skill definition for a `/know-thyself` slash command — does what `START_HERE.md` does, but triggered by the skill system |
+| `example-graph.yaml` | A small fictional example (Alex, 18 nodes) showing the core schema |
+| `example-graph-extended.yaml` | A richer fictional example (Alex, 87 nodes) demonstrating sub-categories, a NOW node, forecast horizons, and the risk-corridor intersection pattern |
 | `example-graph-extended.html` | Self-contained interactive mandala viewer for the extended example |
-| `render.py` | Generate a graphviz diagram from your YAML |
-| `render_mandala.py` | Generate a concentric-ring "mandala" view plus a "risk corridor" view that highlights everything downstream of a chosen pivot node. Also emits 1200×630 OG crops suitable for link previews. Requires `matplotlib` (`pip install matplotlib`). |
-| `printable.py` | Generate a multi-page printable PDF |
+| `alex-vocab.md` | Glossary the extended example pulls into the dashboard LEGEND panel (editorial frames, schema terms, Alex-specific tags) |
+| `alex-actions.md` | Live-work cards (open threads) the extended example pulls into the dashboard TODAY panel |
+| `alex-needs-eyes.md` | Items flagged for external review — companion surface for the extended dashboard |
+| `render.py` | Generate a graphviz diagram from your YAML (full graph + spine subset + validation report). Needs `pyyaml`, `graphviz` pkg, and the `dot` system binary. |
+| `render_mandala.py` | Concentric-ring "mandala" view plus a "risk corridor" view highlighting everything downstream of a chosen pivot node. Also emits 1200×630 OG crops for link previews. Needs `pyyaml`, `matplotlib`. |
+| `render_dashboard.py` | Build a single self-contained interactive dashboard HTML — NOW in the center, concentric rings by type, click-to-read panel, TODAY + LEGEND + NEEDS-EYES side panels wired from the `alex-vocab.md` / `alex-actions.md` / `alex-needs-eyes.md` fixtures. Needs `pyyaml` only. |
+| `printable.py` | Generate a multi-page printable PDF. Needs `pyyaml`, `graphviz`, `pypdf`. |
 
 ---
 
