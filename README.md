@@ -32,10 +32,11 @@ indistinguishable from noise. Every node and every edge must carry
 *(attribution, evidence, derivation)* — who stated it, what it rests on,
 how it was derived.
 
-**The operational rule:** attribution ≠ confidence. A claim you've restated
-across five conversations isn't five pieces of evidence; it's one derivation
-repeated five times. Real confidence accumulates only from **independent**
-derivations — different episodes, different contexts, different evidence types.
+**The operational rule, also from Pat McCarthy's work:** attribution ≠
+confidence. A claim you've restated across five conversations isn't five
+pieces of evidence; it's one derivation repeated five times. Real
+confidence accumulates only from **independent** derivations — different
+episodes, different contexts, different evidence types.
 
 ---
 
@@ -173,14 +174,52 @@ Implications baked into this scaffold's usage guidance:
 
 ## Credit
 
-The underlying epistemic framework (confidence chains, provenance triples,
-emergent nodes from intersection) is inspired by Patrick McCarthy's
-[open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph),
-which is unlicensed at time of writing. The schema as a structural
-taxonomy is treated here as uncopyrightable; the MIT license on this
-repository covers our specific implementation, prose, and renderers.
-The adaptations for personal memory (observation as a first-class node
-type, type-tier confidence instead of a numeric score, HANDLING directives
-for sensitive content, natural-experiment evidence type, first-class
-open questions) are modifications you're free to modify further for
-your own use.
+**The bulk of the epistemic framework is from Patrick McCarthy's
+[open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph)**:
+provenance triples, confidence chains, emergent nodes from intersection,
+the operating rule that *attribution ≠ confidence*. McCarthy's repo is
+unlicensed at time of writing; the schema as a structural taxonomy is
+treated here as uncopyrightable, and the MIT license on this repository
+covers our specific implementation, prose, and renderers — not the
+underlying ideas.
+
+**What this scaffold adds** is a translation of McCarthy's framework
+(originally designed for scientific knowledge — cancer biology,
+genomics) to *personal* memory, where claims are about a person rather
+than about the world. The adaptations:
+
+- **Observation as a first-class node type.** Personal claims rest on
+  dated episodes; scientific claims rest on experiments. Calling out
+  the episode separately keeps interpretations from collapsing back
+  into the events that generated them.
+- **Type-tier confidence** (overlap > novel) instead of a numeric score
+  — appropriate for a domain where there is no replication and no
+  external ground truth.
+- **HANDLING directives** for sensitive content (private to the user;
+  surfaceable only when the user raises them).
+- **Natural-experiment evidence type** for life-events that function
+  like A/B tests without being designed as such.
+- **Open questions as first-class nodes** — preventing unresolved
+  ambiguity from quietly crystallizing into a tentative novel.
+- **Packaging as a Claude Code skill** for in-conversation use.
+
+**Adjacent prior art and contemporary work worth knowing:**
+
+- **Park et al., *Generative Agents: Interactive Simulacra of Human
+  Behavior*** (UIST 2023, [arXiv:2304.03442](https://arxiv.org/abs/2304.03442))
+  — the foundational academic source for separating *observation* from
+  *reflection* in LLM memory, with reflections explicitly citing the
+  observations they rest on. Three years before this scaffold; the
+  observation-as-first-class move is most directly anticipated there.
+- **Andrej Karpathy's LLM Wiki gist** ([karpathy/442a6bf555914893e9891c11519de94f](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f),
+  Apr 2026) — the dominant cultural pattern for human-curated,
+  LLM-maintained, markdown/YAML, provenance-tracked, version-controlled
+  personal knowledge. This scaffold is reasonably read as a
+  typed-schema specialization of that pattern.
+- **Anthropic's MCP Knowledge Graph Memory server** ([modelcontextprotocol/servers/tree/main/src/memory](https://github.com/modelcontextprotocol/servers/tree/main/src/memory))
+  — the closest official artifact, with `Entity / Relation / Observation`
+  as primitives. This scaffold can be read as a typed-evidence extension
+  of that pattern.
+- **Mem0** (mem0.ai) and **Graphiti** (Zep's temporal knowledge graph)
+  — production substrates for LLM memory. The schema in this repo
+  could ride on top of either; we've kept it standalone for portability.
