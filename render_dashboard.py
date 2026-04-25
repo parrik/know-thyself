@@ -1274,7 +1274,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       t.textContent = "▶ NOW";
     } else {
       const parts = n.id.split("-");
-      t.textContent = parts.length > 1 ? parts.slice(1).join("-") : n.id;
+      const slug = parts.length > 1 ? parts.slice(1).join("-") : n.id;
+      t.textContent = n.is_forecast ? "⧗ " + slug : slug;
     }
     g.appendChild(t);
 
