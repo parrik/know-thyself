@@ -2,8 +2,12 @@ MIT License
 
 Copyright (c) 2026 parrik
 
-Built on Patrick McCarthy's open-knowledge-graph schema
-(https://github.com/patdmc/open-knowledge-graph), MIT.
+Inspired by Patrick McCarthy's open-knowledge-graph
+(https://github.com/patdmc/open-knowledge-graph), which is unlicensed
+at time of writing. The schema as a structural taxonomy (typed nodes,
+provenance triples, edge relations) is treated here as uncopyrightable;
+this MIT license covers our specific implementation, prose, and
+renderers — not the underlying ideas.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

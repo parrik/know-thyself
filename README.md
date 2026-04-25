@@ -174,10 +174,13 @@ Implications baked into this scaffold's usage guidance:
 ## Credit
 
 The underlying epistemic framework (confidence chains, provenance triples,
-emergent nodes from intersection) comes from Patrick McCarthy's
+emergent nodes from intersection) is inspired by Patrick McCarthy's
 [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph),
-released MIT. The adaptations for personal memory (observation as a
-first-class node type, type-tier confidence instead of a numeric score,
-HANDLING directives for sensitive content, natural-experiment evidence
-type, first-class open questions) are modifications you're free to modify
-further for your own use.
+which is unlicensed at time of writing. The schema as a structural
+taxonomy is treated here as uncopyrightable; the MIT license on this
+repository covers our specific implementation, prose, and renderers.
+The adaptations for personal memory (observation as a first-class node
+type, type-tier confidence instead of a numeric score, HANDLING directives
+for sensitive content, natural-experiment evidence type, first-class
+open questions) are modifications you're free to modify further for
+your own use.
