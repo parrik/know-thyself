@@ -520,7 +520,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alex — knowledge graph · dashboard</title>
+<title>Alex — knowledge fractal · dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1009,7 +1009,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <body>
 
 <header class="page">
-  <span class="brand">ALEX — KNOWLEDGE GRAPH</span>
+  <span class="brand">ALEX — KNOWLEDGE FRACTAL</span>
   <span class="ver">example-graph · <b>__NODE_COUNT__ nodes</b> · <b>__EDGE_COUNT__ edges</b> · mandala (concentric rings)</span>
   <span class="hints">hover · click · <kbd>scroll</kbd> zoom · <kbd>drag</kbd> pan · <kbd>esc</kbd> deselect · <kbd>/</kbd> search</span>
 </header>
