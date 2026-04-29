@@ -237,6 +237,26 @@ than `O01`. Slugs help when the YAML is edited by hand.
 
 ---
 
+## Sub-categories of `reference` (added April 2026)
+
+After several weeks of building with the schema on a real graph, five patterns emerged as useful **sub-categories of `reference`** — not new node types. Extending the core type list is fragile (see `SCHEMA_DEPRECIATION.md`); extending by descriptive prefix keeps the schema small while making common roles legible.
+
+| Prefix / role | What it is | Example |
+|---|---|---|
+| `R-canary-*` | Evidence-backed leading indicator, cites research | *Sleep-onset latency >30 min for 3 nights predicts relapse (Gates 2016)* |
+| `R-lens-*` | Mental-model frame applied to other nodes | *Circuit breakers (Nygard)*, *Ulysses pact (Elster)*, *Chesterton's Fence* |
+| `R-experiment-*` | Runnable method with an evidence base | *Implementation intentions (Gollwitzer, d=.65 meta-analysis)* |
+| `R-filter-*` | Anti-pattern or bad-choice frame for a decision domain | *Revenue-line reverse interview* for job selection |
+| `type: forecast` | Time-horizon inference, flagged tentative | 1 month · 90 days · 1 year · 10 years · 30 years |
+
+Plus:
+
+- **`NOW`** — a single node with `type: now` at the graph's center, containing current priorities and pointers. First thing you read when the graph is open. Prevents the "where do I start?" problem that plagues typed graphs.
+
+The extended example (`example-graph-extended.yaml`) demonstrates these.
+
+---
+
 ## Optional fields (added Apr 2026, from adjacent frameworks)
 
 These are OPTIONAL. The core schema works without them. Add only on nodes
