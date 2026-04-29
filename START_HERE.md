@@ -3,10 +3,14 @@
 ---
 
 I would like you to help me build a knowledge graph of what you remember
-about me, using a method adapted from Patrick McCarthy's open-knowledge-graph
-schema ([github.com/patdmc/open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph), MIT).
-The goal is to separate observations from interpretations, flag tentative
-claims explicitly, and surface insights that only appear at intersections.
+about me. The provenance-triple shape (claim, attribution, derivation) the
+graph uses draws on the W3C RDF (2004) and PROV-O (2013) standards and on
+Patrick McCarthy's open-knowledge-graph
+([github.com/patdmc/open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph), MIT)
+for the personal-graph framing; this scaffold extends them for personal
+memory specifically. The goal is to separate observations from
+interpretations, flag tentative claims explicitly, and surface insights
+that only appear at intersections.
 
 Before you start, read these instructions carefully and follow them closely.
 
