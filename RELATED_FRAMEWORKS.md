@@ -6,7 +6,7 @@ What this scaffold borrows from, what it doesn't, what's worth knowing.
 
 ## 1. Pat McCarthy's open-knowledge-graph (the starting point)
 
-Designed for **scientific** claims. Adapted here for personal memory. MIT-licensed.
+Designed for **scientific** claims, with formal necessity arguments. I adapted the provenance-triple shape here for personal memory; the personal-graph schema is mine. MIT-licensed.
 
 **Strengths:**
 - Provenance triple: *(attribution, evidence, derivation)* on every claim.

@@ -38,9 +38,9 @@ python render_dashboard.py your-graph.yaml   # interactive HTML, NOW node center
 
 ---
 
-## What this scaffold extends
+## What I built
 
-The provenance-triple shape is older — RDF and PROV-O ship it as W3C standards; Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) gives a contemporary articulation with formal necessity arguments for the **scientific** case. This work takes that shape and extends it structurally for **personal** memory:
+I built a personal-graph schema: typed nodes for a single life, four-scale confidence synthesis, temporal validity, MCP retrieval. The provenance-triple shape underneath is older — RDF and PROV-O ship it as W3C standards, and Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) gives a contemporary articulation with formal necessity arguments for the **scientific** case. The structural extensions for **personal** memory below are mine:
 
 1. **Observation as a first-class node type.** In a scientific graph, observations recede after grounding a proposition. In a personal graph they get *reinterpreted* — the first three months mean one thing in November and another in May. Keeping the episode separate stops interpretations collapsing back into the events that generated them.
 2. **A `valid_at` axis.** Propositions about a person aren't permanently valid the way physical-law propositions are; every claim carries a validity window that decays unless re-grounded.

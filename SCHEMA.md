@@ -302,7 +302,7 @@ Inline `HANDLING:` lines stay valid for human-read graphs. Structured `handling:
 
 Personal memory operates under different constraints than scientific knowledge — no replication, no external ground truth, fuzzy temporal validity, node-dense rather than edge-dense growth as life events accumulate.
 
-This scaffold makes seven deliberate extensions beyond scientific-claims provenance schemas:
+I make seven deliberate extensions beyond scientific-claims provenance schemas:
 
 1. **`observation` as a first-class node type.** Scientific graphs treat events as evidence for propositions; personal graphs treat them as nodes because episodes get reinterpreted.
 
@@ -322,4 +322,4 @@ This scaffold makes seven deliberate extensions beyond scientific-claims provena
 
 ## Credit
 
-Provenance-triple shape from W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) (2004) and [PROV-O](https://www.w3.org/TR/prov-overview/) (2013). Personal-graph framing draws on Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT). McCarthy's schema is **scientific**; this scaffold's contribution is the personal-memory extensions above.
+Provenance-triple shape from W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) (2004) and [PROV-O](https://www.w3.org/TR/prov-overview/) (2013). Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) gives the formal articulation for the **scientific** case. The personal-graph schema above — typed nodes adapted to personal life, four-scale synthesis, `valid_at` temporal validity, MCP retrieval — is mine.

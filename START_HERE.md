@@ -86,4 +86,4 @@ Begin with Phase 1.
 
 ## Credit
 
-Provenance-triple shape draws on W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) and [PROV-O](https://www.w3.org/TR/prov-overview/), and Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) for the personal-graph framing. This scaffold extends them for personal memory specifically.
+Provenance-triple shape draws on W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) and [PROV-O](https://www.w3.org/TR/prov-overview/). Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) gives the formal articulation for **scientific** claims. The personal-graph adaptation in this prompt — typed nodes for personal memory, four-scale synthesis, temporal validity, MCP retrieval — is mine.
