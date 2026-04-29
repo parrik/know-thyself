@@ -1,6 +1,6 @@
 # Schema specification
 
-Formal spec for the memory graph. The provenance-triple shape (claim, attribution, derivation) draws on the W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) (2004) and [PROV-O](https://www.w3.org/TR/prov-overview/) (2013) standards and on Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) for the personal-graph framing; this schema extends them as documented in [Extensions for personal memory](#extensions-for-personal-memory) below. If a node or edge in your graph violates this spec, it's a bug.
+Formal spec for the memory graph. If a node or edge violates this spec, it's a bug.
 
 ---
 
@@ -22,8 +22,7 @@ provenance:
     method: "how the claim follows from the parents — one short sentence"
 ```
 
-A node without this triple is not a node, it's noise. The rule is
-non-negotiable.
+A node without this triple is not a node. Non-negotiable.
 
 ---
 
@@ -40,8 +39,7 @@ non-negotiable.
 
 # Prefer pure references. If a reference accretes episode detail,
 # extract the episode as a separate observation that `derives_from`
-# the reference — this keeps interpretation-surviving-reinterpretation
-# traceable.
+# the reference.
 
 # ── Observation: a specific episode ─────────────────────────────
 - id: O01-example
@@ -50,9 +48,9 @@ non-negotiable.
   statement: |
     What happened. Concrete. Directly witnessed or lived.
   handling: do-not-raise-unprompted   # Optional structured field.
-  # Or keep inline: "HANDLING: do not raise unprompted" in the
-  # statement. Structured form is preferred when a tool needs to
-  # read it; inline is fine when the statement is read by a human.
+  # Or inline: "HANDLING: do not raise unprompted" in the statement.
+  # Structured form preferred when a tool reads it; inline is fine
+  # for human-only reading.
   provenance: {...}
 
 # ── Overlap: pattern across 2+ independent episodes ─────────────
@@ -64,14 +62,13 @@ non-negotiable.
   provenance:
     evidence:
       type: pattern-across-cases
-      references: [O01, O02, O03]       # Must be ≥2 INDEPENDENT observations
+      references: [O01, O02, O03]       # ≥2 INDEPENDENT observations
     derivation:
       from: [O01, O02, O03]
       method: "induction across independent instances"
   implication: |                        # Optional but recommended.
-    The actionable payload. What the pattern implies for choice, not
-    just description. An overlap without an implication tends to drift
-    back into a restated observation.
+    The actionable payload. An overlap without an implication tends
+    to drift back into a restated observation.
 
 # ── Novel: single-derivation interpretation (TENTATIVE) ─────────
 - id: N01-example
@@ -99,7 +96,7 @@ non-negotiable.
       description: "Emerges only from the intersection of parents"
       references: [parent1, parent2]
     derivation:
-      from: [parent1, parent2]          # Must be ≥2 parents
+      from: [parent1, parent2]          # ≥2 parents
       method: "Neither parent alone produces this claim"
 
 # ── Equivalency: bridge to external theory ──────────────────────
@@ -107,7 +104,7 @@ non-negotiable.
   type: equivalency
   name: "External framework — what it grounds here"
   statement: |
-    How the external theoretical framework applies to this graph.
+    How the external framework applies to this graph.
   provenance:
     attribution:
       author: "External theorist name"
@@ -131,25 +128,19 @@ non-negotiable.
   name: "The rule"
   statement: |
     A commitment about how to operate, derived from descriptive
-    claims in the graph. Not itself descriptive — normative.
+    claims. Not descriptive — normative.
     "Don't X before Y." "Always ask directly." "Finish threads."
   provenance:
     attribution: { source: "Self-articulated rule" }
     evidence:
       type: pattern-across-cases
-      references: [P01-example, O01-example]    # What it rests on
+      references: [P01-example, O01-example]
     derivation:
-      from: [P01-example]                       # Usually derives from
+      from: [P01-example]
       method: "normative rule derived from descriptive overlap"
 ```
 
-Practice is a scaffold extension for personal graphs — scientific-claims schemas (including McCarthy's open-knowledge-graph, RDF / PROV-O for academic provenance) don't include it; the operating-rule node is specific to personal memory where the graph naturally accumulates rules the user lives by. Use it when the graph has
-grown operating rules the user explicitly lives by (a daytime-sobriety
-rule, a job-filter rule, a commitment to ask deliberately rather than
-hope-to-be-seen). A practice should `derive_from` an overlap or novel
-that justifies it, so the normative claim is traceable to the descriptive
-claims that motivated it. If your practices have no descriptive
-grounding, they belong in a sibling goals/actions document, not here.
+`practice` is a personal-graph extension. Use when the graph has grown rules the user explicitly lives by (a no-screens-after-X rule, a job-filter rule, a commitment to ask directly). A practice should `derive_from` a descriptive node so the normative claim stays traceable. Floating rules with no descriptive grounding belong in a sibling goals/actions doc, not here.
 
 ---
 
@@ -165,33 +156,30 @@ edges:
     provenance: {...}               # Edges carry provenance too
 ```
 
-**Meanings:**
-
 | Relation | Direction | Meaning |
 |---|---|---|
-| `grounds` | child → parent | This node provides grounding for the target |
-| `grounded_in` | child → parent | This node is grounded in the target (inverse) |
-| `derives_from` | child → parent | This node follows from the target |
-| `generalizes` | specific → general | This node is a generalization of the target |
-| `instantiates` | general → specific | This node is a specific case of the target |
-| `qualifies` | refinement → original | This node adds scope restriction to target |
-| `contradicts` | claim → counter-claim | This node conflicts with target from shared premises |
-| `emergent_from` | intersection → parent | This node precipitated from target (pairs with another parent) |
+| `grounds` | child → parent | Provides grounding for the target |
+| `grounded_in` | child → parent | Grounded in the target (inverse) |
+| `derives_from` | child → parent | Follows from the target |
+| `generalizes` | specific → general | Generalization of the target |
+| `instantiates` | general → specific | Specific case of the target |
+| `qualifies` | refinement → original | Adds scope restriction |
+| `contradicts` | claim → counter-claim | Conflicts from shared premises |
+| `emergent_from` | intersection → parent | Precipitated from target (pairs with another parent) |
 
 ---
 
 ## Evidence types
 
-| Type | Strength | When to use |
+| Type | Strength | When |
 |---|---|---|
-| `external-record` | Strongest | Document, data, verifiable third-party source |
+| `external-record` | Strongest | Document, data, verifiable third-party |
 | `natural-experiment` | Strong | Same variable, different context, different outcome |
 | `pattern-across-cases` | Strong | Repeated instances converging |
 | `self-report` | Medium | User stated it directly |
-| `derived-inference` | Weakest | Inferred in conversation; must be flagged if used alone |
+| `derived-inference` | Weakest | Inferred in conversation; flag if used alone |
 
-A `novel` node grounded only in `derived-inference` is the weakest class
-of claim in the graph. Treat it accordingly.
+A `novel` grounded only in `derived-inference` is the weakest claim class in the graph. Treat it accordingly.
 
 ---
 
@@ -205,23 +193,16 @@ A graph is well-formed iff:
 4. Every `derivation.from` references an existing node.
 5. Every `edges[].to` references an existing node.
 6. Every `provenance.evidence.references` (if present) references existing nodes.
-7. Every `novel` node has `tentative: true` and a non-empty `caveats:` field.
-8. Every `emergent` node has ≥2 distinct entries in `derivation.from`.
-9. Every `overlap` node has ≥2 distinct entries in `evidence.references`
-   AND these references are not trivially the same event restated.
-10. Every `practice` node's `derivation.from` points to at least one
-    descriptive node (overlap, novel, observation) — a practice with no
-    descriptive grounding is a floating rule that belongs in goals.md,
-    not here.
+7. Every `novel` has `tentative: true` and a non-empty `caveats:`.
+8. Every `emergent` has ≥2 distinct entries in `derivation.from`.
+9. Every `overlap` has ≥2 distinct entries in `evidence.references`, not trivially the same event restated.
+10. Every `practice` derives from at least one descriptive node (overlap, novel, observation).
 
-The `render.py` script checks rules 1-6 automatically. Rules 7-10 require
-human judgment; Claude should verify them during Phase 7 of construction.
+`render.py` checks 1–6 automatically. 7–10 require human judgment; verify during Phase 7.
 
 ---
 
 ## IDs
-
-Prefix conventions:
 
 - `R##` — reference
 - `O##` — observation
@@ -230,39 +211,37 @@ Prefix conventions:
 - `E##` — emergent
 - `EQ##` — equivalency
 - `OQ##` — open question
-- `PR##` — practice (operating rule)
+- `PR##` — practice
 
-Use descriptive slugs after the number: `O01-first-day-of-job` is better
-than `O01`. Slugs help when the YAML is edited by hand.
+Use descriptive slugs: `O01-first-day-of-job` over `O01`. Helps when the YAML is hand-edited.
 
 ---
 
 ## Sub-categories of `reference` (added April 2026)
 
-After several weeks of building with the schema on a real graph, five patterns emerged as useful **sub-categories of `reference`** — not new node types. Extending the core type list is fragile (see `SCHEMA_DEPRECIATION.md`); extending by descriptive prefix keeps the schema small while making common roles legible.
+After several weeks of building on a real graph, five patterns emerged as useful **sub-categories of `reference`** — not new node types. Extending the core type list is fragile (see `SCHEMA_DEPRECIATION.md`); descriptive prefixes keep the schema small while making common roles legible.
 
 | Prefix / role | What it is | Example |
 |---|---|---|
-| `R-canary-*` | Evidence-backed leading indicator, cites research | *Sleep-onset latency >30 min for 3 nights predicts relapse (Gates 2016)* |
-| `R-lens-*` | Mental-model frame applied to other nodes | *Circuit breakers (Nygard)*, *Ulysses pact (Elster)*, *Chesterton's Fence* |
-| `R-experiment-*` | Runnable method with an evidence base | *Implementation intentions (Gollwitzer, d=.65 meta-analysis)* |
-| `R-filter-*` | Anti-pattern or bad-choice frame for a decision domain | *Revenue-line reverse interview* for job selection |
+| `R-canary-*` | Evidence-backed leading indicator | *Sleep-onset latency >30 min for 3 nights predicts relapse* |
+| `R-lens-*` | Mental-model frame applied to other nodes | *Circuit breakers, Ulysses pact, Chesterton's Fence* |
+| `R-experiment-*` | Runnable method with an evidence base | *Implementation intentions* |
+| `R-filter-*` | Anti-pattern frame for a decision domain | *Revenue-line reverse interview* |
 | `type: forecast` | Time-horizon inference, flagged tentative | 1 month · 90 days · 1 year · 10 years · 30 years |
 
 Plus:
 
-- **`NOW`** — a single node with `type: now` at the graph's center, containing current priorities and pointers. First thing you read when the graph is open. Prevents the "where do I start?" problem that plagues typed graphs.
+- **`NOW`** — a single node with `type: now` at the graph's center, holding current priorities and pointers. First thing read when the graph opens. Prevents the "where do I start?" problem.
 
-The extended example (`example-graph-extended.yaml`) demonstrates these.
+`example-graph-extended.yaml` demonstrates these.
 
 ---
 
-## Optional fields (added Apr 2026, from adjacent frameworks)
+## Optional fields (added Apr 2026)
 
-These are OPTIONAL. The core schema works without them. Add only on nodes
-where they genuinely help.
+OPTIONAL. Core schema works without them. Add only on nodes where they help.
 
-### `genre:` and `effort:` (from rationalist epistemic-status convention)
+### `genre:` and `effort:`
 
 Distinguishes passing thoughts from deliberate investigation:
 
@@ -271,32 +250,24 @@ genre: observation | speculation | log | analysis | prediction
 effort: passing-thought | sustained | deliberate-investigation
 ```
 
-**Recommended on every `novel` node.** A novel node that's a
-passing-thought deserves a different weight than one you've spent an
-hour on — and novels are the node type most prone to being treated as
-heavier than they are. Tagging effort makes that difference legible.
-Optional elsewhere.
+**Recommended on every `novel`.** A passing-thought novel deserves different weight than an hour-long one — and novels are the type most prone to being treated as heavier than they are.
 
-### `warrant:` (from Toulmin)
+### `warrant:`
 
-The inferential leap from evidence to claim, stated as a separable
-assumption that could be challenged on its own terms:
+The inferential leap from evidence to claim:
 
 ```yaml
 warrant: |
   Why this evidence implies this claim. The assumption doing the work.
-  If someone disagrees with this claim, they probably disagree here,
+  If someone disagrees with the claim, they probably disagree here,
   not with the evidence.
 ```
 
-Most useful on `overlap`, `novel`, and `emergent` nodes. Forces you to
-name assumptions that were implicit.
+Most useful on `overlap`, `novel`, `emergent`. Forces naming assumptions that were implicit.
 
-### `revisions:` (from W3C PROV-O)
+### `revisions:`
 
-History log for how a node has changed over time. Especially useful when
-a node is promoted from tentative → stable, or weakened by later counter-
-evidence:
+History log for how a node has changed:
 
 ```yaml
 revisions:
@@ -304,67 +275,51 @@ revisions:
     activity: promotion | weakening | refinement | contradiction | adoption
     from_state: tentative
     to_state: stable
-    trigger: O03-new-disclosure     # the node that caused the revision
+    trigger: O03-new-disclosure
     reason: "direct first-person disclosure of mechanism"
 ```
 
-Open a revisions log when the node's *truth-state* changes (tentative →
-stable, overlap → qualified overlap), not when its content is edited for
-clarity. A typo fix doesn't belong here; a change in what you believe
-does.
+Open a revisions log when the node's *truth-state* changes (tentative → stable, overlap → qualified overlap), not when content is edited for clarity. Typo fix: no. Change in belief: yes.
 
-### `handling:` (structured form of inline HANDLING directive)
+### `handling:`
 
-For sensitive content, prefer a structured field over inline prose when
-any tool reads the graph:
+Structured form of inline HANDLING directive:
 
 ```yaml
 handling: surface | quiet | do-not-raise-unprompted | archive
 ```
 
 - `surface` — default; can be referenced freely.
-- `quiet` — can be referenced but not proactively brought up.
-- `do-not-raise-unprompted` — only engage if the user surfaces it.
-- `archive` — structurally load-bearing but should not appear in
-  day-to-day conversation.
+- `quiet` — referenced but not proactively raised.
+- `do-not-raise-unprompted` — only engage if user surfaces it.
+- `archive` — structurally load-bearing, should not appear day-to-day.
 
-Inline `HANDLING: ...` lines in the `statement:` body remain valid for
-human-read graphs. Structured `handling:` is preferred when the graph
-feeds a tool.
+Inline `HANDLING:` lines stay valid for human-read graphs. Structured `handling:` is preferred when a tool reads the graph.
 
 ---
 
 ## Extensions for personal memory
 
-This schema makes seven deliberate extensions beyond what scientific-claims provenance schemas (RDF / PROV-O / McCarthy's open-knowledge-graph) supply, because personal memory operates under different constraints than scientific knowledge — no replication, no external ground truth, fuzzy temporal validity, and a graph that grows node-dense rather than edge-dense as life events accumulate:
+Personal memory operates under different constraints than scientific knowledge — no replication, no external ground truth, fuzzy temporal validity, node-dense rather than edge-dense growth as life events accumulate.
 
-1. **Added `observation` as a first-class node type.** Scientific graphs
-   treat events as evidence for propositions; personal graphs treat them
-   as nodes themselves because episodes are what get reinterpreted.
+This scaffold makes seven deliberate extensions beyond scientific-claims provenance schemas:
 
-2. **Replaced numeric C₁ confidence score with type-tier + `tentative:` + `caveats:`.**
-   No principled way to assign proof-strength numbers to personal claims.
-   Narrative caveats are more honest than undefended numbers.
+1. **`observation` as a first-class node type.** Scientific graphs treat events as evidence for propositions; personal graphs treat them as nodes because episodes get reinterpreted.
 
-3. **Inline `HANDLING:` directives** for sensitive content. Scientific
-   nodes don't need operational handling; personal ones do.
+2. **Type-tier + `tentative:` + `caveats:` instead of numeric C₁ confidence.** No principled way to assign proof-strength numbers to personal claims. Narrative caveats are more honest than undefended numbers.
 
-4. **Added `natural-experiment` as an evidence type.** Same person,
-   different environment, different outcome is the strongest evidence
-   available in a personal graph and had no clean analog in Pat's list.
+3. **HANDLING directives** for sensitive content. Scientific nodes don't need operational handling; personal ones do.
 
-5. **Open questions as systematic first-class nodes** with provenance,
-   not just a sparse category. In personal graphs, open questions get
-   silently absorbed into confident answers if not structurally protected.
+4. **`natural-experiment` as an evidence type.** Same person, different environment, different outcome — strongest evidence available in a personal graph, no clean analog in scientific schemas.
 
-6. **Repurposed `equivalency` type** from cross-framework alignment to
-   external-theory bridges. Personal graphs don't have multiple internal
-   frameworks; they may have external theoretical bridges worth naming.
+5. **Open questions as systematic first-class nodes** with provenance. In personal graphs, open questions get silently absorbed into confident answers if not structurally protected.
 
-7. **Added `practice` as an eighth node type.** Personal graphs naturally
-   accumulate operating rules the user lives by (a sobriety rule, a
-   filter rule, a commitment to deliberate asking). These are normative,
-   not descriptive, but they belong in the graph when they `derive_from`
-   descriptive claims — traceability from "this is the pattern" to
-   "therefore this is the rule I'm adopting." A practice with no
-   descriptive grounding belongs in goals.md, not here.
+6. **Repurposed `equivalency`** from cross-framework alignment to external-theory bridges. Personal graphs don't have multiple internal frameworks; they may have external bridges worth naming.
+
+7. **`practice` as an eighth node type.** Personal graphs accumulate operating rules. These are normative, not descriptive, but belong in the graph when they `derive_from` descriptive claims — traceability from "this is the pattern" to "therefore this is the rule." A practice with no descriptive grounding belongs in goals.md, not here.
+
+---
+
+## Credit
+
+Provenance-triple shape from W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) (2004) and [PROV-O](https://www.w3.org/TR/prov-overview/) (2013). Personal-graph framing draws on Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT). McCarthy's schema is **scientific**; this scaffold's contribution is the personal-memory extensions above.

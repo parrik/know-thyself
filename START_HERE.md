@@ -1,160 +1,89 @@
-# START HERE — paste the rest of this file into a Claude conversation
+# START HERE — paste the rest into a Claude conversation
 
 ---
 
-I would like you to help me build a knowledge graph of what you remember
-about me. The provenance-triple shape (claim, attribution, derivation) the
-graph uses draws on the W3C RDF (2004) and PROV-O (2013) standards and on
-Patrick McCarthy's open-knowledge-graph
-([github.com/patdmc/open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph), MIT)
-for the personal-graph framing; this scaffold extends them for personal
-memory specifically. The goal is to separate observations from
-interpretations, flag tentative claims explicitly, and surface insights
-that only appear at intersections.
+Help me build a knowledge graph of what you remember about me. The goal: separate observations from interpretations, flag tentative claims, surface insights that only appear at intersections.
 
-Before you start, read these instructions carefully and follow them closely.
+Read these instructions carefully, then proceed in phases.
 
 ## The invariant
 
-Every node and every edge in the graph must carry a provenance triple:
-*(attribution, evidence, derivation)*. A claim without provenance is
-indistinguishable from noise.
+Every node and every edge carries a provenance triple: *(attribution, evidence, derivation)*. A claim without provenance is indistinguishable from noise.
 
 ## The core rule
 
-**Attribution ≠ confidence.** If I've restated a claim five times across
-conversations, that's one derivation repeated, not five independent
-confirmations. Real confidence comes only from multiple **independent**
-derivations — different episodes, different contexts, different evidence
-types.
+**Attribution ≠ confidence.** A claim restated five times across conversations is one derivation repeated, not five confirmations. Real confidence requires multiple **independent** derivations — different episodes, different contexts, different evidence types.
 
 ## Node types
-
-Use these eight types, with the shown confidence bases:
 
 | Type | Meaning | Confidence basis |
 |---|---|---|
 | `reference` | Biographical fact | Single-source but verifiable |
-| `observation` | A specific episode I witnessed or lived | Direct event |
-| `overlap` | Pattern confirmed by 2+ independent episodes | Multiple groundings |
+| `observation` | Specific episode I lived | Direct event |
+| `overlap` | Pattern from 2+ independent episodes | Multiple groundings |
 | `novel` | Single-derivation interpretation | **Tentative — must flag** |
-| `emergent` | Produced only by intersection of 2+ existing nodes | Most valuable, most speculative |
-| `equivalency` | Bridge to an external theoretical framework | External grounding |
-| `open` | Unresolved question preserved as a first-class node | N/A |
-| `practice` | Normative operating rule derived from descriptive claims | Must `derive_from` at least one overlap/novel/observation |
+| `emergent` | Only appears at intersection of 2+ nodes | Most valuable, most speculative |
+| `equivalency` | Bridge to external framework | External grounding |
+| `open` | Unresolved question, first-class | N/A |
+| `practice` | Operating rule derived from descriptive claims | Must `derive_from` overlap/novel/observation |
 
-Novel nodes MUST carry `tentative: true` and explicit `caveats:` field
-listing how the claim could be wrong. Open questions stay open until
-independently resolved — do not let them collapse into novel interpretations.
+Novel nodes MUST carry `tentative: true` and a `caveats:` field listing how they could be wrong. Open questions stay open — do not collapse them into novel interpretations.
 
 ## Edge relations
 
-Use: `derives_from`, `grounds`, `grounded_in`, `generalizes`, `instantiates`,
-`qualifies`, `contradicts`, `emergent_from`. Every edge carries its own
-provenance triple.
+`derives_from`, `grounds`, `grounded_in`, `generalizes`, `instantiates`, `qualifies`, `contradicts`, `emergent_from`. Each edge carries its own provenance.
 
 ## Evidence types
 
-Use: `self-report` (I said it), `external-record` (document, data, third-party
-source), `pattern-across-cases` (repeated instances), `natural-experiment`
-(same variable, different context, different outcome — very strong),
-`derived-inference` (you inferred it; weakest, must be flagged).
+`self-report` (I said it), `external-record` (document/data/third-party), `pattern-across-cases` (repeated instances), `natural-experiment` (same variable, different context, different outcome — strongest), `derived-inference` (you inferred it; weakest, must be flagged).
 
 ## HANDLING directives
 
-For sensitive content (past harm, trauma, substance use, relationship
-difficulty) that is structurally load-bearing but should not be casually
-surfaced, include an inline directive in the node's statement field, e.g.
-`HANDLING: do not raise unprompted`. Ask me before assuming a directive is
-needed. When in doubt, flag — removal is easier than unsaying.
+For sensitive content that's structurally load-bearing but shouldn't be casually surfaced, include an inline directive: `HANDLING: do not raise unprompted`. Ask before assuming. When in doubt, flag.
 
 ---
 
-## How to proceed
+## Phases — do not jump ahead
 
-Work through this in phases. Don't jump ahead; each phase uses the output
-of the previous.
+**1. Inventory.** Pull biographical facts (`reference`) and specific episodes (`observation`) from what you remember. Don't interpret yet. Show the list. Let me correct, add, remove. Ask which observations need `HANDLING:`.
 
-**Phase 1: Inventory the references and observations.** Look through what
-you remember about me. Pull out the biographical facts (`reference` nodes)
-and the specific episodes (`observation` nodes). Do not interpret yet. Show
-me the list and let me correct it, add to it, or remove things. Ask which
-observations need `HANDLING:` directives.
+**2. Patterns.** Which patterns are grounded in two or more **independent** episodes? Those become `overlap`. Two restatements of the same claim do not count as two groundings.
 
-**Phase 2: Identify the patterns.** With the observations cleaned up, which
-patterns are grounded by two or more **independent** episodes? Those become
-`overlap` nodes. Be strict: two restatements of the same claim don't count
-as two groundings. Show me the patterns and their evidence. I'll push back
-on any where you're counting a single episode twice.
+**3. Novels — tentatively.** Single-derivation interpretations get `novel`, with `tentative: true` and `caveats:`. Include claims I've repeated often that actually rest on one episode — they feel settled and aren't.
 
-**Phase 3: Name the novel interpretations — tentatively.** Which
-interpretations rest on a single derivation? Those are `novel`, with
-`tentative: true` and a `caveats:` field. Do not promote them to overlap
-without new evidence. Include any interpretation that I have repeated often
-but that actually rests on one episode — these feel settled but aren't.
+**4. Emergents.** Claims not present in any single observation but precipitating only when 2+ nodes are held together. Both parents go in `derivation.from`. If one parent alone produces the claim, it's not emergent.
 
-**Phase 4: Find the emergent nodes.** Which claims are not present in any
-single observation but precipitate only when 2+ nodes are held together?
-Those are `emergent`, with explicit `derivation.from` listing both parents.
-If one parent alone could produce the claim, it's not emergent. Be precise.
+**5. Open questions.** What have I wondered about without resolution? Each is its own `open` node. Resist folding these into novels.
 
-**Phase 5: Mark the open questions.** What have I wondered about without
-resolution? Make each an `open` node with its own derivation. Resist the
-urge to fold these into novel interpretations.
+**6. Equivalency bridges (optional).** If my behavior instantiates a formal framework I work within, add `equivalency` nodes. Skip if no strong external framework applies.
 
-**Phase 6: Add equivalency bridges if relevant.** If some of my behavior
-or thinking instantiates a formal framework I already work within (a
-theoretical framework from my field, a philosophical tradition I engage
-with), add those as `equivalency` nodes. These are optional and usually
-only apply if I have a strong intellectual framework I'm embedded in.
+**6.5. Practices (optional).** Have I adopted operating rules derived from the patterns? Each must `derive_from` a descriptive node — a floating rule belongs in goals.md, not here. Skip if none apply.
 
-**Phase 6.5: Name the practices, if any.** Have I adopted operating
-rules derived from the patterns? ("No weed before 9pm" from a
-feeling-tolerance overlap; "only companies whose products I use" from
-an environment-responsive overlap; "deliberate named asking" from a
-visibility pattern.) Each practice must `derive_from` a descriptive
-node — a floating rule with no grounding is not a graph node, it's a
-sibling-doc commitment. Skip this phase if none apply.
+**7. Validate.** Produce the YAML. Check: every node has provenance, every edge has provenance, every `derivation.from` points to an existing node, every HANDLING-flagged observation carries its directive. Compute in-degree — tell me which observations are most load-bearing.
 
-**Phase 7: Validate.** Produce the YAML. Check: every node has a provenance
-triple, every edge has one too, every derivation's `from:` points to a
-node that exists, every observation I flagged for handling carries its
-directive. Compute in-degree per node and tell me which observations are
-most load-bearing — those are the ones a correction would cascade from.
-
-**Phase 8: Reflect.** Tell me what you learned in the construction. What
-claims were you treating as settled that turn out to be tentative? What
-emergent nodes did the intersection actually produce? What open questions
-did you notice you had been quietly answering with novel interpretations?
+**8. Reflect.** What had I been treating as settled that turns out to be tentative? What did the intersection actually produce? What open questions had I been quietly answering with novels?
 
 ---
 
-## What to avoid
+## Avoid
 
-- **Do not diagnose.** No node should read "you have X" or "you are Y."
-  Describe episodes, patterns, tentative frames.
-- **Do not psychoanalyze past a derivation you can state.** If I ask for
-  the derivation of a novel node and you cannot produce clean parents
-  and a clean method, drop the node.
-- **Do not let novel nodes propagate.** If a novel node is tentative, any
-  emergent node derived from it is doubly tentative. Flag that.
-- **Do not be encouraging or reassuring in the graph content.** The graph
-  is descriptive. Warmth and care belong in your conversational response,
-  not in the YAML.
-- **Do not assume depth I haven't shown you.** If memory is thin, the
-  graph should be thin. Resist filling gaps with plausible-sounding
-  inferences.
+- **No diagnosis.** No "you have X" or "you are Y."
+- **No psychoanalysis past a derivation you can state.** If you can't produce clean parents and method, drop the node.
+- **Novels don't propagate.** An emergent derived from a tentative novel is doubly tentative — flag that.
+- **No reassurance in graph content.** Warmth belongs in your conversational response, not the YAML.
+- **Don't fill gaps.** Thin memory → thin graph.
 
 ---
 
-## What to produce at the end
+## Output
 
-- A YAML file with the complete graph.
-- A short summary telling me:
-  - Load-bearing observations (top 5-10 by in-degree).
-  - Fragile claims (all novel nodes, with their caveats).
-  - Emergent nodes (what the intersection produced).
-  - Open questions (what remains unresolved).
-  - Anything you flagged for HANDLING and why.
+- A complete YAML graph.
+- A short summary: load-bearing observations (top 5–10 by in-degree), fragile claims (all novels with caveats), emergent nodes, open questions, anything flagged for HANDLING and why.
 
-When you're ready, begin with Phase 1.
+Begin with Phase 1.
+
+---
+
+## Credit
+
+Provenance-triple shape draws on W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) and [PROV-O](https://www.w3.org/TR/prov-overview/), and Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) for the personal-graph framing. This scaffold extends them for personal memory specifically.
