@@ -5,8 +5,7 @@ one that separates observations from interpretations, flags which claims are
 load-bearing, and surfaces insights that only appear at the intersection of
 multiple patterns.
 
-Built on [Patrick McCarthy's open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph)
-schema, adapted for personal memory rather than scientific claims.
+The schema draws on multiple provenance traditions — [W3C RDF](https://www.w3.org/TR/rdf11-concepts/) (2004) and [PROV-O](https://www.w3.org/TR/prov-overview/) (2013) for the typed-triplet shape, [Anthropic's Claude citations API](https://docs.anthropic.com/en/docs/build-with-claude/citations) for the same triplet inside the product surface, and [Patrick McCarthy's open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) for the formal necessity theorems — and extends them for personal memory (see *What this scaffold extends* below).
 
 Narrative companion essay: **[Know Thyself: a schema for personal memory in LLM conversations](https://parrik.com/essays/know-thyself/)**.
 
@@ -27,12 +26,16 @@ external-theory bridge, open question, and — optionally — operating rules
 derived from those patterns) where every claim carries its provenance and
 can be checked.
 
-**The invariant, from Pat McCarthy's work:** a claim without provenance is
-indistinguishable from noise. Every node and every edge must carry
-*(attribution, evidence, derivation)* — who stated it, what it rests on,
-how it was derived.
+**The invariant** (older than any contemporary articulation; named
+precisely for the personal-graph case in McCarthy's framework): a claim
+without provenance is indistinguishable from noise. Every node and every
+edge must carry *(attribution, evidence, derivation)* — who stated it,
+what it rests on, how it was derived. The triplet shape predates LLMs by
+decades — RDF and PROV-O ship it as W3C standards; Anthropic's Claude
+citations API ships it inside the product surface today.
 
-**The operational rule, also from Pat McCarthy's work:** attribution ≠
+**The operational rule** (standard scientific epistemology, named precisely
+for the personal-graph case in McCarthy's framework): attribution ≠
 confidence. A claim you've restated across five conversations isn't five
 pieces of evidence; it's one derivation repeated five times. Real
 confidence accumulates only from **independent** derivations — different
@@ -172,35 +175,24 @@ Implications baked into this scaffold's usage guidance:
 
 ---
 
-## Credit
+## Lineage and what this scaffold extends
 
-**The bulk of the epistemic framework is from Patrick McCarthy's
-[open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph)**:
-provenance triples, confidence chains, emergent nodes from intersection,
-the operating rule that *attribution ≠ confidence*. McCarthy's repo is
-unlicensed at time of writing; the schema as a structural taxonomy is
-treated here as uncopyrightable, and the MIT license on this repository
-covers our specific implementation, prose, and renderers — not the
-underlying ideas.
+The schema draws on multiple provenance traditions:
 
-**What this scaffold adds** is a translation of McCarthy's framework
-(originally designed for scientific knowledge — cancer biology,
-genomics) to *personal* memory, where claims are about a person rather
-than about the world. The adaptations:
+- **Standard scientific epistemology** for the rule that *attribution ≠ confidence* — the difference between independent evidence and corroboration is older than any contemporary articulation.
+- **W3C [RDF](https://www.w3.org/TR/rdf11-concepts/)** (2004) and **[PROV-O](https://www.w3.org/TR/prov-overview/)** (2013) for the typed-triplet shape: nodes carrying *(claim, attribution, derivation)*.
+- **[Anthropic's Claude citations API](https://docs.anthropic.com/en/docs/build-with-claude/citations)** for shipping the same triplet inside the product surface today.
+- **[Patrick McCarthy's open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph)** for the formal necessity theorems and the precise framing of the rule for the personal-graph case. McCarthy's repo is unlicensed at time of writing; the schema as a structural taxonomy is treated here as uncopyrightable, and the MIT license on this repository covers our specific implementation, prose, and renderers — not the underlying ideas.
 
-- **Observation as a first-class node type.** Personal claims rest on
-  dated episodes; scientific claims rest on experiments. Calling out
-  the episode separately keeps interpretations from collapsing back
-  into the events that generated them.
-- **Type-tier confidence** (overlap > novel) instead of a numeric score
-  — appropriate for a domain where there is no replication and no
-  external ground truth.
-- **HANDLING directives** for sensitive content (private to the user;
-  surfaceable only when the user raises them).
-- **Natural-experiment evidence type** for life-events that function
-  like A/B tests without being designed as such.
-- **Open questions as first-class nodes** — preventing unresolved
-  ambiguity from quietly crystallizing into a tentative novel.
+**What this scaffold extends, beyond what McCarthy's framework — originally designed for scientific knowledge (cancer biology, genomics) — supplies for personal memory:**
+
+- **Observation as a first-class node type.** Personal claims rest on dated episodes; scientific claims rest on experiments. In a scientific graph, observations recede after grounding a proposition. In a personal graph, observations get *reinterpreted* — the first three months mean one thing in November and another in May. Calling out the episode separately keeps interpretations from collapsing back into the events that generated them.
+- **A `valid_at` axis the original framework doesn't supply.** Propositions about a person aren't permanently valid the way physical-law propositions are. McCarthy's necessity arguments run through selection-under-competition; personal-memory graphs aren't under that pressure. The temporal logic has to come from epistemic humility instead — every claim about a person carries a validity window that decays unless re-grounded.
+- **An inverted edge-density prediction.** McCarthy's Paper 1 Corollary 3 predicts mature graphs become edge-dense over time. True for science, where new findings keep slotting into existing structure. False for personal psychology, where new life events spawn new nodes — a person, a loss, a pattern — and cross-time edges stay sparse. A forty-year-old's graph is node-dense with sparse adjacency, not edge-dense.
+- **Type-tier confidence** (overlap > novel) instead of a numeric score — appropriate for a domain where there is no replication and no external ground truth.
+- **HANDLING directives** for sensitive content (private to the user; surfaceable only when the user raises them).
+- **Natural-experiment evidence type** for life-events that function like A/B tests without being designed as such.
+- **Open questions as first-class nodes** — preventing unresolved ambiguity from quietly crystallizing into a tentative novel.
 - **Packaging as a Claude Code skill** for in-conversation use.
 
 **Adjacent prior art and contemporary work worth knowing:**

@@ -1,8 +1,6 @@
 # Schema specification
 
-Formal spec for the memory graph. Adapted from Patrick McCarthy's
-[open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT).
-If a node or edge in your graph violates this spec, it's a bug.
+Formal spec for the memory graph. The provenance-triple shape (claim, attribution, derivation) draws on the W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) (2004) and [PROV-O](https://www.w3.org/TR/prov-overview/) (2013) standards and on Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) for the personal-graph framing; this schema extends them as documented in [Extensions for personal memory](#extensions-for-personal-memory) below. If a node or edge in your graph violates this spec, it's a bug.
 
 ---
 
@@ -145,8 +143,7 @@ non-negotiable.
       method: "normative rule derived from descriptive overlap"
 ```
 
-Practice is a scaffold extension for personal graphs — Pat McCarthy's
-scientific-claims schema doesn't include it. Use it when the graph has
+Practice is a scaffold extension for personal graphs — scientific-claims schemas (including McCarthy's open-knowledge-graph, RDF / PROV-O for academic provenance) don't include it; the operating-rule node is specific to personal memory where the graph naturally accumulates rules the user lives by. Use it when the graph has
 grown operating rules the user explicitly lives by (a daytime-sobriety
 rule, a job-filter rule, a commitment to ask deliberately rather than
 hope-to-be-seen). A practice should `derive_from` an overlap or novel
@@ -317,10 +314,9 @@ feeds a tool.
 
 ---
 
-## Adaptations from Pat McCarthy's original schema
+## Extensions for personal memory
 
-This personal-memory schema differs from Pat's scientific-claims schema in
-seven deliberate ways:
+This schema makes seven deliberate extensions beyond what scientific-claims provenance schemas (RDF / PROV-O / McCarthy's open-knowledge-graph) supply, because personal memory operates under different constraints than scientific knowledge — no replication, no external ground truth, fuzzy temporal validity, and a graph that grows node-dense rather than edge-dense as life events accumulate:
 
 1. **Added `observation` as a first-class node type.** Scientific graphs
    treat events as evidence for propositions; personal graphs treat them
