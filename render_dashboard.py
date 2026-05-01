@@ -1518,11 +1518,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       <h2>Two goals</h2>
       <div class="goals-frame">
         <div class="g-line">1. <strong>Know thyself</strong> — the graph, this dashboard, the reading. Inward.</div>
-        <div class="g-line">2. <strong>Cut the forest</strong> — ship, break ground, move. Outward.</div>
+        <div class="g-line">2. <strong>Reveal thyself</strong> — ship, break ground, move. Outward.</div>
         <div class="g-lever">Single lever where they meet: ${leverChip} &middot; frame: ${nowChip}</div>
       </div>
 
-      <h2>Cut the forest today</h2>
+      <h2>Reveal thyself today</h2>
       ${weekHtml}
 
       <h2>Open threads — live work</h2>
