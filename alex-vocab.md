@@ -9,7 +9,7 @@ glossary and into the Today view as pickable definitions.
 - **close reading** — slow, line-by-line attention to what the text actually does, not what it means.
 - **acquisitions list** — the set of books an editor is signing this year; a shape, not a quota.
 - **in one sitting** — read the manuscript from first page to last without stopping. The whole has a shape a partial read cannot see. (PR02)
-- **cut the forest** — monthly discipline: kill commitments that no longer serve the spine. PR03 applied to life, not prose.
+- **reveal thyself** — monthly discipline: kill commitments that no longer serve the spine. PR03 applied to life, not prose.
 - **P03** — the interpretive-depth + emotional-distance pattern. Close to the text, far from the self.
 - **N01** — the Helen-structural-presence pattern. Grief structurally present in Alex's editorial posture without being named.
 - **risk corridor** — the low-probability, high-consequence cascade that radiates out from O01 (first three months). Each branch has a named canary.
