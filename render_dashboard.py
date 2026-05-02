@@ -4,26 +4,27 @@ render_dashboard.py — generate the Alex interactive dashboard HTML.
 
 Apple-inspired tabbed layout (refresh, May 2 2026):
 
-  - Today     curated single-column hero + multi-column responsive cards-grid
-              with sub-nav pill filter (All / Frame / Week / Threads / Eyes /
-              Canaries / Recent). Every card item is actionable — Done /
-              Snooze 7d buttons persist in localStorage.
-  - Fractal   the concentric-ring mandala (vanilla SVG, no library deps),
-              click any node to open it in the slide-over drawer.
-  - Sources   the bundle index — links to alex-actions.md / alex-needs-eyes.md /
-              alex-vocab.md / SCHEMA.md / SAFETY.md / README.md.
-  - Vocab     the glossary.
+  - Today      curated single-column homepage. Hero (serif italic),
+               one invitation card (today's reading entry), three quiet
+               doors (Read NOW / Browse practices / Wander the graph),
+               aside (counts), quiet footer.
+  - Review     sub-nav: Canaries / Eyes / Tentative / Forecasts.
+  - Structure  sub-nav: Spine (vis-network, force layout) / Practices
+               (operating rules) / Map (concentric mandala, vanilla SVG).
+  - Reference  sub-nav: Sources / Vocab.
 
 Reads:
   - example-graph-extended.yaml   (graph: nodes + provenance)
   - alex-vocab.md                 (glossary)
   - alex-actions.md               (open threads cards)
   - alex-needs-eyes.md            (items needing review)
+  - README.md, START_HERE.md, SCHEMA.md, SAFETY.md,
+    RELATED_FRAMEWORKS.md, skill.md, alex-node-eli5.md (optional)
 
 Writes:
   - example-graph-extended.html   (single self-contained file)
 
-Requires: pyyaml only.
+Requires: pyyaml only (vis-network is loaded via CDN at runtime).
 
 Run: python3 render_dashboard.py
 Open: example-graph-extended.html in any browser.
@@ -45,6 +46,7 @@ YAML_PATH    = HERE / "example-graph-extended.yaml"
 VOCAB_PATH   = HERE / "alex-vocab.md"
 ACTIONS_PATH = HERE / "alex-actions.md"
 EYES_PATH    = HERE / "alex-needs-eyes.md"
+ELI5_PATH    = HERE / "alex-node-eli5.md"
 OUT_PATH     = HERE / "example-graph-extended.html"
 
 
@@ -95,7 +97,7 @@ TYPE_LABEL = {
 
 
 # ──────────────────────────────────────────────────────────────────────────
-#  Parsing
+#  Parsing — markdown helpers
 # ──────────────────────────────────────────────────────────────────────────
 
 def parse_vocab(path):
@@ -136,6 +138,94 @@ def parse_action_cards(path):
     if current and (current["body"].strip() or current["title"]):
         cards.append(current)
     return cards
+
+
+def parse_eyes_candidates(path):
+    """Parse alex-needs-eyes.md into [{title, body}, ...].
+
+    Each `## Heading` block becomes an entry. Skips meta-style headings
+    (Operational note, How to apply, Deferred, Resolved).
+    """
+    if not path.exists():
+        return []
+    text = path.read_text()
+    items = []
+    skip_pat = re.compile(r'^(operational note|how to apply|deferred|resolved)', re.I)
+    current = None
+    for line in text.splitlines():
+        h = re.match(r'^##\s+(.+)$', line)
+        if h:
+            if current and (current["body"].strip() or current["title"]):
+                if not skip_pat.match(current["title"]):
+                    items.append(current)
+            current = {"title": h.group(1).strip().rstrip('.'), "body": ""}
+        elif current is not None:
+            if line.strip():
+                current["body"] += (" " if current["body"] else "") + line.strip()
+    if current and (current["body"].strip() or current["title"]):
+        if not skip_pat.match(current["title"]):
+            items.append(current)
+    return items
+
+
+def parse_node_eli5(path):
+    """Parse alex-node-eli5.md → {node_id: eli5_text}.
+
+    Supports two formats:
+      (1) `## <id>` then a paragraph (until next `##` or `---`)
+      (2) `## Nodes` section + `### <id>` h3 entries beneath it (also `## Schema words` + `## Practice menu` siblings, which we ignore here — only node entries matter for the drawer)
+
+    Returns {<id>: <eli5_text>}; empty dict if file is missing.
+    """
+    if not path.exists():
+        return {}
+    text = path.read_text()
+    out = {}
+    id_pat = re.compile(r'^([A-Z]+\d+(?:-[A-Za-z0-9-]+)?|NOW)')
+
+    # Format 2: split on h2; for the h2 whose title is the nodes section,
+    # iterate its h3 sub-blocks. We also try h2 blocks themselves in case
+    # someone authored format 1.
+    h2_blocks = re.split(r'(?m)^##\s+', text)
+    for block in h2_blocks[1:]:
+        lines = block.splitlines()
+        if not lines:
+            continue
+        h2_title = lines[0].strip().lower()
+        rest = "\n".join(lines[1:])
+        # Format 1: the h2 itself is a node id
+        m = id_pat.match(lines[0].strip())
+        if m and not re.search(r'(?m)^###\s+', rest):
+            body_lines = []
+            for ln in lines[1:]:
+                if ln.strip() == '---':
+                    break
+                body_lines.append(ln)
+            body = "\n".join(body_lines).strip()
+            if body:
+                out[m.group(1)] = body
+            continue
+        # Format 2: this h2 contains h3 sub-entries — only treat as node
+        # entries when the section is the nodes section (skip schema/practice).
+        if 'node' not in h2_title:
+            continue
+        for sub in re.split(r'(?m)^###\s+', rest)[1:]:
+            slines = sub.splitlines()
+            if not slines:
+                continue
+            stitle = slines[0].strip()
+            sm = id_pat.match(stitle)
+            if not sm:
+                continue
+            sbody_lines = []
+            for ln in slines[1:]:
+                if ln.strip() == '---':
+                    break
+                sbody_lines.append(ln)
+            sbody = "\n".join(sbody_lines).strip()
+            if sbody:
+                out[sm.group(1)] = sbody
+    return out
 
 
 def extract_now_section(now_text, heading_pattern):
@@ -205,6 +295,22 @@ def parse_graph(yaml_path):
         if not isinstance(derives_from, list): derives_from = [derives_from]
         if not isinstance(evidence_refs, list): evidence_refs = [evidence_refs]
 
+        # is_forecast: detect via name containing "forecast" or presence of horizon
+        is_forecast = False
+        if ntype == "emergent":
+            if horizon or "forecast" in str(name).lower():
+                is_forecast = True
+
+        # provenance count for "needs second instance" logic on Tentative panel
+        prov_count = 0
+        if isinstance(prov, dict):
+            for k in ("attribution", "evidence", "derivation"):
+                v = prov.get(k)
+                if isinstance(v, dict) and v:
+                    prov_count += 1
+                elif isinstance(v, list) and v:
+                    prov_count += len(v)
+
         nodes.append({
             "id": nid,
             "name": str(name),
@@ -213,6 +319,8 @@ def parse_graph(yaml_path):
             "caveats": str(caveats),
             "tentative": tentative,
             "horizon": horizon,
+            "is_forecast": is_forecast,
+            "prov_count": prov_count,
             "attribution": attribution,
             "evidence": evidence,
             "derivation": deriv,
@@ -258,11 +366,24 @@ def parse_graph(yaml_path):
             n["x"] = round(radius * math.cos(angle), 1)
             n["y"] = round(radius * math.sin(angle), 1)
 
-    backlinks = {}
+    # Backlinks (in-degree) — used for spine selection and declutter
+    indeg = {}
     for e in edges_list:
-        backlinks[e["to"]] = backlinks.get(e["to"], 0) + 1
+        indeg[e["to"]] = indeg.get(e["to"], 0) + 1
     for n in nodes:
-        n["backlink_count"] = backlinks.get(n["id"], 0)
+        n["backlink_count"] = indeg.get(n["id"], 0)
+
+    # Spine: top-N by in-degree (max(8, min(20, n/10))) plus all
+    # Emergent + Equivalency nodes; exclude NOW.
+    n_count = len(nodes)
+    top_n = max(8, min(20, n_count // 10))
+    spine_ids = set(nid for nid, _ in sorted(indeg.items(), key=lambda x: -x[1])[:top_n])
+    for n in nodes:
+        if n["type"] in ("emergent", "equivalency"):
+            spine_ids.add(n["id"])
+    spine_ids.discard("NOW")
+    for n in nodes:
+        n["spine"] = n["id"] in spine_ids
 
     return {"nodes": nodes, "edges": edges_list}
 
@@ -282,6 +403,60 @@ def extract_now_panels(graph):
     }
 
 
+def load_meta_files():
+    """Load bundle markdown files into a dict for the drawer-based Sources tab.
+
+    Returns {filename: {"canonical": <text>, "title": <stem>}}. Files that
+    don't exist are silently skipped (e.g. alex-node-eli5.md before it lands).
+    """
+    names = [
+        "README.md", "START_HERE.md", "SCHEMA.md", "SAFETY.md",
+        "RELATED_FRAMEWORKS.md", "skill.md",
+        "alex-vocab.md", "alex-actions.md", "alex-needs-eyes.md",
+        "alex-node-eli5.md",
+    ]
+    out = {}
+    for name in names:
+        p = HERE / name
+        if not p.exists():
+            continue
+        out[name] = {
+            "canonical": p.read_text(),
+            "title": p.stem.replace('-', ' ').replace('_', ' '),
+        }
+    return out
+
+
+# Sentence-case display titles for meta files (no .md extension shown).
+META_FILE_TITLES = {
+    "README.md":            "Readme",
+    "START_HERE.md":        "Start here",
+    "SCHEMA.md":            "Schema",
+    "SAFETY.md":            "Safety",
+    "RELATED_FRAMEWORKS.md": "Related frameworks",
+    "skill.md":             "Skill",
+    "alex-vocab.md":        "Vocab",
+    "alex-actions.md":      "Open threads",
+    "alex-needs-eyes.md":   "Needs eyes",
+    "alex-node-eli5.md":    "Plain-English overlays",
+}
+
+
+# ──────────────────────────────────────────────────────────────────────────
+#  Favicon — concentric mandala, blues/teals palette (Alex variant)
+# ──────────────────────────────────────────────────────────────────────────
+
+FAVICON_SVG = (
+    '<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22>'
+    '<rect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%23eef5fa%22/>'
+    '<circle cx=%2232%22 cy=%2232%22 r=%2226%22 fill=%22none%22 stroke=%22%23cde4ee%22 stroke-width=%221.4%22/>'
+    '<circle cx=%2232%22 cy=%2232%22 r=%2218%22 fill=%22none%22 stroke=%22%2399c4d8%22 stroke-width=%221.4%22/>'
+    '<circle cx=%2232%22 cy=%2232%22 r=%2210%22 fill=%22none%22 stroke=%22%237aaecb%22 stroke-width=%221.4%22/>'
+    '<circle cx=%2232%22 cy=%2232%22 r=%224%22 fill=%22%231e6fd9%22/>'
+    '</svg>'
+)
+
+
 # ──────────────────────────────────────────────────────────────────────────
 #  HTML template
 # ──────────────────────────────────────────────────────────────────────────
@@ -292,6 +467,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alex · know-thyself</title>
+<link rel="icon" href="data:image/svg+xml,__FAVICON__">
+<meta name="theme-color" content="#fbfaf7">
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   :root {
@@ -312,7 +490,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   a { color:var(--accent); text-decoration:none; }
   a:hover { text-decoration:underline; }
 
-  /* Tab bar — segmented control */
+  /* === Tab bar — segmented control === */
   .tabbar { position:sticky; top:0; z-index:100; background:rgba(251,250,247,0.86); -webkit-backdrop-filter:saturate(180%) blur(14px); backdrop-filter:saturate(180%) blur(14px); border-bottom:1px solid var(--line); padding:10px 24px; height:56px; display:flex; align-items:center; justify-content:space-between; }
   .tabbar .brand { font-size:13px; color:var(--text-2); font-weight:500; }
   .tabbar .seg { display:flex; gap:0; background:rgba(0,0,0,0.05); border-radius:9px; padding:2px; }
@@ -321,95 +499,69 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .tabbar button.active { background:var(--bg-elev); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,0.06); font-weight:590; }
   .tabbar .meta { font-size:11.5px; color:var(--text-3); font-variant:tabular-nums; font-family:var(--mono); }
 
+  /* Sub-nav (lens picker inside a group) */
+  .subnav { position:sticky; top:56px; z-index:90; background:rgba(251,250,247,0.94); -webkit-backdrop-filter:saturate(180%) blur(10px); backdrop-filter:saturate(180%) blur(10px); border-bottom:1px solid var(--line); padding:8px 24px; min-height:0; display:flex; gap:18px; align-items:center; overflow-x:auto; overflow-y:hidden; }
+  .subnav.empty { display:none; }
+  .subnav button { background:transparent; border:none; cursor:pointer; font-family:var(--sans); font-size:12.5px; color:var(--text-3); padding:5px 0; font-weight:500; border-bottom:2px solid transparent; transition:color 0.15s, border-color 0.15s; white-space:nowrap; }
+  .subnav button:hover { color:var(--text-2); }
+  .subnav button.active { color:var(--text); border-bottom-color:var(--text); font-weight:590; }
+
   .tab-panel { display:none; }
   .tab-panel.active { display:block; }
   .container { max-width:720px; margin:0 auto; padding:56px 32px 120px; }
 
-  /* Card filter pills */
-  .card-filter { display:flex; gap:2px; flex-wrap:wrap; margin:32px 0 22px; padding:3px; background:rgba(0,0,0,0.05); border-radius:9px; width:fit-content; max-width:100%; }
-  .card-filter button { background:transparent; border:none; cursor:pointer; font-family:var(--sans); font-size:13px; color:var(--text-2); padding:6px 14px; border-radius:7px; font-weight:500; transition:background 0.12s, color 0.12s, box-shadow 0.12s; }
-  .card-filter button:hover { color:var(--text); }
-  .card-filter button.active { background:var(--bg-elev); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,0.06); font-weight:590; }
+  /* === Today (Apple-spaced minimal) === */
+  .today-shell { max-width:640px; margin:0 auto; padding:96px 28px 120px; }
+  .t-hero { margin-bottom:56px; }
+  .t-eyebrow { font-size:11.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-3); font-weight:500; font-variant:tabular-nums; margin-bottom:18px; }
+  .t-lead { font-family:var(--serif); font-size:30px; line-height:1.35; color:var(--text); margin:0 0 22px; letter-spacing:-0.012em; font-weight:400; font-style:italic; }
+  .t-goals { font-size:12.5px; color:var(--text-3); letter-spacing:0.04em; }
+  .t-invitation { padding:36px 0 40px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin-bottom:48px; }
+  .t-inv-label { font-size:11px; text-transform:uppercase; letter-spacing:0.18em; color:var(--text-3); font-weight:600; margin-bottom:14px; }
+  .t-inv-title { font-family:var(--serif); font-size:24px; line-height:1.3; color:var(--text); font-weight:500; letter-spacing:-0.008em; margin-bottom:14px; }
+  .t-inv-body { font-size:15.5px; line-height:1.7; color:var(--text-2); margin-bottom:24px; max-width:56ch; font-family:var(--serif); }
+  .t-inv-action { display:inline-block; font-size:14px; color:var(--accent); font-weight:500; cursor:pointer; padding:10px 20px; border:1px solid var(--accent); border-radius:22px; background:transparent; transition:background 0.15s, color 0.15s; text-decoration:none; }
+  .t-inv-action:hover { background:var(--accent); color:#fff; text-decoration:none; }
+  .t-doors { display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:48px; }
+  .t-door { display:block; padding:22px 18px; background:var(--bg); cursor:pointer; transition:background 0.15s; text-decoration:none; color:var(--text); }
+  .t-door:hover { background:var(--bg-elev); text-decoration:none; }
+  .t-door-title { font-size:15px; font-weight:500; letter-spacing:-0.005em; color:var(--text); margin-bottom:4px; }
+  .t-door:hover .t-door-title { color:var(--accent); }
+  .t-door-sub { font-size:12px; color:var(--text-3); }
+  .t-aside { text-align:center; font-size:13px; color:var(--text-3); margin-bottom:48px; line-height:1.7; }
+  .t-footer { text-align:center; font-size:12px; color:var(--text-3); letter-spacing:0.02em; line-height:1.7; padding-top:32px; border-top:1px solid var(--line); }
+  @media (max-width:640px) {
+    .today-shell { padding:56px 18px 80px; }
+    .t-lead { font-size:24px; }
+    .t-invitation { padding:28px 0 32px; }
+    .t-inv-title { font-size:21px; }
+    .t-doors { grid-template-columns:1fr; }
+  }
 
-  /* Multi-column card grid */
-  .cards-grid { column-count:1; column-gap:18px; margin-top:8px; }
-  .cards-grid > * { break-inside:avoid; -webkit-column-break-inside:avoid; page-break-inside:avoid; display:block; }
-  .cards-grid > .card, .cards-grid > div > .card { margin-bottom:18px; }
-  .cards-grid > div:empty { display:none; }
-  .cards-grid.filtered { column-count:1 !important; }
-  .cards-grid.filtered > * { display:none; }
-  .cards-grid.filtered > .focus-card { display:block; }
+  /* === Panel hero (used by Spine, Practices, Eyes, Canaries, Forecasts, Tentative, Sources, Vocab) === */
+  .panel-hero h1 { font-size:34px; font-weight:600; letter-spacing:-0.02em; margin:0 0 6px; line-height:1.1; }
+  .panel-hero .sub { font-size:14px; color:var(--text-2); line-height:1.55; max-width:60ch; }
 
-  /* Hero */
-  .hero { max-width:720px; }
-  .hero .eyebrow { font-size:13px; color:var(--text-3); font-variant:tabular-nums; letter-spacing:0.04em; text-transform:uppercase; font-weight:500; }
-  .hero .lead { font-family:var(--serif); font-size:28px; line-height:1.35; color:var(--text); margin:14px 0 0; letter-spacing:-0.005em; }
-  .hero .twogoals { margin-top:18px; font-size:13px; color:var(--text-3); }
-  .hero .twogoals strong { color:var(--text-2); font-weight:500; }
-
-  /* Card */
-  .card { padding:30px 34px; border:1px solid var(--line); border-radius:16px; background:var(--bg-elev); margin-bottom:16px; }
-  .card-label { font-size:13px; color:var(--text-3); margin-bottom:6px; font-weight:400; font-style:italic; font-family:var(--serif); }
-  .card h2 { font-size:24px; font-weight:600; margin:0 0 16px; letter-spacing:-0.012em; color:var(--text); line-height:1.25; font-family:var(--serif); }
-  .card h3 { font-size:17px; font-weight:600; margin:20px 0 10px; color:var(--text); }
-  .card p { font-size:16px; line-height:1.7; color:var(--text); margin:0 0 14px; max-width:60ch; font-family:var(--serif); }
-  .card .sub { font-size:14px; color:var(--text-2); line-height:1.6; max-width:60ch; }
-
-  .card.frame { border-left:3px solid var(--text); padding-left:31px; }
-  .card.canary { border-color:rgba(184,135,62,0.35); background:rgba(184,135,62,0.04); border-left:3px solid var(--warm); padding-left:31px; }
-  .card.canary .card-label { color:var(--warm); font-style:normal; font-family:var(--sans); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; font-weight:600; margin-bottom:14px; }
-  .card.canary h2 { color:#5a3f12; }
-
-  /* Actionable items */
-  .act-item { padding:20px 0; border-top:1px solid var(--line); }
-  .act-item:first-of-type { border-top:none; padding-top:6px; }
-  .card.canary .act-item { border-top-color:rgba(184,135,62,0.18); }
-  .act-item .a-text { font-family:var(--serif); font-size:16px; line-height:1.65; color:var(--text); max-width:62ch; }
-  .act-item .a-text strong { font-weight:600; color:var(--text); }
-  .act-item .a-hint { margin-top:8px; font-size:13px; color:var(--text-2); font-family:var(--sans); max-width:62ch; display:flex; align-items:center; gap:6px; }
-  .act-item .a-hint::before { content:"→"; color:var(--text-3); font-weight:600; }
-  .act-item .a-actions { margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .act-item button, .act-item a.btn { background:var(--bg-elev); border:1px solid var(--line-strong); color:var(--text-2); font-size:12.5px; font-family:var(--sans); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:500; transition:all 0.12s; display:inline-flex; align-items:center; gap:5px; text-decoration:none; }
-  .act-item button:hover, .act-item a.btn:hover { background:rgba(0,0,0,0.04); color:var(--text); border-color:var(--text); }
-  .act-item button.primary { background:var(--text); color:#fff; border-color:var(--text); font-weight:600; }
-  .act-item button.primary:hover { background:#000; border-color:#000; color:#fff; }
-  .card.canary .act-item button.primary { background:var(--warm); color:#fff; border-color:var(--warm); }
-  .card.canary .act-item button.primary:hover { background:#a37733; border-color:#a37733; }
-  .show-resolved { margin-top:20px; padding-top:14px; border-top:1px solid var(--line); font-size:13px; color:var(--text-2); font-family:var(--sans); }
-  .show-resolved a { color:var(--accent); cursor:pointer; }
-  .card-empty { text-align:center; padding:24px 0 8px; font-style:italic; font-family:var(--serif); color:var(--text-2); font-size:15px; }
-  .card-empty::before { content:"✓ "; color:#10b981; font-style:normal; font-weight:700; }
-
-  /* Recent */
-  .recent .ritem { padding:13px 0; border-top:1px solid var(--line); font-size:15px; color:var(--text); line-height:1.5; }
-  .recent .ritem:first-child { border-top:none; padding-top:4px; }
-  .recent .rid { font-family:var(--mono); color:var(--accent); font-size:13px; margin-right:12px; cursor:pointer; }
-  .recent .rid:hover { text-decoration:underline; }
-  .recent .rtag { color:var(--warm); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; margin-left:10px; font-weight:600; }
-
-  /* Footer */
-  .wisdom-footer { margin-top:64px; padding-top:24px; border-top:1px solid var(--line); text-align:center; font-size:13px; color:var(--text-3); line-height:1.7; }
-  .wisdom-footer strong { color:var(--text-2); font-weight:500; }
-  .wisdom-footer a { color:var(--accent); cursor:pointer; }
-
-  /* Fractal */
-  #network-wrap { position:relative; height:calc(100vh - 56px); overflow:hidden; }
-  #network { width:100%; height:100%; background:var(--bg); cursor:grab; user-select:none; }
-  #network:active { cursor:grabbing; }
-  #network svg { width:100%; height:100%; }
-  #fractal-controls { position:absolute; top:24px; left:24px; background:rgba(255,255,255,0.94); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); padding:14px 16px; border-radius:12px; border:1px solid var(--line); font-size:13px; max-width:260px; z-index:5; }
-  #fractal-controls .ctitle { font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.14em; margin-bottom:8px; font-weight:600; }
+  /* === Network panels (Map + Spine, vis-network) === */
+  #network-wrap, #network-spine-wrap { position:relative; height:calc(100vh - 96px); overflow:hidden; }
+  #network, #network-spine { width:100%; height:100%; background:var(--bg); }
+  #fractal-controls, #spine-controls { position:absolute; top:24px; left:24px; background:rgba(255,255,255,0.94); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); padding:14px 16px; border-radius:12px; border:1px solid var(--line); font-size:13px; max-width:280px; z-index:5; }
+  #fractal-controls .ctitle, #spine-controls .ctitle { font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.14em; margin-bottom:8px; font-weight:600; }
   #fractal-controls .legend-item { display:flex; align-items:center; padding:4px 6px; cursor:pointer; border-radius:5px; user-select:none; font-size:13px; color:var(--text); }
   #fractal-controls .legend-item:hover { background:rgba(0,0,0,0.04); }
   #fractal-controls .legend-item.dim { opacity:0.4; }
-  #fractal-controls .swatch { width:9px; height:9px; border-radius:50%; margin-right:8px; }
+  #fractal-controls .swatch { width:9px; height:9px; border-radius:50%; margin-right:8px; flex-shrink:0; }
   #fractal-controls input[type=text] { width:100%; padding:7px 10px; border:1px solid var(--line-strong); border-radius:7px; font-size:13px; margin-top:10px; font-family:var(--sans); background:var(--bg-elev); color:var(--text); }
   #fractal-controls .toggle-row { margin-top:12px; padding-top:10px; border-top:1px solid var(--line); display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-2); }
-  #fractal-controls .stats { margin-top:10px; font-size:11px; color:var(--text-3); font-variant:tabular-nums; }
-  #fractal-zoom { position:absolute; top:24px; right:24px; display:flex; flex-direction:column; gap:4px; z-index:5; }
-  #fractal-zoom button { width:32px; height:32px; background:rgba(255,255,255,0.94); border:1px solid var(--line); border-radius:7px; cursor:pointer; font-size:17px; color:var(--text); }
-  #fractal-zoom button:hover { border-color:var(--accent); color:var(--accent); }
+  #fractal-controls .stats, #spine-controls .stats { margin-top:10px; font-size:11px; color:var(--text-3); font-variant:tabular-nums; }
+  #spine-controls .spine-blurb { font-size:13px; line-height:1.55; color:var(--text-2); margin-top:4px; max-width:240px; }
+  #fractal-zoom, #spine-zoom { position:absolute; top:24px; right:24px; display:flex; flex-direction:column; gap:4px; z-index:5; }
+  #fractal-zoom button, #spine-zoom button { width:32px; height:32px; background:rgba(255,255,255,0.94); border:1px solid var(--line); border-radius:7px; cursor:pointer; font-size:17px; color:var(--text); }
+  #fractal-zoom button:hover, #spine-zoom button:hover { border-color:var(--accent); color:var(--accent); }
 
+  /* === Map: vanilla SVG mandala (concentric rings) === */
+  #network svg.mandala { width:100%; height:100%; cursor:grab; user-select:none; }
+  #network svg.mandala:active { cursor:grabbing; }
   .node circle { transition:opacity 0.2s, r 0.15s; }
   .node text { font-family:var(--sans); font-size:11px; fill:var(--text); pointer-events:none; user-select:none; paint-order:stroke; stroke:var(--bg); stroke-width:3px; stroke-linejoin:round; }
   .node.tentative circle { stroke:var(--warm); stroke-width:2; }
@@ -419,7 +571,26 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .node.dim { opacity:0.18; }
   .node.dim circle { pointer-events:none; }
 
-  /* Drawer */
+  /* === List rows (Practices, Canaries, Forecasts, Tentative, Eyes) === */
+  .panel-list { margin-top:18px; }
+  .row { display:block; padding:16px 0; border-bottom:1px solid var(--line); cursor:pointer; transition:background 0.12s; }
+  .row:hover { background:rgba(0,0,0,0.015); }
+  .row .rh { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .row .rid { font-family:var(--mono); font-size:12px; color:var(--text-3); font-weight:500; }
+  .row .rname { font-size:15.5px; color:var(--text); font-weight:500; letter-spacing:-0.005em; }
+  .row:hover .rname { color:var(--accent); }
+  .row .rsum { font-size:14px; color:var(--text-2); margin-top:6px; line-height:1.55; }
+  .row .reli5 { margin-top:8px; padding:10px 12px; background:rgba(30,111,217,0.05); border-left:2px solid var(--accent); border-radius:0 5px 5px 0; font-size:13px; line-height:1.6; color:var(--text-2); }
+  .row .reli5 .velab { font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--accent); font-weight:600; margin-bottom:4px; display:block; }
+  .pill { display:inline-block; font-size:10.5px; padding:2px 8px; border-radius:10px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; }
+  .pill.thin { background:rgba(245,158,11,0.12); color:#b8873e; }
+  .pill.fc { background:rgba(251,191,36,0.18); color:#9a6b00; }
+  .pill.horizon { background:rgba(184,135,62,0.10); color:var(--warm); font-variant:tabular-nums; }
+  .group-head { font-size:11px; text-transform:uppercase; letter-spacing:0.16em; color:var(--text-3); font-weight:600; padding-bottom:10px; border-bottom:1px solid var(--line); margin:32px 0 0; }
+  .group-head:first-of-type { margin-top:18px; }
+  .empty-list { color:var(--text-3); padding:24px 0; font-style:italic; font-family:var(--serif); }
+
+  /* === Drawer === */
   #drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.16); opacity:0; pointer-events:none; transition:opacity 0.2s; z-index:199; }
   #drawer-overlay.open { opacity:1; pointer-events:auto; }
   #drawer { position:fixed; top:0; right:-620px; width:600px; max-width:96vw; height:100vh; background:var(--bg-elev); border-left:1px solid var(--line); box-shadow:-1px 0 0 var(--line), 0 12px 40px rgba(0,0,0,0.08); transition:right 0.25s cubic-bezier(0.16, 1, 0.3, 1); z-index:200; display:flex; flex-direction:column; }
@@ -446,6 +617,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   #drawer .ref:hover { text-decoration:underline; }
   #drawer .caveats { margin:20px 0; padding:14px 16px; background:rgba(184,135,62,0.08); border-left:3px solid var(--warm); border-radius:0 8px 8px 0; font-family:var(--sans); font-size:14px; line-height:1.6; color:#4a4030; }
   #drawer .caveats .clab { font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--warm); margin-bottom:8px; font-weight:600; }
+  #drawer .eli5-block { margin-bottom:24px; padding:14px 18px; background:rgba(30,111,217,0.05); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; font-family:var(--sans); font-size:14px; line-height:1.65; color:var(--text); }
+  #drawer .eli5-block .eli5-label { font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--accent); margin-bottom:8px; font-weight:600; }
   #drawer .related { margin-top:36px; padding-top:24px; border-top:1px solid var(--line); }
   #drawer .relgroup { margin-bottom:16px; }
   #drawer .rlab { font-family:var(--sans); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-3); margin-bottom:10px; font-weight:600; }
@@ -460,7 +633,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   #drawer .mentioned { margin-top:24px; padding-top:18px; border-top:1px solid var(--line); }
   #drawer .mentioned .ref { margin-right:10px; line-height:1.9; font-size:13px; }
 
-  /* Sources / vocab */
+  /* === Sources / vocab === */
   .source-list, .vocab-list { margin-top:24px; }
   .source-item { display:block; padding:18px 0; border-bottom:1px solid var(--line); text-decoration:none; color:var(--text); cursor:pointer; }
   .source-item:hover .stitle { color:var(--accent); }
@@ -469,8 +642,6 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .vocab-row { padding:14px 0; border-bottom:1px solid var(--line); }
   .vocab-row .vterm { font-weight:600; color:var(--text); font-size:15px; }
   .vocab-row .vdef { color:var(--text-2); font-size:14px; line-height:1.6; margin-top:4px; }
-  .panel-hero h1 { font-size:34px; font-weight:600; letter-spacing:-0.02em; margin:0 0 4px; line-height:1.1; }
-  .panel-hero .sub { font-size:14px; color:var(--text-2); }
 
   ::-webkit-scrollbar { width:9px; height:9px; }
   ::-webkit-scrollbar-track { background:transparent; }
@@ -479,64 +650,122 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
   @media (max-width: 640px) {
     .container { padding:36px 18px 80px; }
-    .hero .lead { font-size:22px; }
-    .card { padding:20px 18px; }
-    .card h2 { font-size:20px; }
     #drawer { width:100vw; }
   }
   @media (min-width: 1100px) {
-    .container { max-width:1080px; padding:64px 36px 120px; }
-    .cards-grid { column-count:2; }
-  }
-  @media (min-width: 1600px) {
-    .container { max-width:1520px; padding:72px 48px 140px; }
-    .cards-grid { column-count:3; }
+    .container { max-width:840px; padding:64px 36px 120px; }
   }
 </style>
 </head>
 <body>
 <nav class="tabbar">
   <div class="brand">Alex · know-thyself</div>
-  <div class="seg">
-    <button data-tab="today" class="active">Today</button>
-    <button data-tab="fractal">Fractal</button>
-    <button data-tab="sources">Sources</button>
-    <button data-tab="vocab">Vocab</button>
+  <div class="seg" id="group-bar">
+    <button data-group="today" class="active">Today</button>
+    <button data-group="review">Review</button>
+    <button data-group="structure">Structure</button>
+    <button data-group="reference">Reference</button>
   </div>
   <div class="meta"><span id="nodecount">0</span> nodes · <span id="edgecount">0</span> edges</div>
 </nav>
+<nav class="subnav empty" id="subnav-bar"></nav>
 
 <section id="tab-today" class="tab-panel active">
-  <div class="container">
-    <header class="hero">
-      <div class="eyebrow" id="hero-eyebrow"></div>
-      <p class="lead" id="hero-lead"></p>
-      <div class="twogoals">Two goals: <strong>know thyself</strong> · <strong>reveal thyself</strong></div>
+  <div class="today-shell">
+    <header class="t-hero">
+      <div class="t-eyebrow" id="hero-eyebrow"></div>
+      <p class="t-lead" id="hero-lead"></p>
+      <div class="t-goals">know thyself · reveal thyself</div>
     </header>
 
-    <div class="card-filter" id="card-filter">
-      <button data-card="all" class="active">All</button>
-      <button data-card="frame">Frame</button>
-      <button data-card="week">Week</button>
-      <button data-card="threads">Threads</button>
-      <button data-card="eyes">Eyes</button>
-      <button data-card="canaries">Canaries</button>
-      <button data-card="recent">Recent</button>
-    </div>
+    <article class="t-invitation" id="t-invitation"></article>
 
-    <div class="cards-grid" id="cards-grid">
-      <div id="frame-card" class="card frame" data-card="frame"></div>
-      <div id="week-card" class="card" data-card="week"></div>
-      <div id="threads-card" class="card" data-card="threads"></div>
-      <div id="eyes-slot" data-card="eyes"></div>
-      <div id="canaries-slot" data-card="canaries"></div>
-      <div id="recent-card" class="card" data-card="recent"></div>
-    </div>
+    <nav class="t-doors">
+      <a class="t-door" onclick="openDrawer('NOW')">
+        <div class="t-door-title">Read NOW</div>
+        <div class="t-door-sub">today's frame</div>
+      </a>
+      <a class="t-door" onclick="switchTab('practices')">
+        <div class="t-door-title">Browse practices</div>
+        <div class="t-door-sub">operating rules</div>
+      </a>
+      <a class="t-door" onclick="switchTab('fractal')">
+        <div class="t-door-title">Wander the graph</div>
+        <div class="t-door-sub">the map</div>
+      </a>
+    </nav>
 
-    <footer class="wisdom-footer">
-      <div><strong>Spine</strong> · <strong>provenance</strong> · <strong>reveal thyself monthly</strong></div>
-      <div style="margin-top:14px;"><a onclick="openDrawer('NOW')">Open the full NOW node →</a></div>
+    <div class="t-aside" id="t-aside"></div>
+
+    <footer class="t-footer">
+      <div>kill your darlings &middot; reveal thyself &middot; know thyself</div>
     </footer>
+  </div>
+</section>
+
+<section id="tab-canaries" class="tab-panel">
+  <div class="container">
+    <header class="panel-hero">
+      <h1>Canaries</h1>
+      <div class="sub">Trip-wires Alex set for herself. Each watches a specific failure mode.</div>
+    </header>
+    <div class="panel-list" id="canary-list"></div>
+  </div>
+</section>
+
+<section id="tab-eyes" class="tab-panel">
+  <div class="container">
+    <header class="panel-hero">
+      <h1>Eyes</h1>
+      <div class="sub">Items flagged for review. Handle deliberately.</div>
+    </header>
+    <div class="panel-list" id="eyes-list"></div>
+  </div>
+</section>
+
+<section id="tab-tentative" class="tab-panel">
+  <div class="container">
+    <header class="panel-hero">
+      <h1>Tentative</h1>
+      <div class="sub">Claims grounded in only one observation. Watch for second instances.</div>
+    </header>
+    <div class="panel-list" id="tentative-list"></div>
+  </div>
+</section>
+
+<section id="tab-forecasts" class="tab-panel">
+  <div class="container">
+    <header class="panel-hero">
+      <h1>Forecasts</h1>
+      <div class="sub">What Alex's graph predicts. Ordered by horizon.</div>
+    </header>
+    <div class="panel-list" id="forecast-list"></div>
+  </div>
+</section>
+
+<section id="tab-spine" class="tab-panel">
+  <div id="network-spine-wrap">
+    <div id="network-spine"></div>
+    <div id="spine-controls">
+      <div class="ctitle">Spine</div>
+      <div class="spine-blurb">The load-bearing nodes. Where the graph leans.</div>
+      <div class="stats" id="spine-stats"></div>
+    </div>
+    <div id="spine-zoom">
+      <button title="Zoom in" onclick="spineZoomBy(1.25)">+</button>
+      <button title="Zoom out" onclick="spineZoomBy(0.8)">−</button>
+      <button title="Fit all" onclick="spineNetwork && spineNetwork.fit({animation:{duration:300}})">⟲</button>
+    </div>
+  </div>
+</section>
+
+<section id="tab-practices" class="tab-panel">
+  <div class="container">
+    <header class="panel-hero">
+      <h1>Practices</h1>
+      <div class="sub">Operating rules. The shape of Alex's etudes.</div>
+    </header>
+    <div class="panel-list" id="practice-list"></div>
   </div>
 </section>
 
@@ -560,9 +789,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       <div class="stats" id="fractal-stats"></div>
     </div>
     <div id="fractal-zoom">
-      <button title="Zoom in (+)" onclick="zoomBy(1.25)">+</button>
-      <button title="Zoom out (−)" onclick="zoomBy(0.8)">−</button>
-      <button title="Fit all (0)" onclick="fitMandala()">⟲</button>
+      <button title="Zoom in" onclick="zoomBy(1.25)">+</button>
+      <button title="Zoom out" onclick="zoomBy(0.8)">−</button>
+      <button title="Fit all" onclick="fitMandala()">⟲</button>
     </div>
   </div>
 </section>
@@ -571,7 +800,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <div class="container">
     <header class="panel-hero">
       <h1>Sources</h1>
-      <div class="sub">Underlying files in the example bundle.</div>
+      <div class="sub">Files in the bundle. Click any to read.</div>
     </header>
     <div class="source-list" id="source-list"></div>
   </div>
@@ -612,23 +841,92 @@ const EYES = __EYES__;
 const NOW_PANELS = __NOW_PANELS__;
 const TYPE_COLOR = __TYPE_COLOR__;
 const TYPE_LABEL = __TYPE_LABEL__;
+const NODE_ELI5 = __NODE_ELI5__;
+const META_FILES = __META_FILES__;
+const META_FILE_TITLES = __META_FILE_TITLES__;
 
 document.getElementById('nodecount').textContent = GRAPH.nodes.length;
 document.getElementById('edgecount').textContent = GRAPH.edges.length;
 
-document.querySelectorAll('.tabbar button').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
+// === Tabs (two-level: groups + sub-nav lenses) ===
+const TAB_GROUPS = {
+  today:     { label: 'Today',     subs: [], defaultSub: 'today' },
+  review:    { label: 'Review',    subs: [
+    { id: 'canaries',  label: 'Canaries' },
+    { id: 'eyes',      label: 'Eyes' },
+    { id: 'tentative', label: 'Tentative' },
+    { id: 'forecasts', label: 'Forecasts' },
+  ], defaultSub: 'canaries' },
+  structure: { label: 'Structure', subs: [
+    { id: 'spine',     label: 'Spine' },
+    { id: 'practices', label: 'Practices' },
+    { id: 'fractal',   label: 'Map' },
+  ], defaultSub: 'spine' },
+  reference: { label: 'Reference', subs: [
+    { id: 'sources',   label: 'Sources' },
+    { id: 'vocab',     label: 'Vocab' },
+  ], defaultSub: 'sources' },
+};
+const SUB_TO_GROUP = {};
+for (const [g, def] of Object.entries(TAB_GROUPS)) {
+  if (def.subs.length === 0) SUB_TO_GROUP[g] = g;
+  else def.subs.forEach(s => { SUB_TO_GROUP[s.id] = g; });
+}
+
+function switchGroup(group) {
+  const def = TAB_GROUPS[group];
+  if (!def) return;
+  document.querySelectorAll('#group-bar button').forEach(b => b.classList.toggle('active', b.dataset.group === group));
+  const sub = document.getElementById('subnav-bar');
+  if (def.subs.length === 0) {
+    sub.classList.add('empty');
+    sub.innerHTML = '';
+  } else {
+    sub.classList.remove('empty');
+    sub.innerHTML = def.subs.map(s => `<button data-sub="${s.id}">${escapeHtml(s.label)}</button>`).join('');
+    sub.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => switchTab(b.dataset.sub));
+    });
+  }
+  switchTab(def.defaultSub);
+}
+
 function switchTab(name) {
-  document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+  document.querySelectorAll('#subnav-bar button').forEach(b => b.classList.toggle('active', b.dataset.sub === name));
+  const parent = SUB_TO_GROUP[name];
+  if (parent) {
+    document.querySelectorAll('#group-bar button').forEach(b => b.classList.toggle('active', b.dataset.group === parent));
+    // Make sure sub-nav is populated for the parent group when called directly.
+    const def = TAB_GROUPS[parent];
+    const sub = document.getElementById('subnav-bar');
+    if (def && def.subs.length > 0 && sub.children.length === 0) {
+      sub.classList.remove('empty');
+      sub.innerHTML = def.subs.map(s => `<button data-sub="${s.id}">${escapeHtml(s.label)}</button>`).join('');
+      sub.querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => switchTab(b.dataset.sub));
+        if (b.dataset.sub === name) b.classList.add('active');
+      });
+    } else if (def && def.subs.length === 0) {
+      sub.classList.add('empty');
+      sub.innerHTML = '';
+    }
+  }
   if (name === 'fractal') {
     if (!mandalaInited) initMandala();
     setTimeout(fitMandala, 30);
   }
+  if (name === 'spine') {
+    if (!spineNetwork) initSpineNetwork();
+  }
   history.replaceState(null, '', '#' + name);
 }
 
+document.querySelectorAll('#group-bar button').forEach(btn => {
+  btn.addEventListener('click', () => switchGroup(btn.dataset.group));
+});
+
+// === Markdown helpers ===
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function inlineFormat(s) {
   let t = escapeHtml(s);
@@ -666,179 +964,50 @@ function resolveRef(ref) {
 function summaryOf(n) {
   if (!n || !n.statement) return '';
   const f = n.statement.split(/\n\s*\n/)[0].trim().replace(/\s+/g, ' ');
-  return f.length > 160 ? f.slice(0,160) + '…' : f;
+  return f.length > 200 ? f.slice(0,200) + '…' : f;
 }
 
-// Action state — localStorage per item
-function _hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h*31 + s.charCodeAt(i)) | 0; return Math.abs(h).toString(36); }
-function actKey(text) { return 'a:' + _hash(text); }
-function getAct(text) { try { return JSON.parse(localStorage.getItem(actKey(text)) || 'null'); } catch(e) { return null; } }
-function setAct(text, state) { if (state === null) localStorage.removeItem(actKey(text)); else localStorage.setItem(actKey(text), JSON.stringify(state)); }
-function isHiddenItem(text) {
-  const s = getAct(text);
-  if (!s) return false;
-  if (s.status === 'done') return true;
-  if (s.status === 'daily-done') return s.day === new Date().toDateString();
-  if (s.status === 'deferred' && s.until > Date.now()) return true;
-  return false;
-}
-let _itemRegistry = [];
-function regItem(text) { _itemRegistry.push(text); return _itemRegistry.length - 1; }
-window.act = function(idx, kind, days) {
-  const text = _itemRegistry[idx]; if (!text) return;
-  let state;
-  if (kind === 'done')  state = { status:'done', at:Date.now() };
-  if (kind === 'daily') state = { status:'daily-done', day:new Date().toDateString() };
-  if (kind === 'defer') state = { status:'deferred', until:Date.now() + (days||7)*86400000 };
-  if (kind === 'undo')  state = null;
-  setAct(text, state);
-  buildToday();
-};
-window.showAllResolved = function() {
-  const keys = [];
-  for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('a:')) keys.push(k); }
-  keys.forEach(k => localStorage.removeItem(k));
-  buildToday();
-};
-
-function actItem(text, hint, opts) {
-  opts = opts || {};
-  const idx = regItem(text);
-  if (isHiddenItem(text)) return '';
-  const buttons = (opts.buttons || []).map(b => {
-    if (b.href) return `<a class="btn ${b.kind||''}" href="${b.href}">${escapeHtml(b.label)}</a>`;
-    return `<button class="${b.kind||''}" onclick="act(${idx},'${b.action}'${b.days?','+b.days:''})">${escapeHtml(b.label)}</button>`;
-  }).join('');
-  return `<div class="act-item">
-    <div class="a-text">${opts.formatted || inlineFormat(text)}</div>
-    ${hint ? `<div class="a-hint">${escapeHtml(hint)}</div>` : ''}
-    ${buttons ? `<div class="a-actions">${buttons}</div>` : ''}
-  </div>`;
-}
-function countHidden(items) { return items.filter(t => isHiddenItem(t)).length; }
-function showResolvedLine(visible, total) {
-  if (visible >= total) return '';
-  const hidden = total - visible;
-  return `<div class="show-resolved">${hidden} hidden (done / snoozed) · <a onclick="showAllResolved()">show all</a></div>`;
-}
-
+// === Today (homepage) — minimal Apple-spaced landing ===
 function buildToday() {
-  _itemRegistry = [];
   const now = new Date();
   const dStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   document.getElementById('hero-eyebrow').textContent = `Today · ${dStr}`;
 
   const framePara = (NOW_PANELS.frame || '').split(/\n\s*\n/)[0].trim();
-  document.getElementById('hero-lead').innerHTML = inlineFormat(framePara || 'No NOW.Frame section found.');
+  document.getElementById('hero-lead').innerHTML = inlineFormat(framePara || 'An entry into Alex’s case study.');
 
-  document.getElementById('frame-card').innerHTML = `
-    <div class="card-label">Where Alex is right now</div>
-    <h2>Frame</h2>
-    ${renderMarkdown(NOW_PANELS.frame || '')}
-    <div class="show-resolved" style="border-top:none;padding-top:6px;">
-      <a onclick="openDrawer('NOW')">open the full NOW node →</a>
-    </div>
-  `;
-
-  const weekItems = NOW_PANELS.week || [];
-  const weekHtml = weekItems.map(it => actItem(it,
-    'Pick a slot, mark done after. Reset at midnight.',
-    { buttons: [
-        { label: '✓ Did today', action: 'daily', kind: 'primary' },
-        { label: '⏱ Skip today', action: 'defer', days: 1 },
-    ]})).join('');
-  document.getElementById('week-card').innerHTML = `
-    <div class="card-label">This week — pick a slot to commit</div>
-    ${weekHtml || '<div class="card-empty">All this-week items handled today.</div>'}
-    ${showResolvedLine(weekItems.length - countHidden(weekItems), weekItems.length)}
-  `;
-
-  const threadsHtml = THREADS.map(t => {
-    const formatted = `<strong>${escapeHtml(t.title)}</strong><div style="margin-top:6px;font-size:14.5px;color:var(--text-2);font-family:var(--serif);line-height:1.65;">${inlineFormat(t.body || '')}</div>`;
-    return actItem(t.title, 'Take one step today, or close it, or defer.', {
-      formatted: formatted,
-      buttons: [
-        { label: '✓ Acted today', action: 'daily', kind: 'primary' },
-        { label: '✓ Closed', action: 'done' },
-        { label: '⏱ 7d', action: 'defer', days: 7 },
-      ]
-    });
-  }).join('');
-  document.getElementById('threads-card').innerHTML = `
-    <div class="card-label">Open threads — pick one to advance</div>
-    ${threadsHtml || '<div class="card-empty">All open threads handled today.</div>'}
-    ${showResolvedLine(THREADS.length - countHidden(THREADS.map(t => t.title)), THREADS.length)}
-  `;
-
-  const eyesSlot = document.getElementById('eyes-slot');
-  if (EYES.length) {
-    const eyesHtml = EYES.map(e => {
-      const formatted = `<strong>${escapeHtml(e.title)}</strong><div style="margin-top:6px;font-size:14.5px;color:var(--text-2);font-family:var(--serif);line-height:1.65;">${inlineFormat(e.body || '')}</div>`;
-      return actItem(e.title, 'Pick a call: done means resolved on the underlying file; snooze hides for a week.', {
-        formatted: formatted,
-        buttons: [
-          { label: '✓ Done', action: 'done', kind: 'primary' },
-          { label: '⏱ 7d', action: 'defer', days: 7 },
-        ]
-      });
-    }).join('');
-    eyesSlot.innerHTML = `
-      <div class="card canary">
-        <div class="card-label">Needs eyes — make a call</div>
-        ${eyesHtml || '<div class="card-empty">All needs-eyes items handled.</div>'}
-        ${showResolvedLine(EYES.length - countHidden(EYES.map(e => e.title)), EYES.length)}
-      </div>`;
-  } else {
-    eyesSlot.innerHTML = '';
+  // Today's reading entry: pick a node from the NOW.Frame that anchors the moment.
+  // O05 (Chen book) is the live anchor referenced in the Frame; fall back gracefully.
+  const anchorIds = ['O05-workplace-conflict', 'O05', 'PR02-one-sitting-manuscript-read', 'NOW'];
+  let anchor = null;
+  for (const id of anchorIds) {
+    anchor = GRAPH.nodes.find(x => x.id === id) || GRAPH.nodes.find(x => x.id.startsWith(id + '-'));
+    if (anchor) break;
+  }
+  if (!anchor) anchor = GRAPH.nodes.find(x => x.id === 'NOW');
+  const inv = document.getElementById('t-invitation');
+  if (inv && anchor) {
+    const summary = summaryOf(anchor);
+    inv.innerHTML = `
+      <div class="t-inv-label">Today’s reading entry</div>
+      <div class="t-inv-title">${escapeHtml(anchor.name)}</div>
+      <div class="t-inv-body">${inlineFormat(summary)}</div>
+      <a class="t-inv-action" onclick="openDrawer('${anchor.id}')">Open this node →</a>
+    `;
   }
 
-  const canaryItems = NOW_PANELS.canaries || [];
-  const canarySlot = document.getElementById('canaries-slot');
-  if (canaryItems.length) {
-    const canaryHtml = canaryItems.map(it => actItem(it,
-      'If true, pause and look. Mark seen if not active.',
-      { buttons: [
-          { label: '✓ Seen / not active', action: 'done', kind: 'primary' },
-          { label: '⏱ Check in 7d', action: 'defer', days: 7 },
-      ]})).join('');
-    canarySlot.innerHTML = `
-      <div class="card canary">
-        <div class="card-label">Canaries — watch</div>
-        ${canaryHtml || '<div class="card-empty">All canaries handled today.</div>'}
-        ${showResolvedLine(canaryItems.length - countHidden(canaryItems), canaryItems.length)}
-      </div>`;
-  } else {
-    canarySlot.innerHTML = '';
+  // Aside: counts computed from the actual graph.
+  const spineCount = GRAPH.nodes.filter(n => n.spine).length;
+  const tentativeCount = GRAPH.nodes.filter(n => n.tentative).length;
+  const canaryCount = GRAPH.nodes.filter(n => /^R\d+-canary-/.test(n.id)).length;
+  const aside = document.getElementById('t-aside');
+  if (aside) {
+    aside.innerHTML =
+      `${spineCount} load-bearing nodes. ${tentativeCount} tentative. ${canaryCount} canaries to watch.`;
   }
-
-  const recent = GRAPH.nodes.filter(n => n.id !== 'NOW').slice(-7).reverse();
-  document.getElementById('recent-card').innerHTML = `
-    <div class="card-label">Recently in the graph · click to open</div>
-    <div class="recent">
-      ${recent.map(n => `<div class="ritem">
-        <span class="rid" onclick="openDrawer('${n.id}')">${escapeHtml(n.id)}</span>${escapeHtml(n.name)}${n.tentative ? '<span class="rtag">tentative</span>' : ''}
-      </div>`).join('')}
-    </div>
-  `;
 }
 
-function setCardFilter(card) {
-  document.querySelectorAll('#card-filter button').forEach(b => b.classList.toggle('active', b.dataset.card === card));
-  const grid = document.getElementById('cards-grid');
-  if (card === 'all') {
-    grid.classList.remove('filtered');
-    grid.querySelectorAll('[data-card]').forEach(el => el.classList.remove('focus-card'));
-  } else {
-    grid.classList.add('filtered');
-    grid.querySelectorAll('[data-card]').forEach(el => el.classList.toggle('focus-card', el.dataset.card === card));
-  }
-  try { localStorage.setItem('today-filter', card); } catch(e) {}
-}
-document.querySelectorAll('#card-filter button').forEach(btn => {
-  btn.addEventListener('click', () => setCardFilter(btn.dataset.card));
-});
-
-// === Mandala — vanilla SVG ===
+// === Map (vanilla SVG mandala) ===
 let mandalaInited = false;
 let mandalaSvg = null;
 let viewBox = { x: -900, y: -900, w: 1800, h: 1800 };
@@ -853,7 +1022,7 @@ function initMandala() {
   const visibleSet = new Set(visible.map(n => n.id));
   const edges = GRAPH.edges.filter(e => visibleSet.has(e.from) && visibleSet.has(e.to));
 
-  let svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-900 -900 1800 1800" preserveAspectRatio="xMidYMid meet">';
+  let svg = '<svg class="mandala" xmlns="http://www.w3.org/2000/svg" viewBox="-900 -900 1800 1800" preserveAspectRatio="xMidYMid meet">';
   svg += '<g id="mandala-g">';
   for (const e of edges) {
     const a = GRAPH.nodes.find(x => x.id === e.from);
@@ -946,8 +1115,281 @@ document.querySelectorAll('#fractal-controls .legend-item').forEach(item => {
   });
 });
 
-// === Drawer ===
+// === Spine (load-bearing subset, vis-network force layout) ===
+let spineNetwork = null;
+function initSpineNetwork() {
+  if (typeof vis === 'undefined') {
+    document.getElementById('network-spine').innerHTML =
+      '<div style="padding:64px 32px;text-align:center;color:var(--text-3);">vis-network failed to load. Check your network connection.</div>';
+    return;
+  }
+  const spineNodes = GRAPH.nodes.filter(n => n.spine);
+  const spineIds = new Set(spineNodes.map(n => n.id));
+  const nodes = spineNodes.map(n => {
+    const color = TYPE_COLOR[n.type] || '#888';
+    return {
+      id: n.id,
+      label: n.id + '\n' + (n.name.length > 36 ? n.name.slice(0, 36) + '…' : n.name),
+      title: n.name,
+      color: { background: '#ffffff', border: color, highlight: { background: '#f5f5f5', border: color } },
+      borderWidth: n.tentative ? 2 : 1.5,
+      shape: 'box',
+      shapeProperties: { borderDashes: n.tentative ? [4, 3] : false },
+      widthConstraint: { maximum: 180 },
+      margin: { top: 8, right: 10, bottom: 8, left: 10 },
+      font: { color: '#1d1d1f', size: 11, face: '"Charter", "Iowan Old Style", "Georgia", ui-serif, serif', align: 'center', multi: false },
+    };
+  });
+  const edges = GRAPH.edges.filter(e => spineIds.has(e.from) && spineIds.has(e.to)).map((e, i) => ({
+    id: i, from: e.from, to: e.to,
+    color: { color: 'rgba(0,0,0,0.22)', highlight: '#1d1d1f' },
+    arrows: { to: { enabled: true, scaleFactor: 0.35 } },
+    smooth: { enabled: true, type: 'continuous', roundness: 0.18 },
+    width: 0.9,
+  }));
+
+  const ds_nodes = new vis.DataSet(nodes);
+  const ds_edges = new vis.DataSet(edges);
+  spineNetwork = new vis.Network(document.getElementById('network-spine'), { nodes: ds_nodes, edges: ds_edges }, {
+    physics: {
+      enabled: true,
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: { gravitationalConstant: -55, centralGravity: 0.012, springLength: 110, springConstant: 0.08, damping: 0.5 },
+      stabilization: { iterations: 350, fit: true },
+    },
+    interaction: { hover: true, tooltipDelay: 150, dragNodes: true, dragView: true, zoomView: true, keyboard: false },
+  });
+  spineNetwork.once('stabilizationIterationsDone', () => {
+    spineNetwork.setOptions({ physics: { enabled: false } });
+    spineNetwork.fit({ animation: { duration: 400 } });
+  });
+  spineNetwork.on('click', params => { if (params.nodes.length) openDrawer(params.nodes[0]); });
+  document.getElementById('spine-stats').textContent = `${nodes.length} of ${GRAPH.nodes.length} nodes · ${edges.length} edges`;
+}
+function spineZoomBy(f) { if (!spineNetwork) return; const s = spineNetwork.getScale(); spineNetwork.moveTo({ scale: s * f, animation: { duration: 200 } }); }
+
+// === Practices (P-nodes, sorted by P-index then KT) ===
+function renderPractices() {
+  const list = document.getElementById('practice-list');
+  if (!list) return;
+  const ps = GRAPH.nodes.filter(n => n.type === 'practice');
+  function pSortKey(id) {
+    // PR01 → (0, 1); KT01 → (1, 1); P01 (rare) → (0, 1) too
+    if (id.startsWith('KT')) {
+      const m = id.match(/^KT(\d+)/);
+      return [1, m ? parseInt(m[1]) : 0];
+    }
+    const m = id.match(/^PR?(\d+)/);
+    return [0, m ? parseInt(m[1]) : 0];
+  }
+  ps.sort((a, b) => {
+    const ka = pSortKey(a.id), kb = pSortKey(b.id);
+    return (ka[0] - kb[0]) || (ka[1] - kb[1]);
+  });
+  list.innerHTML = '';
+  ps.forEach(n => {
+    let summary = (n.statement || '').split(/\n\s*\n/)[0].trim().replace(/\s+/g, ' ');
+    if (summary.length > 240) summary = summary.slice(0, 240) + '…';
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.onclick = () => openDrawer(n.id);
+    row.innerHTML = `
+      <div class="rh">
+        <span class="rid">${escapeHtml(n.id)}</span>
+        <span class="rname">${escapeHtml(n.name)}</span>
+      </div>
+      <div class="rsum">${escapeHtml(summary)}</div>
+    `;
+    list.appendChild(row);
+  });
+  if (!ps.length) {
+    list.innerHTML = '<div class="empty-list">No practice nodes found.</div>';
+  }
+}
+
+// === Canaries (Alex variant: R12-R15 + R37-R39 by ID-slug clusters) ===
+function renderCanaries() {
+  const clist = document.getElementById('canary-list');
+  if (!clist) return;
+  const cans = GRAPH.nodes.filter(n => /^R\d+-canary-/.test(n.id));
+  const clusters = [
+    { key: 'routine',    label: 'Routine',    match: /missed-run|crossword/ },
+    { key: 'substance',  label: 'Substance',  match: /drinking/ },
+    { key: 'mood',       label: 'Mood',       match: /silent-mornings/ },
+    { key: 'relational', label: 'Relational', match: /nadia-uncalled/ },
+    { key: 'work',       label: 'Work',       match: /political-budget|old-contracts/ },
+    { key: 'other',      label: 'Other',      match: /./ },
+  ];
+  const buckets = clusters.map(c => ({ ...c, items: [] }));
+  cans.forEach(n => {
+    for (const b of buckets) {
+      if (b.match.test(n.id)) { b.items.push(n); break; }
+    }
+  });
+  function rIndex(id) { const m = id.match(/^R(\d+)/); return m ? parseInt(m[1]) : 0; }
+  buckets.forEach(b => b.items.sort((a, c) => rIndex(a.id) - rIndex(c.id)));
+
+  clist.innerHTML = '';
+  buckets.forEach(b => {
+    if (!b.items.length) return;
+    const head = document.createElement('div');
+    head.className = 'group-head';
+    head.textContent = `${b.label} · ${b.items.length}`;
+    clist.appendChild(head);
+    b.items.forEach(n => {
+      let summary = (n.statement || '').split(/\n\s*\n/)[0].trim().replace(/\s+/g, ' ');
+      if (summary.length > 280) summary = summary.slice(0, 280) + '…';
+      const eli5 = NODE_ELI5[n.id];
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.onclick = () => openDrawer(n.id);
+      row.innerHTML = `
+        <div class="rh">
+          <span class="rid">${escapeHtml(n.id)}</span>
+          <span class="rname">${escapeHtml(n.name)}</span>
+        </div>
+        <div class="rsum">${escapeHtml(summary)}</div>
+        ${eli5 ? `<div class="reli5"><span class="velab">In plain English</span>${inlineFormat(eli5)}</div>` : ''}
+      `;
+      clist.appendChild(row);
+    });
+  });
+  if (!cans.length) {
+    clist.innerHTML = '<div class="empty-list">No canary nodes found.</div>';
+  }
+}
+
+// === Forecasts (Emergent + horizon, ordered by horizon) ===
+function renderForecasts() {
+  const flist = document.getElementById('forecast-list');
+  if (!flist) return;
+  const fcs = GRAPH.nodes.filter(n => n.is_forecast);
+  function horizonDays(n) {
+    const txt = ((n.horizon || '') + ' ' + n.name + ' ' + (n.statement || '')).toLowerCase();
+    const m = txt.match(/(\d+)\s*[- ]?\s*(day|week|month|year|yr|mo)/);
+    if (!m) return 99999;
+    const v = parseInt(m[1]);
+    const u = m[2];
+    if (u === 'day') return v;
+    if (u === 'week') return v * 7;
+    if (u === 'month' || u === 'mo') return v * 30;
+    if (u === 'year' || u === 'yr') return v * 365;
+    return 99999;
+  }
+  function horizonLabel(n) {
+    if (n.horizon) return String(n.horizon);
+    const d = horizonDays(n);
+    if (d < 60) return d + 'd';
+    if (d < 700) return Math.round(d / 30) + 'mo';
+    return Math.round(d / 365) + 'y';
+  }
+  fcs.forEach(n => { n._h = horizonDays(n); });
+  fcs.sort((a, b) => a._h - b._h);
+  flist.innerHTML = '';
+  fcs.forEach(n => {
+    let summary = (n.statement || '').split(/\n\s*\n/)[0].trim().replace(/\s+/g, ' ');
+    if (summary.length > 280) summary = summary.slice(0, 280) + '…';
+    const tent = n.tentative ? '<span class="pill thin">tentative</span>' : '';
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.onclick = () => openDrawer(n.id);
+    row.innerHTML = `
+      <div class="rh">
+        <span class="pill horizon">${escapeHtml(horizonLabel(n))}</span>
+        <span class="rid">${escapeHtml(n.id)}</span>
+        <span class="rname">${escapeHtml(n.name)}</span>
+        ${tent}
+      </div>
+      <div class="rsum">${escapeHtml(summary)}</div>
+    `;
+    flist.appendChild(row);
+  });
+  if (!fcs.length) {
+    flist.innerHTML = '<div class="empty-list">No forecast nodes found.</div>';
+  }
+}
+
+// === Tentative (filter tentative:true, group by type, "needs second instance" when prov_count==1) ===
+function renderTentative() {
+  const tlist = document.getElementById('tentative-list');
+  if (!tlist) return;
+  const tentative = GRAPH.nodes.filter(n => n.tentative && n.id !== 'NOW');
+  const order = ['emergent', 'overlap', 'novel', 'practice', 'reference', 'observation', 'open'];
+  const labels = {
+    emergent:    'Emergent — synthesis claims',
+    overlap:     'Overlap — patterns across observations',
+    novel:       'Novel — interpretations',
+    practice:    'Practice — operating rules',
+    reference:   'Reference',
+    observation: 'Observation',
+    open:        'Open question',
+  };
+  const groups = {};
+  tentative.forEach(n => { (groups[n.type] = groups[n.type] || []).push(n); });
+  function key(n) { const m = n.id.match(/^[A-Z]+(\d+)/); return m ? parseInt(m[1]) : 0; }
+  tlist.innerHTML = '';
+  order.forEach(t => {
+    if (!groups[t] || !groups[t].length) return;
+    const head = document.createElement('div');
+    head.className = 'group-head';
+    head.textContent = `${labels[t] || t} · ${groups[t].length}`;
+    tlist.appendChild(head);
+    groups[t].sort((a, b) => key(a) - key(b)).forEach(n => {
+      let summary = (n.statement || '').split(/\n\s*\n/)[0].trim().replace(/\s+/g, ' ');
+      if (summary.length > 240) summary = summary.slice(0, 240) + '…';
+      const pills = [];
+      if ((n.prov_count || 0) <= 1) pills.push('<span class="pill thin">needs second instance</span>');
+      if (n.is_forecast) pills.push('<span class="pill fc">forecast</span>');
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.onclick = () => openDrawer(n.id);
+      row.innerHTML = `
+        <div class="rh">
+          <span class="rid">${escapeHtml(n.id)}</span>
+          <span class="rname">${escapeHtml(n.name)}</span>
+          ${pills.join(' ')}
+        </div>
+        <div class="rsum">${escapeHtml(summary)}</div>
+      `;
+      tlist.appendChild(row);
+    });
+  });
+  if (!tentative.length) {
+    tlist.innerHTML = '<div class="empty-list">No tentative nodes — graph is fully promoted.</div>';
+  }
+}
+
+// === Eyes (parsed from alex-needs-eyes.md, h2 candidate sections) ===
+function renderEyes() {
+  const list = document.getElementById('eyes-list');
+  if (!list) return;
+  if (!EYES.length) {
+    list.innerHTML = '<div class="empty-list">No items in needs-eyes right now.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  EYES.forEach(e => {
+    // Try to resolve a node id from the leading token of the title (e.g. "N01 — ...").
+    const m = e.title.match(/^([A-Z]+\d+(?:-[A-Za-z0-9-]+)?)/);
+    const node = m ? (GRAPH.nodes.find(x => x.id === m[1]) || GRAPH.nodes.find(x => x.id.startsWith(m[1] + '-'))) : null;
+    const row = document.createElement('div');
+    row.className = 'row';
+    if (node) row.onclick = () => openDrawer(node.id);
+    row.innerHTML = `
+      <div class="rh">
+        ${node ? `<span class="rid">${escapeHtml(node.id)}</span>` : ''}
+        <span class="rname">${escapeHtml(e.title)}</span>
+      </div>
+      <div class="rsum">${inlineFormat(e.body)}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+// === Drawer (nodes + meta files via openContentDrawer) ===
 const DRAWER_HISTORY = [];
+const CONTENT_DRAWERS = {};
+
 function openDrawer(id, opts) {
   opts = opts || {};
   const n = GRAPH.nodes.find(x => x.id === id) || GRAPH.nodes.find(x => x.id.startsWith(id + '-'));
@@ -961,7 +1403,12 @@ function openDrawer(id, opts) {
   document.getElementById('drawer-title').textContent = n.name;
   document.getElementById('drawer-meta').textContent = n.id + (n.horizon ? ' · horizon ' + n.horizon : '');
 
-  let html = renderMarkdown(n.statement);
+  let html = '';
+  const eli5 = NODE_ELI5[n.id];
+  if (eli5) {
+    html += '<div class="eli5-block"><div class="eli5-label">In plain English</div>' + renderMarkdown(eli5) + '</div>';
+  }
+  html += renderMarkdown(n.statement);
   if (n.caveats && n.caveats.trim()) {
     html += '<div class="caveats"><div class="clab">Caveats</div>' + renderMarkdown(n.caveats) + '</div>';
   }
@@ -1015,10 +1462,61 @@ function openDrawer(id, opts) {
   document.getElementById('drawer-overlay').classList.add('open');
   document.querySelector('#drawer .dbody').scrollTop = 0;
 }
+
+function openContentDrawer(payload, opts) {
+  // payload: { key, title, type, meta, body, eli5, bodyPrefix }
+  opts = opts || {};
+  const newId = '_content:' + payload.key;
+  CONTENT_DRAWERS[payload.key] = payload;
+
+  const cur = document.getElementById('drawer').dataset.cur;
+  if (cur && cur !== newId && !opts.noPush) DRAWER_HISTORY.push(cur);
+  document.getElementById('drawer').dataset.cur = newId;
+
+  document.getElementById('drawer-type').innerHTML = escapeHtml(payload.type || '');
+  document.getElementById('drawer-title').textContent = payload.title || '';
+  document.getElementById('drawer-meta').textContent = payload.meta || '';
+
+  let html = '';
+  if (payload.bodyPrefix) html += payload.bodyPrefix;
+  if (payload.eli5) {
+    html += '<div class="eli5-block"><div class="eli5-label">In plain English</div>' + renderMarkdown(payload.eli5) + '</div>';
+  }
+  html += renderMarkdown(payload.body || '');
+
+  document.getElementById('drawer-stmt').innerHTML = html;
+  document.getElementById('drawer-back').style.display = DRAWER_HISTORY.length ? 'inline-block' : 'none';
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.querySelector('#drawer .dbody').scrollTop = 0;
+}
+
+function openMetaFile(filename) {
+  const def = META_FILES[filename];
+  if (!def) {
+    // Graceful fallback: try to open the raw file in a new tab.
+    window.open(filename, '_blank');
+    return;
+  }
+  openContentDrawer({
+    key: 'meta:' + filename,
+    title: META_FILE_TITLES[filename] || def.title,
+    type: 'source',
+    meta: filename,
+    body: def.canonical,
+  });
+}
+
 function drawerBack() {
   if (!DRAWER_HISTORY.length) return;
   const id = DRAWER_HISTORY.pop();
-  openDrawer(id, { noPush: true });
+  if (id && id.startsWith('_content:')) {
+    const key = id.slice('_content:'.length);
+    const payload = CONTENT_DRAWERS[key];
+    if (payload) openContentDrawer(payload, { noPush: true });
+  } else {
+    openDrawer(id, { noPush: true });
+  }
 }
 function closeDrawer() {
   document.getElementById('drawer').classList.remove('open');
@@ -1041,60 +1539,93 @@ function mentionedBy(targetId) {
   }
   return hits.slice(0, 30);
 }
+
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if (e.key === 'Escape') closeDrawer();
   else if (e.key === '/' && document.getElementById('tab-fractal').classList.contains('active')) {
     e.preventDefault(); document.getElementById('search').focus();
   }
-  else if ((e.key === '+' || e.key === '=') && mandalaInited) zoomBy(1.25);
-  else if ((e.key === '-' || e.key === '_') && mandalaInited) zoomBy(0.8);
-  else if (e.key === '0' && mandalaInited) fitMandala();
+  else if ((e.key === '+' || e.key === '=')) {
+    if (document.getElementById('tab-spine').classList.contains('active')) spineZoomBy(1.25);
+    else if (mandalaInited) zoomBy(1.25);
+  }
+  else if ((e.key === '-' || e.key === '_')) {
+    if (document.getElementById('tab-spine').classList.contains('active')) spineZoomBy(0.8);
+    else if (mandalaInited) zoomBy(0.8);
+  }
+  else if (e.key === '0') {
+    if (document.getElementById('tab-spine').classList.contains('active') && spineNetwork) spineNetwork.fit({animation:{duration:300}});
+    else if (mandalaInited) fitMandala();
+  }
 });
 
-// === Sources ===
-const SOURCES = [
-  { name: 'NOW node', click: () => openDrawer('NOW'), desc: 'Top-of-stack: frame, this week / month / quarter, standing rules, canaries.' },
-  { name: 'README.md', file: 'README.md', desc: 'Project overview. Schema-as-taxonomy, how to use the scaffold.' },
-  { name: 'SCHEMA.md', file: 'SCHEMA.md', desc: 'Formal spec — node types, edges, provenance triple. Non-negotiable invariant.' },
-  { name: 'SAFETY.md', file: 'SAFETY.md', desc: 'Caveats. Read first.' },
-  { name: 'SCHEMA_DEPRECIATION.md', file: 'SCHEMA_DEPRECIATION.md', desc: 'Why typed knowledge graphs decay, and what this scaffold does about it.' },
-  { name: 'RELATED_FRAMEWORKS.md', file: 'RELATED_FRAMEWORKS.md', desc: 'What this borrows from PROV-O, Toulmin, Zettelkasten, PKG.' },
-  { name: 'alex-actions.md', file: 'alex-actions.md', desc: 'Open threads cards source.' },
-  { name: 'alex-needs-eyes.md', file: 'alex-needs-eyes.md', desc: 'Items needing review source.' },
-  { name: 'alex-vocab.md', file: 'alex-vocab.md', desc: 'Glossary source.' },
-  { name: 'example-graph-extended.yaml', file: 'example-graph-extended.yaml', desc: 'The graph itself — Alex, the worked example.' },
+// === Sources (drawer-based — openMetaFile) ===
+const SOURCE_ENTRIES = [
+  { name: 'NOW',                 open: () => openDrawer('NOW'),                       desc: 'Top of the stack — frame, this week, standing rules, canaries.' },
+  { name: 'Readme',              open: () => openMetaFile('README.md'),               desc: 'Project overview and how to use the scaffold.' },
+  { name: 'Start here',          open: () => openMetaFile('START_HERE.md'),           desc: 'Five-minute orientation for first-time readers.' },
+  { name: 'Schema',              open: () => openMetaFile('SCHEMA.md'),               desc: 'Formal spec — node types, edges, provenance triple.' },
+  { name: 'Safety',              open: () => openMetaFile('SAFETY.md'),               desc: 'Caveats. Read first.' },
+  { name: 'Related frameworks',  open: () => openMetaFile('RELATED_FRAMEWORKS.md'),   desc: 'What this borrows from PROV-O, Toulmin, Zettelkasten, PKG.' },
+  { name: 'Skill',               open: () => openMetaFile('skill.md'),                desc: 'Skill-card prompt for the scaffold.' },
+  { name: 'Vocab',               open: () => openMetaFile('alex-vocab.md'),           desc: 'Glossary source.' },
+  { name: 'Open threads',        open: () => openMetaFile('alex-actions.md'),         desc: 'Live-work cards source.' },
+  { name: 'Needs eyes',          open: () => openMetaFile('alex-needs-eyes.md'),      desc: 'Items requiring review source.' },
+  { name: 'Plain-English overlays', open: () => openMetaFile('alex-node-eli5.md'),    desc: 'ELI5 layer for spine nodes, canaries, practices.' },
 ];
-const sourceList = document.getElementById('source-list');
-SOURCES.forEach(s => {
-  const a = document.createElement('a');
-  a.className = 'source-item';
-  if (s.click) { a.href = '#'; a.onclick = (e) => { e.preventDefault(); s.click(); }; }
-  else { a.href = s.file; a.target = '_blank'; }
-  a.innerHTML = `<div class="stitle">${escapeHtml(s.name)}</div><div class="sdesc">${escapeHtml(s.desc)}</div>`;
-  sourceList.appendChild(a);
-});
+function renderSources() {
+  const sourceList = document.getElementById('source-list');
+  if (!sourceList) return;
+  sourceList.innerHTML = '';
+  SOURCE_ENTRIES.forEach(s => {
+    // Skip meta-file entries whose underlying file wasn't loaded (e.g. eli5 not yet authored).
+    if (s.open && s.name !== 'NOW') {
+      // Heuristic: read the closure's file by matching against META_FILES keys.
+      // We can't introspect the function, so just render and let openMetaFile fall back.
+    }
+    const a = document.createElement('a');
+    a.className = 'source-item';
+    a.href = '#';
+    a.onclick = (e) => { e.preventDefault(); s.open(); };
+    a.innerHTML = `<div class="stitle">${escapeHtml(s.name)}</div><div class="sdesc">${escapeHtml(s.desc)}</div>`;
+    sourceList.appendChild(a);
+  });
+}
 
 // === Vocab ===
-const vlist = document.getElementById('vocab-list');
-document.getElementById('vocab-count').textContent = `${VOCAB.length} terms in the working vocabulary.`;
-VOCAB.forEach(v => {
-  const row = document.createElement('div');
-  row.className = 'vocab-row';
-  row.innerHTML = `<div class="vterm">${escapeHtml(v.term)}</div><div class="vdef">${escapeHtml(v.def)}</div>`;
-  vlist.appendChild(row);
-});
+function renderVocab() {
+  const vlist = document.getElementById('vocab-list');
+  if (!vlist) return;
+  document.getElementById('vocab-count').textContent = `${VOCAB.length} terms in the working vocabulary.`;
+  vlist.innerHTML = '';
+  VOCAB.forEach(v => {
+    const row = document.createElement('div');
+    row.className = 'vocab-row';
+    row.innerHTML = `<div class="vterm">${escapeHtml(v.term)}</div><div class="vdef">${escapeHtml(v.def)}</div>`;
+    vlist.appendChild(row);
+  });
+}
 
 // === Boot ===
 buildToday();
-try {
-  const savedFilter = localStorage.getItem('today-filter');
-  if (savedFilter && document.querySelector(`#card-filter button[data-card="${savedFilter}"]`)) {
-    setCardFilter(savedFilter);
-  }
-} catch(e) {}
+renderPractices();
+renderCanaries();
+renderForecasts();
+renderTentative();
+renderEyes();
+renderSources();
+renderVocab();
+
 const initialTab = (location.hash || '').replace('#', '');
-if (['fractal','sources','vocab'].includes(initialTab)) switchTab(initialTab);
+const VALID_SUBS = ['today','canaries','eyes','tentative','forecasts','spine','practices','fractal','sources','vocab'];
+if (VALID_SUBS.includes(initialTab)) {
+  const group = SUB_TO_GROUP[initialTab] || 'today';
+  switchGroup(group);
+  switchTab(initialTab);
+} else {
+  switchGroup('today');
+}
 </script>
 </body>
 </html>
@@ -1112,24 +1643,35 @@ def main():
     graph = parse_graph(YAML_PATH)
     vocab = parse_vocab(VOCAB_PATH)
     threads = parse_action_cards(ACTIONS_PATH)
-    eyes = parse_action_cards(EYES_PATH)
+    eyes = parse_eyes_candidates(EYES_PATH)
     now_panels = extract_now_panels(graph)
+    node_eli5 = parse_node_eli5(ELI5_PATH)
+    meta_files = load_meta_files()
 
     html = (
         HTML_TEMPLATE
-        .replace("__DATA__",       json.dumps(graph, ensure_ascii=False))
-        .replace("__VOCAB__",      json.dumps(vocab, ensure_ascii=False))
-        .replace("__THREADS__",    json.dumps(threads, ensure_ascii=False))
-        .replace("__EYES__",       json.dumps(eyes, ensure_ascii=False))
-        .replace("__NOW_PANELS__", json.dumps(now_panels, ensure_ascii=False))
-        .replace("__TYPE_COLOR__", json.dumps(TYPE_COLOR))
-        .replace("__TYPE_LABEL__", json.dumps(TYPE_LABEL))
+        .replace("__FAVICON__",          FAVICON_SVG)
+        .replace("__DATA__",             json.dumps(graph, ensure_ascii=False))
+        .replace("__VOCAB__",            json.dumps(vocab, ensure_ascii=False))
+        .replace("__THREADS__",          json.dumps(threads, ensure_ascii=False))
+        .replace("__EYES__",             json.dumps(eyes, ensure_ascii=False))
+        .replace("__NOW_PANELS__",       json.dumps(now_panels, ensure_ascii=False))
+        .replace("__TYPE_COLOR__",       json.dumps(TYPE_COLOR))
+        .replace("__TYPE_LABEL__",       json.dumps(TYPE_LABEL))
+        .replace("__NODE_ELI5__",        json.dumps(node_eli5, ensure_ascii=False))
+        .replace("__META_FILES__",       json.dumps(meta_files, ensure_ascii=False))
+        .replace("__META_FILE_TITLES__", json.dumps(META_FILE_TITLES, ensure_ascii=False))
     )
     OUT_PATH.write_text(html)
     print(f"Wrote {OUT_PATH}")
     print(f"  nodes: {len(graph['nodes'])}  edges: {len(graph['edges'])}")
     print(f"  vocab: {len(vocab)}  threads: {len(threads)}  eyes: {len(eyes)}")
-    print(f"  now-panels: frame={len(now_panels['frame'])}c · week={len(now_panels['week'])} bullets · canaries={len(now_panels['canaries'])} bullets")
+    print(f"  spine: {sum(1 for n in graph['nodes'] if n.get('spine'))} nodes")
+    print(f"  forecasts: {sum(1 for n in graph['nodes'] if n.get('is_forecast'))} nodes")
+    print(f"  tentative: {sum(1 for n in graph['nodes'] if n.get('tentative'))} nodes")
+    print(f"  meta files loaded: {len(meta_files)}")
+    if node_eli5:
+        print(f"  node-eli5 entries: {len(node_eli5)}")
 
 
 if __name__ == "__main__":

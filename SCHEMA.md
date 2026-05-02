@@ -2,9 +2,14 @@
 
 Formal spec for the memory graph. If a node or edge violates this spec, it's a bug.
 
+> **Claim:** This document is the formal spec; deviations are bugs, not variants.
+> **Grounds:** Stated as the file's purpose.
+> **Status:** stipulated
+> **Leans on:** every renderer and validator in the repo; START_HERE.md (which paraphrases this spec for the LLM).
+
 ---
 
-## Provenance triple (the invariant)
+## Provenance triple — the invariant every node and edge must carry
 
 Every node and every edge carries:
 
@@ -24,9 +29,14 @@ provenance:
 
 A node without this triple is not a node. Non-negotiable.
 
+> **Claim:** Provenance is the schema invariant — without the triple, the unit is not a graph node.
+> **Grounds:** Definitional rule, traceable to PROV-O's typed-triplet shape.
+> **Status:** stipulated
+> **Leans on:** every node type below; the validation rules; render.py's checks 1–6.
+
 ---
 
-## Node types
+## Node types — the eight typed shapes a claim can take
 
 ```yaml
 # ── Reference: a biographical fact ──────────────────────────────
@@ -142,9 +152,14 @@ A node without this triple is not a node. Non-negotiable.
 
 `practice` is a personal-graph extension. Use when the graph has grown rules the user explicitly lives by (a no-screens-after-X rule, a job-filter rule, a commitment to ask directly). A practice should `derive_from` a descriptive node so the normative claim stays traceable. Floating rules with no descriptive grounding belong in a sibling goals/actions doc, not here.
 
+> **Claim:** Eight typed node shapes — reference, observation, overlap, novel, emergent, equivalency, open, practice — exhaust the kinds of claim the graph admits.
+> **Grounds:** Enumerated definitions above; each carries a YAML template and a discriminating rule.
+> **Status:** stipulated
+> **Leans on:** the validation rules below (which enforce per-type constraints); the IDs section; START_HERE.md's node-type table.
+
 ---
 
-## Edge relations
+## Edge relations — the eight typed connections between nodes
 
 Every node can have an optional `edges` list:
 
@@ -167,9 +182,14 @@ edges:
 | `contradicts` | claim → counter-claim | Conflicts from shared premises |
 | `emergent_from` | intersection → parent | Precipitated from target (pairs with another parent) |
 
+> **Claim:** Eight typed edge relations cover the structural moves the graph needs to express.
+> **Grounds:** Enumerated relation table with directionality and meaning.
+> **Status:** stipulated
+> **Leans on:** validation rule 5 (every `edges[].to` resolves); the renderers' adjacency computations.
+
 ---
 
-## Evidence types
+## Evidence types — the five-tier strength ladder
 
 | Type | Strength | When |
 |---|---|---|
@@ -181,9 +201,14 @@ edges:
 
 A `novel` grounded only in `derived-inference` is the weakest claim class in the graph. Treat it accordingly.
 
+> **Claim:** Evidence type maps to claim strength on a discrete five-tier ladder, not a numeric score.
+> **Grounds:** Tabulated above; rationale (no replication, no external ground truth) elaborated in the personal-memory extensions section.
+> **Status:** stipulated
+> **Leans on:** the type-tier-instead-of-numeric-confidence extension; the HANDLING for `novel`-only-on-`derived-inference`.
+
 ---
 
-## Validation rules
+## Validation rules — the ten well-formedness conditions
 
 A graph is well-formed iff:
 
@@ -200,9 +225,14 @@ A graph is well-formed iff:
 
 `render.py` checks 1–6 automatically. 7–10 require human judgment; verify during Phase 7.
 
+> **Claim:** Ten conditions are jointly necessary and sufficient for a well-formed graph.
+> **Grounds:** Enumerated; partition between machine-checkable (1–6) and human-judgment (7–10) is operationalized in render.py.
+> **Status:** stipulated
+> **Leans on:** render.py (1–6); START_HERE.md Phase 7 (7–10).
+
 ---
 
-## IDs
+## IDs — the eight prefixes and the descriptive-slug convention
 
 - `R##` — reference
 - `O##` — observation
@@ -215,9 +245,14 @@ A graph is well-formed iff:
 
 Use descriptive slugs: `O01-first-day-of-job` over `O01`. Helps when the YAML is hand-edited.
 
+> **Claim:** ID prefix encodes node type; descriptive slug aids hand-editing.
+> **Grounds:** Convention; example contrast.
+> **Status:** stipulated
+> **Leans on:** node-type validation (prefix-to-type matching); cross-references throughout the bundle.
+
 ---
 
-## Sub-categories of `reference` (added April 2026)
+## Sub-categories of `reference` (added April 2026) — five role prefixes plus `NOW` and `forecast`
 
 After several weeks of building on a real graph, five patterns emerged as useful **sub-categories of `reference`** — not new node types. Extending the core type list is fragile (see `SCHEMA_DEPRECIATION.md`); descriptive prefixes keep the schema small while making common roles legible.
 
@@ -235,13 +270,18 @@ Plus:
 
 `example-graph-extended.yaml` demonstrates these.
 
+> **Claim:** Common reference roles are best expressed as descriptive prefixes, not new top-level node types.
+> **Grounds:** Empirical — patterns observed after weeks of use; rationale grounded in SCHEMA_DEPRECIATION.md's argument against type-list bloat.
+> **Status:** tentative (introduced April 2026; could deprecate)
+> **Leans on:** SCHEMA_DEPRECIATION.md; example-graph-extended.yaml as the demonstrating instance.
+
 ---
 
-## Optional fields (added Apr 2026)
+## Optional fields (added Apr 2026) — `genre`, `effort`, `warrant`, `revisions`, `handling`
 
 OPTIONAL. Core schema works without them. Add only on nodes where they help.
 
-### `genre:` and `effort:`
+### `genre:` and `effort:` — distinguish passing thoughts from deliberate investigation
 
 Distinguishes passing thoughts from deliberate investigation:
 
@@ -252,7 +292,12 @@ effort: passing-thought | sustained | deliberate-investigation
 
 **Recommended on every `novel`.** A passing-thought novel deserves different weight than an hour-long one — and novels are the type most prone to being treated as heavier than they are.
 
-### `warrant:`
+> **Claim:** Annotating effort prevents passing-thought novels being read as sustained investigations.
+> **Grounds:** Observed failure mode — novels accreting unwarranted weight.
+> **Status:** tentative
+> **Leans on:** the novel node type's `tentative:` requirement; the caveats discipline.
+
+### `warrant:` — the inferential leap from evidence to claim
 
 The inferential leap from evidence to claim:
 
@@ -265,7 +310,12 @@ warrant: |
 
 Most useful on `overlap`, `novel`, `emergent`. Forces naming assumptions that were implicit.
 
-### `revisions:`
+> **Claim:** Surfacing the warrant exposes the assumption that bears the weight of disagreement.
+> **Grounds:** Toulmin-style move; tracks how disagreements actually run.
+> **Status:** stipulated
+> **Leans on:** RELATED_FRAMEWORKS.md (Toulmin); overlap/novel/emergent as the load-bearing types.
+
+### `revisions:` — log of truth-state changes
 
 History log for how a node has changed:
 
@@ -281,7 +331,12 @@ revisions:
 
 Open a revisions log when the node's *truth-state* changes (tentative → stable, overlap → qualified overlap), not when content is edited for clarity. Typo fix: no. Change in belief: yes.
 
-### `handling:`
+> **Claim:** A revisions log captures *belief* change, not edit history.
+> **Grounds:** Discriminating example (typo vs. promotion); fields enumerated.
+> **Status:** stipulated
+> **Leans on:** the tentative/stable lifecycle for novels; the temporal-validity (`valid_at`) extension.
+
+### `handling:` — structured form of the inline HANDLING directive
 
 Structured form of inline HANDLING directive:
 
@@ -296,9 +351,14 @@ handling: surface | quiet | do-not-raise-unprompted | archive
 
 Inline `HANDLING:` lines stay valid for human-read graphs. Structured `handling:` is preferred when a tool reads the graph.
 
+> **Claim:** Four-value `handling` enum gives tools a machine-readable surface for the inline HANDLING discipline.
+> **Grounds:** Enumeration plus rationale (tool-readable vs. human-only).
+> **Status:** stipulated
+> **Leans on:** the HANDLING extension below; SAFETY.md's caveats around sensitive content.
+
 ---
 
-## Extensions for personal memory
+## Extensions for personal memory — the seven deliberate departures from scientific-claims schemas
 
 Personal memory operates under different constraints than scientific knowledge — no replication, no external ground truth, fuzzy temporal validity, node-dense rather than edge-dense growth as life events accumulate.
 
@@ -318,8 +378,18 @@ I make seven deliberate extensions beyond scientific-claims provenance schemas:
 
 7. **`practice` as an eighth node type.** Personal graphs accumulate operating rules. These are normative, not descriptive, but belong in the graph when they `derive_from` descriptive claims — traceability from "this is the pattern" to "therefore this is the rule." A practice with no descriptive grounding belongs in goals.md, not here.
 
+> **Claim:** Seven deliberate extensions adapt the scientific-claims provenance shape to the constraints of personal memory.
+> **Grounds:** Enumerated, each tied to a specific constraint (no replication, no ground truth, fuzzy validity, node-dense growth).
+> **Status:** stipulated
+> **Leans on:** README.md's "What I built"; each extension's corresponding schema element above.
+
 ---
 
-## Credit
+## Credit — provenance lineage of this spec
 
 Provenance-triple shape from W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) (2004) and [PROV-O](https://www.w3.org/TR/prov-overview/) (2013). Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) gives the formal articulation for the **scientific** case. The personal-graph schema above — typed nodes adapted to personal life, four-scale synthesis, `valid_at` temporal validity, MCP retrieval — is mine.
+
+> **Claim:** The provenance-triple shape is borrowed from W3C standards; the personal-graph extensions on top are original.
+> **Grounds:** Cited W3C standards; cited McCarthy repo; explicit boundary between borrowed shape and new extensions.
+> **Status:** established (cited prior art); stipulated (boundary)
+> **Leans on:** README.md's Credit section; RELATED_FRAMEWORKS.md.
