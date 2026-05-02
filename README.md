@@ -6,9 +6,14 @@ A flat memory list treats a claim repeated five times as five pieces of evidence
 
 > Companion essay: **[Know Thyself](https://parrik.com/essays/know-thyself/)** — the full argument lives there.
 
+> **Claim:** Restructuring flat LLM memory into a provenance-typed graph yields honest confidence accumulation.
+> **Grounds:** Stated thesis of the scaffold; elaborated in the companion essay.
+> **Status:** stipulated
+> **Leans on:** the schema and prompt below; SCHEMA.md for the typed-node spec.
+
 ---
 
-## Quickstart
+## Quickstart — how to run the scaffold end-to-end
 
 1. Read `SAFETY.md` (5 minutes).
 2. In a Claude conversation that has accumulated real memory, paste `START_HERE.md`. (Claude Code: a `/know-thyself` slash command does the same thing.)
@@ -21,9 +26,14 @@ python render_dashboard.py your-graph.yaml   # interactive HTML, NOW node center
 
 `render.py` builds a static graphviz diagram, `render_mandala.py` does concentric rings, `printable.py` builds a multi-page PDF. Each script tells you which `pip install` it needs.
 
+> **Claim:** Three steps (safety read → paste prompt → render) are sufficient to produce a usable graph.
+> **Grounds:** Operational instructions; verified by the bundled renderers.
+> **Status:** stipulated
+> **Leans on:** START_HERE.md (the prompt), SCHEMA.md (the YAML shape), the render scripts in this repo.
+
 ---
 
-## What's here
+## What's here — the file inventory of this repo
 
 | File | Purpose |
 |---|---|
@@ -36,9 +46,14 @@ python render_dashboard.py your-graph.yaml   # interactive HTML, NOW node center
 | `example-graph-extended.html` | Self-contained interactive viewer for the extended example |
 | `skill.md` | Claude Code skill definition |
 
+> **Claim:** These files are the complete public surface of the scaffold.
+> **Grounds:** Direct enumeration of the repo contents.
+> **Status:** stipulated
+> **Leans on:** every cross-reference elsewhere in the README and START_HERE.md.
+
 ---
 
-## What I built
+## What I built — the structural extensions for personal memory
 
 I built a personal-graph schema: typed nodes for a single life, four-scale confidence synthesis, temporal validity, MCP retrieval. The provenance-triple shape underneath is older — RDF and PROV-O ship it as W3C standards, and Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) gives a contemporary articulation with formal necessity arguments for the **scientific** case. The structural extensions for **personal** memory below are mine:
 
@@ -48,12 +63,22 @@ I built a personal-graph schema: typed nodes for a single life, four-scale confi
 
 Smaller extensions: type-tier confidence (no replication, no external ground truth, so a numeric score is dishonest); HANDLING directives for sensitive content; natural-experiment evidence type for life events that function like A/B tests; open questions as first-class nodes.
 
+> **Claim:** The personal-graph schema is a deliberate set of structural extensions on top of an older provenance-triple shape.
+> **Grounds:** Builder's account; cross-checked against PROV-O / RDF / open-knowledge-graph as the prior art.
+> **Status:** stipulated
+> **Leans on:** SCHEMA.md (formal spec of the extensions), the Credit section below.
+
 ---
 
-## Credit
+## Credit — where the underlying ideas come from
 
 - W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) (2004) and [PROV-O](https://www.w3.org/TR/prov-overview/) (2013) — the typed-triplet shape as web standards.
 - George Miller (1956) and Nelson Cowan (2001) — working-memory bounds that motivate why a graph beats a flat list.
 - [Patrick McCarthy's open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) — formal necessity arguments for the scientific case. McCarthy's repo is unlicensed at time of writing; the schema as a structural taxonomy is treated here as uncopyrightable, and this repository's MIT license covers the specific implementation, prose, and renderers — not the underlying ideas.
 
 Adjacent prior art (Anthropic's citations API, Park et al.'s *Generative Agents*, MCP Knowledge Graph Memory, Mem0, Graphiti, and others) is surveyed in the [companion essay](https://parrik.com/essays/know-thyself/).
+
+> **Claim:** The provenance-triple lineage is W3C-standardized; the personal-graph extensions are the new contribution here.
+> **Grounds:** Cited W3C standards (RDF 2004, PROV-O 2013), Miller (1956), Cowan (2001), McCarthy's open-knowledge-graph repo.
+> **Status:** established (for the cited prior art); stipulated (for the boundary between borrowed shape and new extensions)
+> **Leans on:** RELATED_FRAMEWORKS.md for the broader survey; the companion essay for adjacent prior art.
