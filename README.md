@@ -69,12 +69,15 @@ Setting `KNOW_THYSELF_GRAPH` enables mtime-based auto-rebuild of the index whene
 | `SAFETY.md` | Caveats — read first |
 | `RELATED_FRAMEWORKS.md` | What this borrows from PROV-O, Toulmin, Zettelkasten, PKG |
 | `SCHEMA_DEPRECIATION.md` | Why typed knowledge graphs decay, and what this scaffold does about it |
+| `skill.md` | Claude Code skill definition |
+| `example-graph.yaml` | 18-node minimal example (referenced from `skill.md`) |
 | `example-graph-extended.yaml` | 87-node fictional example demonstrating sub-categories, the NOW node, forecast horizons |
 | `example-graph-extended.html` | Self-contained interactive viewer for the extended example |
-| `skill.md` | Claude Code skill definition |
+| `alex-*.md` | Companion case-study artifacts for the extended example (vocab, action threads, eyes-on candidates, ELI5 per-node) |
 | `embed.py` / `search.py` / `compare.py` | Vector retrieval CLIs over a graph YAML |
 | `mcp_server.py` | MCP server exposing retrieval to Claude Code et al. |
 | `render*.py`, `printable.py` | Static / interactive / PDF renderers |
+| `requirements.txt` | Pinned-floor dependency declarations (most are optional per backend) |
 
 > **Claim:** These files are the complete public surface of the scaffold.
 > **Grounds:** Direct enumeration of the repo contents.

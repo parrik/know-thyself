@@ -25,6 +25,7 @@ Usage:
 import argparse
 import json
 import sys
+from pathlib import Path
 
 try:
     import numpy as np
@@ -129,7 +130,7 @@ def main():
     )
     args = ap.parse_args()
 
-    index = json.loads(open(args.embeddings).read())
+    index = json.loads(Path(args.embeddings).read_text())
     nodes = index["nodes"]
     backend = index["backend"]
 
