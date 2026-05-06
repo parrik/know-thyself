@@ -15,21 +15,21 @@ A flat memory list treats a claim repeated five times as five pieces of evidence
 
 ## Quickstart — how to run the scaffold end-to-end
 
-1. Read `SAFETY.md` (5 minutes).
-2. In a Claude conversation that has accumulated real memory, paste `START_HERE.md`. (Claude Code: a `/know-thyself` slash command does the same thing.)
-3. Save the YAML Claude produces. Render it:
+1. Read `docs/SAFETY.md` (5 minutes).
+2. In a Claude conversation that has accumulated real memory, paste `docs/START_HERE.md`. (Claude Code: a `/know-thyself` slash command does the same thing.)
+3. Save the YAML Claude produces. Render it (run from the repo root so Python finds the package):
 
 ```bash
 pip install pyyaml graphviz
-python render_dashboard.py your-graph.yaml   # interactive HTML, NOW node centered
+python -m know_thyself.render.dashboard your-graph.yaml   # interactive HTML, NOW node centered
 ```
 
-`render.py` builds a static graphviz diagram, `render_mandala.py` does concentric rings, `printable.py` builds a multi-page PDF. Each script tells you which `pip install` it needs.
+`know_thyself.render.graphviz` builds a static graphviz diagram, `know_thyself.render.mandala` draws concentric rings, `know_thyself.render.printable` builds a multi-page PDF. Each module tells you which `pip install` it needs.
 
 > **Claim:** Three steps (safety read → paste prompt → render) are sufficient to produce a usable graph.
 > **Grounds:** Operational instructions; verified by the bundled renderers.
 > **Status:** stipulated
-> **Leans on:** START_HERE.md (the prompt), SCHEMA.md (the YAML shape), the render scripts in this repo.
+> **Leans on:** `docs/START_HERE.md` (the prompt), `docs/SCHEMA.md` (the YAML shape), the renderers in `know_thyself/render/`.
 
 ---
 
@@ -39,45 +39,52 @@ A graph YAML fits in a model's context at 200 nodes. At 2,000 it doesn't, and ev
 
 ```bash
 pip install pyyaml numpy
-python embed.py example-graph-extended.yaml          # → graph-embeddings.json
-python search.py "when did Mira's grades start improving"
-python compare.py "when have I felt isolated"        # three ranking modes side-by-side
+python -m know_thyself.retrieval.embed examples/example-graph-extended.yaml      # → graph-embeddings.json
+python -m know_thyself.retrieval.search "when did Mira's grades start improving"
+python -m know_thyself.retrieval.compare "when have I felt isolated"             # three ranking modes side-by-side
 ```
 
-`embed.py` vectorizes each node's `statement` (TF-IDF default; OpenAI and `sentence-transformers/local` backends optional) and writes a JSON index. `search.py` accepts a query and returns top-k hits. `compare.py` shows the same query under pure cosine, type-filtered, and provenance-reranked modes — what each layer earns is the lesson.
+`know_thyself.retrieval.embed` vectorizes each node's `statement` (TF-IDF default; OpenAI and `sentence-transformers/local` backends optional) and writes a JSON index. `know_thyself.retrieval.search` accepts a query and returns top-k hits. `know_thyself.retrieval.compare` shows the same query under pure cosine, type-filtered, and provenance-reranked modes — what each layer earns is the lesson.
 
-`mcp_server.py` wraps retrieval as an [MCP](https://modelcontextprotocol.io) tool surface. **IDs-only by default**: `search_graph` and `walk_provenance` return id / type / name / score / tentative + structural edges, never statement text. `get_node` returns full statement and is **hidden** unless `KNOW_THYSELF_ALLOW_FULL_TEXT=1` is set in the server's environment. Once a graph contains personal content and a cloud-LLM client connects, statement text crossing the wire is the leak; the gate exists to keep that decision explicit, per graph.
+`know_thyself.retrieval.server` wraps retrieval as an [MCP](https://modelcontextprotocol.io) tool surface. **IDs-only by default**: `search_graph` and `walk_provenance` return id / type / name / score / tentative + structural edges, never statement text. `get_node` returns full statement and is **hidden** unless `KNOW_THYSELF_ALLOW_FULL_TEXT=1` is set in the server's environment. Once a graph contains personal content and a cloud-LLM client connects, statement text crossing the wire is the leak; the gate exists to keep that decision explicit, per graph.
 
 ```bash
 pip install "mcp[cli]"
 claude mcp add know-thyself -s user \
+  -e PYTHONPATH=/path/to/know-thyself \
   -e KNOW_THYSELF_INDEX=/path/to/graph-embeddings.json \
   -e KNOW_THYSELF_GRAPH=/path/to/graph.yaml \
-  -- python /path/to/mcp_server.py
+  -- python -m know_thyself.retrieval.server
 ```
 
-Setting `KNOW_THYSELF_GRAPH` enables mtime-based auto-rebuild of the index whenever the source YAML is newer.
+Setting `KNOW_THYSELF_GRAPH` enables mtime-based auto-rebuild of the index whenever the source YAML is newer. `PYTHONPATH` points at the repo root so the package is importable regardless of the client's working directory.
 
 ---
 
-## What's here — the file inventory of this repo
+## What's here — the layout
 
-| File | Purpose |
-|---|---|
-| `START_HERE.md` | The prompt to paste into Claude |
-| `SCHEMA.md` | Node types, edges, sub-categories, optional fields |
-| `SAFETY.md` | Caveats — read first |
-| `RELATED_FRAMEWORKS.md` | What this borrows from PROV-O, Toulmin, Zettelkasten, PKG |
-| `SCHEMA_DEPRECIATION.md` | Why typed knowledge graphs decay, and what this scaffold does about it |
-| `skill.md` | Claude Code skill definition |
-| `example-graph.yaml` | 18-node minimal example (referenced from `skill.md`) |
-| `example-graph-extended.yaml` | 87-node fictional example demonstrating sub-categories, the NOW node, forecast horizons |
-| `example-graph-extended.html` | Self-contained interactive viewer for the extended example |
-| `alex-*.md` | Companion case-study artifacts for the extended example (vocab, action threads, eyes-on candidates, ELI5 per-node) |
-| `embed.py` / `search.py` / `compare.py` | Vector retrieval CLIs over a graph YAML |
-| `mcp_server.py` | MCP server exposing retrieval to Claude Code et al. |
-| `render*.py`, `printable.py` | Static / interactive / PDF renderers |
-| `requirements.txt` | Pinned-floor dependency declarations (most are optional per backend) |
+```
+know-thyself/
+├── README.md                  this file
+├── LICENSE
+├── skill.md                   Claude Code skill definition
+├── requirements.txt           dependency floors (most optional per backend)
+├── docs/
+│   ├── SCHEMA.md              node types, edges, sub-categories, optional fields
+│   ├── SAFETY.md              caveats — read first
+│   ├── START_HERE.md          the prompt to paste into Claude
+│   ├── RELATED_FRAMEWORKS.md  what this borrows from PROV-O, Toulmin, Zettelkasten, PKG
+│   └── SCHEMA_DEPRECIATION.md why typed graphs decay, and what this does about it
+├── examples/
+│   ├── example-graph.yaml             18-node minimal example
+│   ├── example-graph-extended.yaml    87-node Alex-Navarro case study
+│   ├── example-graph-extended.html    self-contained interactive viewer
+│   ├── alex-vocab.md / alex-actions.md / alex-needs-eyes.md / alex-node-eli5.md
+│   └── (rendered PNG/SVG fixtures)
+└── know_thyself/              importable package
+    ├── retrieval/             embed / search / compare / server (MCP)
+    └── render/                dashboard / graphviz / mandala / printable
+```
 
 > **Claim:** These files are the complete public surface of the scaffold.
 > **Grounds:** Direct enumeration of the repo contents.

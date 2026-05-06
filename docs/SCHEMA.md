@@ -32,7 +32,7 @@ A node without this triple is not a node. Non-negotiable.
 > **Claim:** Provenance is the schema invariant — without the triple, the unit is not a graph node.
 > **Grounds:** Definitional rule, traceable to PROV-O's typed-triplet shape.
 > **Status:** stipulated
-> **Leans on:** every node type below; the validation rules; render.py's checks 1–6.
+> **Leans on:** every node type below; the validation rules; `know_thyself.render.graphviz`'s checks 1–6.
 
 ---
 
@@ -223,12 +223,12 @@ A graph is well-formed iff:
 9. Every `overlap` has ≥2 distinct entries in `evidence.references`, not trivially the same event restated.
 10. Every `practice` derives from at least one descriptive node (overlap, novel, observation).
 
-`render.py` checks 1–6 automatically. 7–10 require human judgment; verify during Phase 7.
+``know_thyself.render.graphviz`` checks 1–6 automatically. 7–10 require human judgment; verify during Phase 7.
 
 > **Claim:** Ten conditions are jointly necessary and sufficient for a well-formed graph.
-> **Grounds:** Enumerated; partition between machine-checkable (1–6) and human-judgment (7–10) is operationalized in render.py.
+> **Grounds:** Enumerated; partition between machine-checkable (1–6) and human-judgment (7–10) is operationalized in `know_thyself.render.graphviz`.
 > **Status:** stipulated
-> **Leans on:** render.py (1–6); START_HERE.md Phase 7 (7–10).
+> **Leans on:** `know_thyself.render.graphviz` (1–6); START_HERE.md Phase 7 (7–10).
 
 ---
 

@@ -9,7 +9,7 @@ Open with this frame, verbatim or close:
 
 > The model doesn't remember — the graph does. We'll build a YAML file you can paste into any future conversation, with any model, to bootstrap context about yourself. Typed, provenance-carrying, separates known from guessed. Diagnostic work, not coaching. I won't interpret what you haven't articulated, and I'll flag tentative as tentative.
 
-Then check: does the user have a local copy of the scaffold? If yes, reference `SCHEMA.md` and `example-graph.yaml` throughout. If no, proceed — schema is summarized below — and at the end point them at github.com/parrik/know-thyself.
+Then check: does the user have a local copy of the scaffold? If yes, reference `docs/SCHEMA.md` and `examples/example-graph.yaml` throughout. If no, proceed — schema is summarized below — and at the end point them at github.com/parrik/know-thyself.
 
 ## Operating rule (quote to user)
 
@@ -24,7 +24,7 @@ Then check: does the user have a local copy of the scaffold? If yes, reference `
 - Warmth in conversational response, not in YAML. The YAML is descriptive.
 - Thin memory → thin graph. Resist plausible-sounding fill.
 
-## Node types (summary — see `SCHEMA.md`)
+## Node types (summary — see `docs/SCHEMA.md`)
 
 | Type | ID | What it is |
 |---|---|---|
@@ -78,9 +78,9 @@ What had the user been treating as settled that turns out tentative? What did th
 
 ## Output
 
-Emit YAML as a single code block to save as `graph.yaml`. If a local scaffold is present, mirror `example-graph.yaml`. Then:
+Emit YAML as a single code block to save as `graph.yaml`. If a local scaffold is present, mirror `examples/example-graph.yaml`. Then:
 
-> Save this as `graph.yaml`. To see the mandala (full graph) and spine (load-bearing observations), run `python render.py graph.yaml` from inside the scaffold directory. Scaffold at github.com/parrik/know-thyself.
+> Save this as `graph.yaml`. To see the mandala (full graph) and spine (load-bearing observations), run `python -m know_thyself.render.graphviz graph.yaml` from the scaffold root. Scaffold at github.com/parrik/know-thyself.
 
 Remind: the graph is portable. Paste at the start of any future conversation with any model. The model does not remember — the graph does.
 

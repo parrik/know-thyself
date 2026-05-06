@@ -129,7 +129,7 @@ For sensitive content that's structurally load-bearing but shouldn't be casually
 > **Claim:** Validation enforces the well-formedness rules and surfaces load-bearing observations by in-degree.
 > **Grounds:** Phase rule; corresponds to SCHEMA.md validation rules 1–10.
 > **Status:** stipulated
-> **Leans on:** SCHEMA.md validation section; render.py for the machine-checkable subset.
+> **Leans on:** SCHEMA.md validation section; `know_thyself.render.graphviz` for the machine-checkable subset.
 
 **8. Reflect — what was settled is tentative, what intersection produced, what novels were quiet answers.** What had I been treating as settled that turns out to be tentative? What did the intersection actually produce? What open questions had I been quietly answering with novels?
 
