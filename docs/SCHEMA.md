@@ -208,7 +208,7 @@ A `novel` grounded only in `derived-inference` is the weakest claim class in the
 
 ---
 
-## Validation rules — the ten well-formedness conditions
+## Validation rules — the well-formedness conditions
 
 A graph is well-formed iff:
 
@@ -223,16 +223,24 @@ A graph is well-formed iff:
 9. Every `overlap` has ≥2 distinct entries in `evidence.references`, not trivially the same event restated.
 10. Every `practice` derives from at least one descriptive node (overlap, novel, observation).
 
-``know_thyself.render.graphviz`` checks 1–6 automatically. 7–10 require human judgment; verify during Phase 7.
+If a graph uses the temporal-organization types (`now`, `theme`, `period`) the following also apply:
 
-> **Claim:** Ten conditions are jointly necessary and sufficient for a well-formed graph.
-> **Grounds:** Enumerated; partition between machine-checkable (1–6) and human-judgment (7–10) is operationalized in `know_thyself.render.graphviz`.
+11. There is at most one `type: now` node, with `id: NOW`.
+12. Every `theme` has ≥3 distinct entries in `binds:`, and `derivation.from` lists ≥2 distinct periods.
+13. No two `period` nodes have overlapping `span:` ranges (a transition event may appear in `contains:` on both sides only when the event is *the* transition).
+
+`know_thyself.render.graphviz` checks 1–6 and 11 automatically. 7–10, 12, 13 require human judgment; verify during Phase 7.
+
+> **Claim:** Thirteen conditions are jointly necessary and sufficient for a well-formed graph (10 core + 3 conditional on temporal-type use).
+> **Grounds:** Enumerated; partition between machine-checkable (1–6, 11) and human-judgment (7–10, 12–13) is operationalized in `know_thyself.render.graphviz`.
 > **Status:** stipulated
-> **Leans on:** `know_thyself.render.graphviz` (1–6); START_HERE.md Phase 7 (7–10).
+> **Leans on:** `know_thyself.render.graphviz` (machine-checkable subset); START_HERE.md Phase 7 (human-judgment subset).
 
 ---
 
-## IDs — the eight prefixes and the descriptive-slug convention
+## IDs — the prefixes and the descriptive-slug convention
+
+Eight core types:
 
 - `R##` — reference
 - `O##` — observation
@@ -243,16 +251,22 @@ A graph is well-formed iff:
 - `OQ##` — open question
 - `PR##` — practice
 
-Use descriptive slugs: `O01-first-day-of-job` over `O01`. Helps when the YAML is hand-edited.
+Plus three temporal-organization types added May 2026 (see *Temporal organization* section below):
+
+- `T-##` — theme (cross-time organizing packet)
+- `L-##` — period (lifetime period container)
+- `NOW` — singleton, `type: now`
+
+Use descriptive slugs: `O01-first-day-of-job` over `O01`. Helps when the YAML is hand-edited. Theme and period IDs use a hyphen-after-prefix form (`T-01-...`, `L-01-...`) to keep the prefix legible against an `R##` numeric run.
 
 > **Claim:** ID prefix encodes node type; descriptive slug aids hand-editing.
-> **Grounds:** Convention; example contrast.
+> **Grounds:** Convention; example contrast; prefix-form rationale (legibility).
 > **Status:** stipulated
 > **Leans on:** node-type validation (prefix-to-type matching); cross-references throughout the bundle.
 
 ---
 
-## Sub-categories of `reference` (added April 2026) — five role prefixes plus `NOW` and `forecast`
+## Sub-categories of `reference` (added April 2026) — five role prefixes plus `forecast`
 
 After several weeks of building on a real graph, five patterns emerged as useful **sub-categories of `reference`** — not new node types. Extending the core type list is fragile (see `SCHEMA_DEPRECIATION.md`); descriptive prefixes keep the schema small while making common roles legible.
 
@@ -264,10 +278,6 @@ After several weeks of building on a real graph, five patterns emerged as useful
 | `R-filter-*` | Anti-pattern frame for a decision domain | *Revenue-line reverse interview* |
 | `type: forecast` | Time-horizon inference, flagged tentative | 1 month · 90 days · 1 year · 10 years · 30 years |
 
-Plus:
-
-- **`NOW`** — a single node with `type: now` at the graph's center, holding current priorities and pointers. First thing read when the graph opens. Prevents the "where do I start?" problem.
-
 `example-graph-extended.yaml` demonstrates these.
 
 > **Claim:** Common reference roles are best expressed as descriptive prefixes, not new top-level node types.
@@ -277,7 +287,132 @@ Plus:
 
 ---
 
-## Optional fields (added Apr 2026) — `genre`, `effort`, `warrant`, `revisions`, `handling`
+## Temporal organization — `now`, `theme`, `period` (added May 2026)
+
+After ~6 months of building on a long-running graph, three temporal-organization types earned promotion to first-class status. They are additive: existing R/O/N/E/P/EQ/OQ/PR nodes need no migration, and a graph that doesn't use them is still well-formed.
+
+The throughline is that the eight core types describe **claims** (facts, episodes, patterns, interpretations, intersections, bridges, questions, rules); the three temporal types describe **organization** of those claims across time. They earn their own types because their cardinality, ID-shape, and validation rules differ from references.
+
+### `now` — the singleton orienting node
+
+A single node, `id: NOW`, `type: now`, holding the graph's current orienting frame: this week, this month, this quarter, standing rules, canaries to watch for. First thing read when the graph opens. Prevents the *where do I start?* problem when a graph grows past ~50 nodes.
+
+```yaml
+- id: NOW
+  type: now
+  name: "NOW — current moves"
+  statement: |
+    Read this first. Everything else is context for what's in this node.
+    Last updated: <date>.
+
+    ## Frame
+    <one-paragraph register of the current life stage>
+
+    ## This week
+    • <commitment with deadline>
+    • <protected slot>
+
+    ## This month
+    • <decision due>
+
+    ## This quarter
+    • <forcing-function deadline>
+
+    ## Standing rules
+    • <protected practice>
+
+    ## Canaries — watch for
+    • <signal threshold> → <downstream cascade>
+  provenance:
+    attribution: { source: "Self-articulated", date: "<YYYY-MM>" }
+    evidence: { type: self-report }
+    derivation: { from: [], method: "direct" }
+```
+
+There is exactly one `NOW`. Updating its content updates `attribution.date`. Other nodes may `derive_from` `NOW` for short-horizon forecasts (1-month, 90-day) — the `NOW` content is the cadence variables those forecasts extrapolate from.
+
+### `theme` (T-prefix) — cross-time organizing packet
+
+A `theme` is a recurring shape of meaning that binds nodes from different *periods* by shared semantic content — what Roger Schank called a Thematic Organization Packet (TOP) in *Dynamic Memory* (1982). Unlike an `overlap` (which generalizes ≥2 independent observations into one pattern), a theme **does not generalize** — it points at a constellation of nodes across time and says *these belong to the same long-running thread*. Themes are the substrate the same person re-encounters in different decades and recognizes as one continuous concern.
+
+```yaml
+- id: T-01-relationship-as-mirror
+  type: theme
+  name: "Relationship-as-mirror — the theme"
+  statement: |
+    A long-running thread: relationships across multiple lifetime
+    periods (L-01 college years, L-03 first marriage, L-05 post-
+    divorce dating) function for me primarily as mirrors I read
+    myself in, and only secondarily as encounters with another
+    person. The theme is not a pattern I've earned by induction;
+    it's a constellation I recognize across times.
+  binds:                              # ≥3 cross-period instances
+    - O11-college-roommate-conversation
+    - O27-first-anniversary-surprise
+    - O43-second-date-after-divorce
+  provenance:
+    attribution: { source: "Surfaced May 2026" }
+    evidence:
+      type: pattern-across-cases
+      description: "Theme recognized across lifetime periods, not derived"
+      references: [O11-..., O27-..., O43-...]
+    derivation:
+      from: [L-01-college, L-03-marriage, L-05-post-divorce]
+      method: "thematic recognition across periods (Schank TOP)"
+```
+
+**Rules:**
+
+- A theme that binds fewer than three cross-period instances is just a label, not a theme. Promote with restraint.
+- A theme is not a pattern; do not extract an `implication`. The point is recognition, not prediction.
+- `binds:` enumerates the constituent nodes; `derivation.from` lists the periods spanned.
+
+### `period` (L-prefix) — lifetime period container
+
+A `period` is a named lifetime span with a start, an end, and a tone — what Martin Conway calls a *lifetime period* in his Self-Memory System (Conway 2005). Periods are containers: nodes representing observations and patterns within a stretch of life live inside a period. Roughly 6–10 periods cover a life; more is too granular, fewer is too coarse.
+
+```yaml
+- id: L-03-first-marriage
+  type: period
+  name: "First marriage (2008–2019)"
+  span: [2008, 2019]
+  tone: "ascendant-then-attenuating"   # one-phrase register of the period
+  statement: |
+    Eleven years. Married Daniel summer 2008; daughter born 2011;
+    moved Brooklyn 2014; divorce finalized 2019. The arc moves
+    from generative to attenuating across roughly two halves;
+    the household stayed legible from outside throughout but the
+    inside register changed in 2014.
+  contains:                            # nodes whose timeframe falls inside
+    - O20-wedding
+    - O22-daughter-born
+    - O28-brooklyn-move
+    - O35-divorce-finalized
+  provenance:
+    attribution: { source: "Self-articulated", date: "2026-05" }
+    evidence: { type: self-report }
+    derivation: { from: [], method: "lifetime-period demarcation (Conway SMS)" }
+```
+
+**Rules:**
+
+- Periods do not overlap. Each named span has a clean start and end; transitional events (the move, the diagnosis, the divorce) belong to one side.
+- A `tone:` field — one short phrase — names the period's register. Not a summary, not a verdict; a register-handle.
+- `contains:` is the inverse of an observation's implicit period membership. Optional but recommended when the period spans many nodes.
+- An observation that falls between two periods (a transition event) is allowed to be `contains:`'d by both, only if the event is genuinely the transition.
+
+### Why these earned their own types instead of more reference sub-categories
+
+Periods and themes have **different cardinality** than references (a life has ~6–10 periods, not dozens), **different referential semantics** (`contains` and `binds` are not `derivation.from`), and **different validation rules** (themes need ≥3 cross-period bindings; periods must not overlap). A reference sub-category prefix can't express those constraints. The pattern from April's "use prefixes, not new types" rule still holds for *role-flavors of references* — but temporal organization is structurally a different shape, not a flavor.
+
+> **Claim:** `now`, `theme`, and `period` are first-class node types because their cardinality, referential semantics, and validation rules differ from references.
+> **Grounds:** Cited cognitive-science substrates (Schank's TOP for theme; Conway's Self-Memory System for period; the *NOW* singleton's empirical role as graph orienting frame); structural arguments above.
+> **Status:** stipulated (introduced May 2026 after ~6 months of long-running graph use)
+> **Leans on:** SCHEMA_DEPRECIATION.md (the rule: extend types only when prefixes won't work); the validation-rules section below for the well-formedness conditions.
+
+---
+
+## Optional fields (added Apr–May 2026) — `genre`, `effort`, `warrant`, `revisions`, `handling`, `source_kind`
 
 OPTIONAL. Core schema works without them. Add only on nodes where they help.
 
@@ -355,6 +490,28 @@ Inline `HANDLING:` lines stay valid for human-read graphs. Structured `handling:
 > **Grounds:** Enumeration plus rationale (tool-readable vs. human-only).
 > **Status:** stipulated
 > **Leans on:** the HANDLING extension below; SAFETY.md's caveats around sensitive content.
+
+### `source_kind:` — distinguish lived from told from inferred from imagined
+
+A four-value tag, applicable to any node type, that records *how the content reached the graph*:
+
+```yaml
+source_kind: lived | told | inferred | imagined
+```
+
+- `lived` — first-person re-experienced content. Tulving's autonoetic register: the graph-builder remembers being there.
+- `told` — heard from someone else (family stories, third-party reports, historical accounts of one's own life that no living memory holds).
+- `inferred` — pattern claims without a single experienced moment. The default for `overlap` and most `novel` nodes.
+- `imagined` — counterfactual or speculative content not grounded in any actual episode. Useful for `novel` futures explicitly framed as not-yet-occurred.
+
+Defaults: `lived` for `observation` nodes built from first-person memory; `told` for family-history references; `inferred` for pattern claims with no single experienced moment; `imagined` only when the node is explicitly counterfactual.
+
+The distinction comes from Endel Tulving's *autonoetic consciousness* (the subjective sense of personally re-experiencing the past) and Marcia Johnson's *source monitoring* (the cognitive process of discriminating among origins of mental content). For a personal graph, conflating *I lived this* with *I was told this happened to me* is the failure that the tag exists to prevent.
+
+> **Claim:** A four-value `source_kind` distinguishes the four origins of mental content that personal graphs blur if not tagged.
+> **Grounds:** Tulving (1985) on autonoetic consciousness; Johnson (1993) on source monitoring; observed failure mode where told-by-family content collapses into lived register.
+> **Status:** stipulated
+> **Leans on:** RELATED_FRAMEWORKS.md (cognitive-science substrate); the `evidence` ladder (which tags claim *strength*, distinct from origin).
 
 ---
 
