@@ -33,6 +33,33 @@ python render_dashboard.py your-graph.yaml   # interactive HTML, NOW node center
 
 ---
 
+## Retrieval — vectors and an MCP server
+
+A graph YAML fits in a model's context at 200 nodes. At 2,000 it doesn't, and even when it does the model wastes attention scanning irrelevant parts. The retrieval layer turns the YAML into something an agent can actually query.
+
+```bash
+pip install pyyaml numpy
+python embed.py example-graph-extended.yaml          # → graph-embeddings.json
+python search.py "when did Mira's grades start improving"
+python compare.py "when have I felt isolated"        # three ranking modes side-by-side
+```
+
+`embed.py` vectorizes each node's `statement` (TF-IDF default; OpenAI and `sentence-transformers/local` backends optional) and writes a JSON index. `search.py` accepts a query and returns top-k hits. `compare.py` shows the same query under pure cosine, type-filtered, and provenance-reranked modes — what each layer earns is the lesson.
+
+`mcp_server.py` wraps retrieval as an [MCP](https://modelcontextprotocol.io) tool surface. **IDs-only by default**: `search_graph` and `walk_provenance` return id / type / name / score / tentative + structural edges, never statement text. `get_node` returns full statement and is **hidden** unless `KNOW_THYSELF_ALLOW_FULL_TEXT=1` is set in the server's environment. Once a graph contains personal content and a cloud-LLM client connects, statement text crossing the wire is the leak; the gate exists to keep that decision explicit, per graph.
+
+```bash
+pip install "mcp[cli]"
+claude mcp add know-thyself -s user \
+  -e KNOW_THYSELF_INDEX=/path/to/graph-embeddings.json \
+  -e KNOW_THYSELF_GRAPH=/path/to/graph.yaml \
+  -- python /path/to/mcp_server.py
+```
+
+Setting `KNOW_THYSELF_GRAPH` enables mtime-based auto-rebuild of the index whenever the source YAML is newer.
+
+---
+
 ## What's here — the file inventory of this repo
 
 | File | Purpose |
@@ -45,6 +72,9 @@ python render_dashboard.py your-graph.yaml   # interactive HTML, NOW node center
 | `example-graph-extended.yaml` | 87-node fictional example demonstrating sub-categories, the NOW node, forecast horizons |
 | `example-graph-extended.html` | Self-contained interactive viewer for the extended example |
 | `skill.md` | Claude Code skill definition |
+| `embed.py` / `search.py` / `compare.py` | Vector retrieval CLIs over a graph YAML |
+| `mcp_server.py` | MCP server exposing retrieval to Claude Code et al. |
+| `render*.py`, `printable.py` | Static / interactive / PDF renderers |
 
 > **Claim:** These files are the complete public surface of the scaffold.
 > **Grounds:** Direct enumeration of the repo contents.
