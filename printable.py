@@ -17,6 +17,7 @@ import sys
 import textwrap
 from collections import defaultdict, Counter
 from pathlib import Path
+from xml.sax.saxutils import escape as xml_escape
 
 try:
     import yaml
@@ -49,6 +50,7 @@ TYPE_STYLE = {
     'novel':       {'fillcolor': '#F5E0A0', 'color': '#7A5A0E', 'shape': 'ellipse', 'style': 'filled,dashed'},
     'emergent':    {'fillcolor': '#E0C8F0', 'color': '#5A3A7A', 'shape': 'diamond', 'style': 'filled'},
     'equivalency': {'fillcolor': '#F5C890', 'color': '#7A4A0E', 'shape': 'hexagon', 'style': 'filled'},
+    'practice':    {'fillcolor': '#F0D8A0', 'color': '#7A4A2A', 'shape': 'parallelogram', 'style': 'filled'},
     'open':        {'fillcolor': '#F5C8C8', 'color': '#7A2A2A', 'shape': 'octagon', 'style': 'filled,dashed'},
 }
 
@@ -57,6 +59,7 @@ EDGE_STYLE = {
     'grounded_in':   {'color': '#2A6A3A', 'penwidth': '1.2'},
     'derives_from':  {'color': '#2A4A8A', 'penwidth': '1.0'},
     'instantiates':  {'color': '#8A4A2A', 'penwidth': '1.0'},
+    'generalizes':   {'color': '#4A6A8A', 'penwidth': '1.0'},
     'qualifies':     {'color': '#6A2A8A', 'penwidth': '1.0', 'style': 'dashed'},
     'emergent_from': {'color': '#6A4A8A', 'penwidth': '1.0', 'style': 'dotted'},
     'contradicts':   {'color': '#8A2A2A', 'penwidth': '1.2'},
@@ -176,7 +179,6 @@ def render_cover_pdf(nodes, out_path, title):
                            textColor=HexColor('#333'))
     body_s = ParagraphStyle('B', parent=styles['Normal'], fontSize=9.5,
                              leading=13, spaceAfter=6)
-    small_s = ParagraphStyle('S', parent=body_s, fontSize=8.5, leading=11)
     cell_s = ParagraphStyle('C', parent=body_s, fontSize=7.5,
                              leading=10, spaceAfter=0)
     header_s = ParagraphStyle('TH', parent=body_s, fontName='Helvetica-Bold',
@@ -239,11 +241,13 @@ def render_cover_pdf(nodes, out_path, title):
         if not n:
             continue
         short_id = nid.split('-', 1)[0]
-        name = n['name']
+        # xml_escape — node names can contain '&', '<' which would break
+        # reportlab's mini-XML parser and abort the PDF build.
+        name = xml_escape(n['name'])
         lb_rows.append([
             Paragraph(f'{rank}<br/><font size=6 color="#888">({count})</font>', cell_s),
             Paragraph(f'<b>{short_id}</b>: {name}', cell_s),
-            Paragraph(n['type'], cell_s),
+            Paragraph(xml_escape(n['type']), cell_s),
         ])
     lb_table = Table(lb_rows, colWidths=[0.45*inch, 5.1*inch, 1.45*inch])
     lb_table.setStyle(TableStyle([
