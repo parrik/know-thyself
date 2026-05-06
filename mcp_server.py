@@ -88,14 +88,32 @@ _INDEX_LOADED_FROM_MTIME: float = 0.0
 
 def _rebuild_index() -> None:
     """Run embed.py logic in-process against KNOW_THYSELF_GRAPH and write
-    the result to INDEX_PATH. Only callable when KNOW_THYSELF_GRAPH is set."""
+    the result to INDEX_PATH. Only callable when KNOW_THYSELF_GRAPH is set.
+
+    Picks the backend in this order:
+      1. KNOW_THYSELF_BACKEND env var, if set
+      2. The backend stored in the existing INDEX_PATH (if it exists), so a
+         re-embed preserves whatever shape was originally chosen
+      3. tfidf (default — no API, no model download)
+
+    Order (2) before (1) would silently override an explicit env var; (1)
+    before (2) keeps the env var as the explicit override."""
     if not GRAPH_PATH:
         raise RuntimeError(
             "cannot rebuild index — KNOW_THYSELF_GRAPH is not set"
         )
     from embed import build_index  # noqa: E402
 
-    out = build_index(GRAPH_PATH, backend=os.environ.get("KNOW_THYSELF_BACKEND", "tfidf"))
+    backend = os.environ.get("KNOW_THYSELF_BACKEND")
+    if not backend and INDEX_PATH.exists():
+        try:
+            existing = json.loads(INDEX_PATH.read_text())
+            backend = existing.get("backend")
+        except (json.JSONDecodeError, OSError):
+            pass
+    backend = backend or "tfidf"
+
+    out = build_index(GRAPH_PATH, backend=backend)
     INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
     INDEX_PATH.write_text(json.dumps(out))
 

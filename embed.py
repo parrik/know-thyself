@@ -19,8 +19,8 @@ Both write the same JSON shape so search.py reads either interchangeably —
 which is the essay's point: the substrate changes, the shape doesn't.
 
 Usage:
-  python embed.py examples/example-graph-extended.yaml
-  python embed.py examples/example-graph-extended.yaml --backend openai
+  python embed.py example-graph-extended.yaml
+  python embed.py example-graph-extended.yaml --backend openai
 """
 import argparse
 import json
@@ -295,8 +295,10 @@ def tfidf_embed(nodes):
 def openai_embed(nodes, model="text-embedding-3-small"):
     try:
         from openai import OpenAI
-    except ImportError:
-        sys.exit("ERROR: pip install openai")
+    except ImportError as e:
+        raise ImportError(
+            "openai backend requires the openai package; pip install openai"
+        ) from e
     client = OpenAI()  # reads OPENAI_API_KEY from env
     texts = [(n.get("statement") or "") + "\n\n" + (n.get("name") or "") for n in nodes]
     print(f"  calling OpenAI {model} for {len(texts)} statements...", file=sys.stderr)
@@ -321,8 +323,11 @@ def openai_embed(nodes, model="text-embedding-3-small"):
 def local_embed(nodes, model="sentence-transformers/all-MiniLM-L6-v2"):
     try:
         from sentence_transformers import SentenceTransformer
-    except ImportError:
-        sys.exit("ERROR: pip install sentence-transformers")
+    except ImportError as e:
+        raise ImportError(
+            "local backend requires sentence-transformers; "
+            "pip install sentence-transformers"
+        ) from e
     print(f"  loading {model} (first run downloads ~80MB to ~/.cache/huggingface/)...", file=sys.stderr)
     encoder = SentenceTransformer(model)
     texts = [(n.get("statement") or "") + "\n\n" + (n.get("name") or "") for n in nodes]
