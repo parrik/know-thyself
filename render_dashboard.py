@@ -42,12 +42,18 @@ except ImportError:
 
 
 HERE         = Path(__file__).resolve().parent
-YAML_PATH    = HERE / "example-graph-extended.yaml"
+
+# Default to the bundled Alex example; let the user override with a positional
+# argument (matches the README's `python render_dashboard.py your-graph.yaml`
+# contract). Companion paths (vocab / actions / eyes / eli5) are still resolved
+# next to this script — those readers gracefully degrade if files are missing.
+DEFAULT_YAML = HERE / "example-graph-extended.yaml"
+YAML_PATH    = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else DEFAULT_YAML
 VOCAB_PATH   = HERE / "alex-vocab.md"
 ACTIONS_PATH = HERE / "alex-actions.md"
 EYES_PATH    = HERE / "alex-needs-eyes.md"
 ELI5_PATH    = HERE / "alex-node-eli5.md"
-OUT_PATH     = HERE / "example-graph-extended.html"
+OUT_PATH     = YAML_PATH.with_suffix(".html")
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -263,9 +269,11 @@ def normalize_type(t):
 
 
 def parse_graph(yaml_path):
-    raw = yaml.safe_load(yaml_path.read_text())
+    raw = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
     if not isinstance(raw, list):
-        sys.exit("ERROR: example-graph-extended.yaml must be a top-level YAML list")
+        raise ValueError(
+            f"{yaml_path.name}: must be a top-level YAML list of nodes"
+        )
 
     nodes = []
     edges = set()
@@ -291,9 +299,12 @@ def parse_graph(yaml_path):
         derives_from = deriv.get("from") or []
         evidence_refs = evidence.get("references") or []
 
-        if not isinstance(related_to, list): related_to = [related_to]
-        if not isinstance(derives_from, list): derives_from = [derives_from]
-        if not isinstance(evidence_refs, list): evidence_refs = [evidence_refs]
+        if not isinstance(related_to, list):
+            related_to = [related_to]
+        if not isinstance(derives_from, list):
+            derives_from = [derives_from]
+        if not isinstance(evidence_refs, list):
+            evidence_refs = [evidence_refs]
 
         # is_forecast: detect via name containing "forecast" or presence of horizon
         is_forecast = False
@@ -329,9 +340,12 @@ def parse_graph(yaml_path):
             "evidence_refs": [str(x) for x in evidence_refs],
         })
 
-        for r in related_to: edges.add((nid, str(r)))
-        for r in derives_from: edges.add((nid, str(r)))
-        for r in evidence_refs: edges.add((nid, str(r)))
+        for r in related_to:
+            edges.add((nid, str(r)))
+        for r in derives_from:
+            edges.add((nid, str(r)))
+        for r in evidence_refs:
+            edges.add((nid, str(r)))
         for m in NODE_ID_RE.finditer(statement + " " + caveats):
             ref = m.group(1)
             if ref != nid:

@@ -90,10 +90,10 @@ RISK_FADED_EDGE = "#BEBEBE"
 #  YAML + graph shape
 # ─────────────────────────────────────────────────────────────────────────
 def load_nodes(yaml_path):
-    with open(yaml_path) as f:
+    with open(yaml_path, encoding="utf-8") as f:
         nodes = yaml.safe_load(f)
     if not isinstance(nodes, list):
-        sys.exit("YAML must be a top-level list of nodes.")
+        raise ValueError("YAML must be a top-level list of nodes.")
     return nodes
 
 
@@ -399,7 +399,7 @@ def render_risk_corridor(nodes, pivot_id, out_png, out_svg=None,
         match = next((n["id"] for n in nodes
                       if n["id"].split("-", 1)[0] == short), None)
         if match is None:
-            raise SystemExit(
+            raise ValueError(
                 f"pivot node {pivot_id!r} not found in graph "
                 f"(and no node id starts with {short!r})"
             )
