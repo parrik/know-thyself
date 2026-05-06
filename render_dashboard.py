@@ -992,7 +992,7 @@ function buildToday() {
       <div class="t-inv-label">Today’s reading entry</div>
       <div class="t-inv-title">${escapeHtml(anchor.name)}</div>
       <div class="t-inv-body">${inlineFormat(summary)}</div>
-      <a class="t-inv-action" onclick="openDrawer('${anchor.id}')">Open this node →</a>
+      <a class="t-inv-action" data-open-drawer="${escapeHtml(anchor.id)}">Open this node →</a>
     `;
   }
 
@@ -1437,7 +1437,7 @@ function openDrawer(id, opts) {
       g.items.forEach(item => {
         const t = resolveRef(item);
         if (t) {
-          html += `<div class="relnode" onclick="openDrawer('${t.id}')">
+          html += `<div class="relnode" data-open-drawer="${escapeHtml(t.id)}">
             <div class="rhead"><span class="rid">${escapeHtml(t.id)}</span><span class="rname">${escapeHtml(t.name||'')}</span></div>
             <div class="rsum">${escapeHtml(summaryOf(t))}</div></div>`;
         } else {
@@ -1452,7 +1452,7 @@ function openDrawer(id, opts) {
   const mentioned = mentionedBy(n.id);
   if (mentioned.length) {
     html += '<div class="mentioned"><div class="rlab">Mentioned by — ' + mentioned.length + '</div>';
-    html += mentioned.map(m => `<span class="ref" onclick="openDrawer('${m.id}')" title="${escapeHtml(m.name||'')}">${escapeHtml(m.id)}</span>`).join('');
+    html += mentioned.map(m => `<span class="ref" data-open-drawer="${escapeHtml(m.id)}" title="${escapeHtml(m.name||'')}">${escapeHtml(m.id)}</span>`).join('');
     html += '</div>';
   }
 
@@ -1607,6 +1607,19 @@ function renderVocab() {
   });
 }
 
+// === Drawer-open delegation ===
+// All elements with [data-open-drawer="<id>"] open the drawer for that
+// node id when clicked. Replaces inline onclick="openDrawer('${id}')"
+// patterns that would interpolate raw node ids into a JS string literal
+// — XSS surface if an id ever contained a quote or a script-end token.
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-open-drawer]');
+  if (t) {
+    e.preventDefault();
+    openDrawer(t.getAttribute('data-open-drawer'));
+  }
+});
+
 // === Boot ===
 buildToday();
 renderPractices();
@@ -1648,19 +1661,33 @@ def main():
     node_eli5 = parse_node_eli5(ELI5_PATH)
     meta_files = load_meta_files()
 
+    # safe_json escapes "</" and "<!--" so JSON-encoded payloads (which
+    # may contain user-supplied statement text or markdown) can't break
+    # out of the surrounding <script> block. Without this, a node statement
+    # containing the literal "</script>" would terminate the script tag
+    # and execute whatever follows. ensure_ascii=False keeps Unicode
+    # readable in source view; the escapes only cover the script-context
+    # break sequences.
+    def safe_json(data):
+        return (
+            json.dumps(data, ensure_ascii=False)
+            .replace("</", "<\\/")
+            .replace("<!--", "<\\!--")
+        )
+
     html = (
         HTML_TEMPLATE
         .replace("__FAVICON__",          FAVICON_SVG)
-        .replace("__DATA__",             json.dumps(graph, ensure_ascii=False))
-        .replace("__VOCAB__",            json.dumps(vocab, ensure_ascii=False))
-        .replace("__THREADS__",          json.dumps(threads, ensure_ascii=False))
-        .replace("__EYES__",             json.dumps(eyes, ensure_ascii=False))
-        .replace("__NOW_PANELS__",       json.dumps(now_panels, ensure_ascii=False))
-        .replace("__TYPE_COLOR__",       json.dumps(TYPE_COLOR))
-        .replace("__TYPE_LABEL__",       json.dumps(TYPE_LABEL))
-        .replace("__NODE_ELI5__",        json.dumps(node_eli5, ensure_ascii=False))
-        .replace("__META_FILES__",       json.dumps(meta_files, ensure_ascii=False))
-        .replace("__META_FILE_TITLES__", json.dumps(META_FILE_TITLES, ensure_ascii=False))
+        .replace("__DATA__",             safe_json(graph))
+        .replace("__VOCAB__",            safe_json(vocab))
+        .replace("__THREADS__",          safe_json(threads))
+        .replace("__EYES__",             safe_json(eyes))
+        .replace("__NOW_PANELS__",       safe_json(now_panels))
+        .replace("__TYPE_COLOR__",       safe_json(TYPE_COLOR))
+        .replace("__TYPE_LABEL__",       safe_json(TYPE_LABEL))
+        .replace("__NODE_ELI5__",        safe_json(node_eli5))
+        .replace("__META_FILES__",       safe_json(meta_files))
+        .replace("__META_FILE_TITLES__", safe_json(META_FILE_TITLES))
     )
     OUT_PATH.write_text(html)
     print(f"Wrote {OUT_PATH}")
