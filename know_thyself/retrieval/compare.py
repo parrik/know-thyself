@@ -34,7 +34,7 @@ except ImportError:
     sys.exit("ERROR: pip install numpy")
 
 # Reuse the same machinery as search.py
-from search import (
+from know_thyself.retrieval.search import (
     TYPE_TIER,
     TENTATIVE_PENALTY,
     cosine_query,

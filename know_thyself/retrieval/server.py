@@ -49,7 +49,6 @@ Run
 """
 import json
 import os
-import sys
 from collections import Counter
 from pathlib import Path
 from typing import Optional
@@ -57,8 +56,7 @@ from typing import Optional
 import numpy as np
 from mcp.server.fastmcp import FastMCP
 
-sys.path.insert(0, str(Path(__file__).parent))
-from search import (  # noqa: E402
+from know_thyself.retrieval.search import (
     TENTATIVE_PENALTY,
     TYPE_TIER,
     cosine_query,
@@ -102,7 +100,7 @@ def _rebuild_index() -> None:
         raise RuntimeError(
             "cannot rebuild index — KNOW_THYSELF_GRAPH is not set"
         )
-    from embed import build_index  # noqa: E402
+    from know_thyself.retrieval.embed import build_index
 
     backend = os.environ.get("KNOW_THYSELF_BACKEND")
     if not backend and INDEX_PATH.exists():

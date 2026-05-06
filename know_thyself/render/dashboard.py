@@ -41,18 +41,23 @@ except ImportError:
     sys.exit("ERROR: install pyyaml — pip install pyyaml")
 
 
-HERE         = Path(__file__).resolve().parent
+# dashboard.py lives at know_thyself/render/dashboard.py; the layout has
+# the docs at <root>/docs/ and the examples at <root>/examples/.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_EXAMPLES  = _REPO_ROOT / "examples"
+_DOCS      = _REPO_ROOT / "docs"
 
 # Default to the bundled Alex example; let the user override with a positional
-# argument (matches the README's `python render_dashboard.py your-graph.yaml`
-# contract). Companion paths (vocab / actions / eyes / eli5) are still resolved
-# next to this script — those readers gracefully degrade if files are missing.
-DEFAULT_YAML = HERE / "example-graph-extended.yaml"
+# argument (matches the README's `python -m know_thyself.render.dashboard
+# your-graph.yaml` contract). Companion paths (vocab / actions / eyes / eli5)
+# resolve in the examples/ directory — those readers gracefully degrade if
+# files are missing.
+DEFAULT_YAML = _EXAMPLES / "example-graph-extended.yaml"
 YAML_PATH    = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else DEFAULT_YAML
-VOCAB_PATH   = HERE / "alex-vocab.md"
-ACTIONS_PATH = HERE / "alex-actions.md"
-EYES_PATH    = HERE / "alex-needs-eyes.md"
-ELI5_PATH    = HERE / "alex-node-eli5.md"
+VOCAB_PATH   = _EXAMPLES / "alex-vocab.md"
+ACTIONS_PATH = _EXAMPLES / "alex-actions.md"
+EYES_PATH    = _EXAMPLES / "alex-needs-eyes.md"
+ELI5_PATH    = _EXAMPLES / "alex-node-eli5.md"
 OUT_PATH     = YAML_PATH.with_suffix(".html")
 
 
@@ -423,19 +428,26 @@ def load_meta_files():
     Returns {filename: {"canonical": <text>, "title": <stem>}}. Files that
     don't exist are silently skipped (e.g. alex-node-eli5.md before it lands).
     """
-    names = [
-        "README.md", "START_HERE.md", "SCHEMA.md", "SAFETY.md",
-        "RELATED_FRAMEWORKS.md", "skill.md",
-        "alex-vocab.md", "alex-actions.md", "alex-needs-eyes.md",
-        "alex-node-eli5.md",
+    # Per-file home directories — schema-shaped docs sit in docs/, the
+    # Alex case-study sits in examples/, README and skill.md stay at root.
+    _meta_paths = [
+        _REPO_ROOT / "README.md",
+        _DOCS      / "START_HERE.md",
+        _DOCS      / "SCHEMA.md",
+        _DOCS      / "SAFETY.md",
+        _DOCS      / "RELATED_FRAMEWORKS.md",
+        _REPO_ROOT / "skill.md",
+        _EXAMPLES  / "alex-vocab.md",
+        _EXAMPLES  / "alex-actions.md",
+        _EXAMPLES  / "alex-needs-eyes.md",
+        _EXAMPLES  / "alex-node-eli5.md",
     ]
     out = {}
-    for name in names:
-        p = HERE / name
+    for p in _meta_paths:
         if not p.exists():
             continue
-        out[name] = {
-            "canonical": p.read_text(),
+        out[p.name] = {
+            "canonical": p.read_text(encoding="utf-8"),
             "title": p.stem.replace('-', ' ').replace('_', ' '),
         }
     return out
