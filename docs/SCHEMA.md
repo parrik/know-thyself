@@ -248,10 +248,10 @@ If a graph uses the temporal-organization types (`now`, `theme`, `period`) the f
 
 Edges carry `to:` and `relation:` only — they inherit provenance from the parent node's `derives_from` when the edge mirrors that derivation. Explicit edge provenance fields (`evidence_kind`, `evidence_notes`, `how_it_follows`) are allowed but not required.
 
-Rules 1–5 and 10 are mechanically checkable from the YAML alone; 6–9, 11, 12 require human judgment and are verified during Phase 7 of START_HERE.md.
+Rules 1–10 are checked structurally from the YAML alone (the validator at `know-thyself-search` runs them). Rules 7–10 also have a human-judgment layer beyond the structural check — independence of overlap references, sufficiency of novel caveats, whether a practice's parents are genuinely descriptive — verified during Phase 7 of START_HERE.md. Rules 11–12 (theme cardinality, period non-overlap) require human judgment fully.
 
 > **Claim:** Twelve conditions are jointly necessary and sufficient for a well-formed graph (9 core + 3 conditional on temporal-type use).
-> **Grounds:** Enumerated; the partition between mechanical (1–5, 10) and human-judgment (6–9, 11–12) is the partition between syntactic and semantic verification. Rule 9 broadened to admit role-prefixed references after empirical use showed practices regularly derive from `R-lens-` / `R-experiment-` / `R-filter-` nodes. The edge-provenance requirement was dropped after empirical use showed essentially no edges in long-running graphs carry provenance — edges encode structural relationships whose justification lives on the parent node.
+> **Grounds:** Enumerated; rules 1–10 are checked structurally by the validator at `know-thyself-search`; rules 7–10 also have a human-judgment layer (independence of evidence, caveats sufficiency, whether parents are genuinely descriptive); rules 11–12 are pure human judgment. Rule 9 broadened to admit role-prefixed references after empirical use showed practices regularly derive from `R-lens-` / `R-experiment-` / `R-filter-` nodes. The edge-provenance requirement was dropped after empirical use showed essentially no edges in long-running graphs carry provenance — edges encode structural relationships whose justification lives on the parent node.
 > **Status:** stipulated
 > **Leans on:** the rule enumeration above; START_HERE.md Phase 7 (human-judgment subset).
 
