@@ -139,7 +139,7 @@ For sensitive content that's structurally load-bearing but shouldn't be casually
 > **Claim:** Validation enforces the well-formedness rules and surfaces load-bearing observations by in-degree.
 > **Grounds:** Phase rule; corresponds to SCHEMA.md validation rules 1–10.
 > **Status:** stipulated
-> **Leans on:** SCHEMA.md validation section; `know_thyself.render.graphviz` for the machine-checkable subset.
+> **Leans on:** SCHEMA.md validation section.
 
 **8. Reflect — what was settled is tentative, what intersection produced, what novels were quiet answers.** What had I been treating as settled that turns out to be tentative? What did the intersection actually produce? What open questions had I been quietly answering with novels?
 
@@ -181,7 +181,7 @@ Begin with Phase 1.
 
 ## Credit — lineage of the provenance shape and personal-graph adaptation
 
-Provenance-triple shape draws on W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) and [PROV-O](https://www.w3.org/TR/prov-overview/). Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) gives the formal articulation for **scientific** claims. The personal-graph adaptation in this prompt — typed nodes for personal memory, four-scale synthesis, temporal validity, MCP retrieval — is mine.
+Provenance-triple shape draws on W3C [RDF](https://www.w3.org/TR/rdf11-concepts/) and [PROV-O](https://www.w3.org/TR/prov-overview/). Patrick McCarthy's [open-knowledge-graph](https://github.com/patdmc/open-knowledge-graph) (MIT) gives the formal articulation for **scientific** claims. The personal-graph adaptation in this prompt — typed nodes for personal memory, four-scale synthesis with independence-checked promotion, temporal validity that decays unless re-grounded — is mine.
 
 > **Claim:** Provenance-triple shape is borrowed from W3C; personal-graph adaptation in this prompt is original.
 > **Grounds:** Cited standards; explicit boundary statement.

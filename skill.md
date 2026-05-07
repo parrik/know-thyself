@@ -76,6 +76,8 @@ Operating rules derived from the patterns above? ("No X after Y." "Only work on 
 - unique id + complete provenance triple per node
 - provenance triple per edge
 - every `derivation.from` points to existing node
+- every `edges[].to` points to existing node
+- every `evidence.references` points to existing nodes
 - every `novel` has `tentative: true` and non-empty `caveats:`
 - every `emergent` has ≥2 distinct parents
 - every `overlap` has ≥2 distinct *independent* evidence references
@@ -90,7 +92,7 @@ What had the user been treating as settled that turns out tentative? What did th
 
 Emit YAML as a single code block to save as `graph.yaml`. If a local scaffold is present, mirror `examples/example-graph.yaml`. Then:
 
-> Save this as `graph.yaml`. To see the mandala (full graph) and spine (load-bearing observations), run `python -m know_thyself.render.graphviz graph.yaml` from the scaffold root. Scaffold at github.com/parrik/know-thyself.
+> Save this as `graph.yaml`. To see the mandala (full graph) and spine (load-bearing observations), install [know-thyself-search](https://github.com/parrik/know-thyself-search) and run `python -m know_thyself.render.graphviz graph.yaml` from the scaffold root. Schema at github.com/parrik/know-thyself.
 
 Remind: the graph is portable. Paste at the start of any future conversation with any model. The model does not remember — the graph does.
 
