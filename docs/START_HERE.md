@@ -8,7 +8,7 @@ Read these instructions carefully, then proceed in phases.
 
 ## The invariant — every node and edge carries provenance
 
-Every node and every edge carries a provenance triple: *(attribution, evidence, derivation)*. A claim without provenance is indistinguishable from noise.
+Every node carries seven flat fields that together form its paper trail: who said it (`said_by`, `said_when`), what it rests on (`evidence_kind`, `evidence_notes`, `evidence_refs`), and how it follows from prior claims (`derives_from`, `how_it_follows`). A claim without that paper trail is indistinguishable from noise.
 
 > **Claim:** Provenance is the structural invariant; nodes without it are not nodes.
 > **Grounds:** Definitional, mirrors SCHEMA.md's invariant.
@@ -56,7 +56,7 @@ Novel nodes MUST carry `tentative: true` and a `caveats:` field listing how they
 
 ## Edge relations — the eight typed connections
 
-`derives_from`, `grounds`, `grounded_in`, `generalizes`, `instantiates`, `qualifies`, `contradicts`, `emergent_from`. Each edge carries its own provenance.
+`derives_from`, `grounds`, `grounded_in`, `generalizes`, `instantiates`, `qualifies`, `contradicts`, `emergent_from`. Edges that need justification beyond their endpoints can carry their own provenance fields (`evidence_kind`, `evidence_notes`, `how_it_follows`); most edges inherit provenance from the parent node's `derives_from`.
 
 > **Claim:** Eight relation types cover the structural moves between nodes.
 > **Grounds:** Enumeration; matches SCHEMA.md's edge-relations table.
@@ -115,7 +115,7 @@ Every node may carry an optional `source_kind:` field with one of `lived | told 
 > **Status:** stipulated
 > **Leans on:** the felt-settled-but-isn't failure mode; Phase 8's reflection step.
 
-**4. Emergents — claims that only appear at the intersection of ≥2 parents.** Claims not present in any single observation but precipitating only when 2+ nodes are held together. Both parents go in `derivation.from`. If one parent alone produces the claim, it's not emergent.
+**4. Emergents — claims that only appear at the intersection of ≥2 parents.** Claims not present in any single observation but precipitating only when 2+ nodes are held together. Both parents go in `derives_from`. If one parent alone produces the claim, it's not emergent.
 
 > **Claim:** Emergent claims require ≥2 parents and disappear if any one parent alone could produce them.
 > **Grounds:** Phase rule; matches SCHEMA.md validation rule 7.
@@ -143,7 +143,7 @@ Every node may carry an optional `source_kind:` field with one of `lived | told 
 > **Status:** stipulated
 > **Leans on:** Phases 2–4 (the descriptive parents); SCHEMA.md practice definition.
 
-**7. Validate — produce the YAML and check well-formedness.** Produce the YAML. Check: every node has provenance, every `derivation.from` points to an existing node, every `edges[].to` resolves, every HANDLING-flagged observation carries its directive. Compute in-degree — tell me which observations are most load-bearing.
+**7. Validate — produce the YAML and check well-formedness.** Produce the YAML. Check: every node has the four required provenance fields (`said_by`, `evidence_kind`, `derives_from`, `how_it_follows`), every `derives_from` points to an existing node, every `edges[].to` resolves, every HANDLING-flagged observation carries its directive. Compute in-degree — tell me which observations are most load-bearing.
 
 > **Claim:** Validation enforces the well-formedness rules and surfaces load-bearing observations by in-degree.
 > **Grounds:** Phase rule; corresponds to SCHEMA.md validation rules 1–9 (core well-formedness).
