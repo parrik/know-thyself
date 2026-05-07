@@ -27,11 +27,11 @@ docs/
 └── DEPRECATION.md         why typed graphs decay
 examples/
 ├── example-graph.yaml             18-node minimal
-└── example-graph-extended.yaml    87-node case study
+└── example-graph-extended.yaml    96-node case study (periods, themes, source_kind)
 skill.md                            Claude Code slash-command definition
 ```
 
-*The repo also currently includes an in-tree `know_thyself/` Python package (retrieval + render) duplicating the canonical home at [know-thyself-search](https://github.com/parrik/know-thyself-search). It is being removed in a follow-up; use the canonical repo for tooling.*
+For tooling — dashboard, renderers, retrieval, MCP server — see [know-thyself-search](https://github.com/parrik/know-thyself-search).
 
 ## what's different
 
