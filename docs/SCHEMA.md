@@ -35,7 +35,7 @@ For root nodes (no parents): `derives_from: []` and `how_it_follows: "direct"` i
 > **Claim:** Provenance is the schema invariant — without the seven fields, the unit is not a graph node.
 > **Grounds:** Definitional rule. The shape is structurally equivalent to PROV-O's three-tuple (attribution / evidence / derivation), flattened to plain English keys for readability. RDF/PROV-O compatibility is available by re-grouping; the schema's primary surface is human-editable YAML.
 > **Status:** stipulated
-> **Leans on:** every node type below; the validation rules; the validator's mechanical checks (rules 1–5, 10).
+> **Leans on:** every node type below; the validation rules; the validator's mechanical checks (rules 1–10).
 
 ---
 
