@@ -26,6 +26,8 @@ Then check: does the user have a local copy of the scaffold? If yes, reference `
 
 ## Node types (summary — see `docs/SCHEMA.md`)
 
+Eight core types describing claims:
+
 | Type | ID | What it is |
 |---|---|---|
 | `reference` | R## | Biographical fact, single-source verifiable |
@@ -37,7 +39,15 @@ Then check: does the user have a local copy of the scaffold? If yes, reference `
 | `open` | OQ## | Unresolved question, first-class |
 | `practice` | PR## | Operating rule, must `derive_from` a descriptive node |
 
-Provenance triple on every node: `attribution`, `evidence`, `derivation`. Evidence types: `self-report`, `external-record`, `pattern-across-cases`, `natural-experiment`, `derived-inference` (weakest, must flag).
+Plus three temporal-organization types (use only if the graph has accumulated enough material to warrant them):
+
+| Type | ID | What it is |
+|---|---|---|
+| `now` | `NOW` | Singleton orienting node — current week/month/quarter, standing rules, canaries |
+| `theme` | T-## | Cross-time organizing packet (Schank TOP) — binds ≥3 nodes from different periods by shared meaning |
+| `period` | L-## | Lifetime period (Conway SMS) — named span with start/end/tone; nodes live inside |
+
+Provenance triple on every node: `attribution`, `evidence`, `derivation`. Evidence types: `self-report`, `external-record`, `pattern-across-cases`, `natural-experiment`, `derived-inference` (weakest, must flag). Optional `source_kind:` (`lived` | `told` | `inferred` | `imagined`) tags origin of mental content — Tulving / Johnson source-monitoring.
 
 ## Phases
 

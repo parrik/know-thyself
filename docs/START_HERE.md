@@ -26,6 +26,8 @@ Every node and every edge carries a provenance triple: *(attribution, evidence, 
 
 ## Node types — the eight typed shapes a claim can take
 
+**Eight core types describing claims:**
+
 | Type | Meaning | Confidence basis |
 |---|---|---|
 | `reference` | Biographical fact | Single-source but verifiable |
@@ -37,11 +39,19 @@ Every node and every edge carries a provenance triple: *(attribution, evidence, 
 | `open` | Unresolved question, first-class | N/A |
 | `practice` | Operating rule derived from descriptive claims | Must `derive_from` overlap/novel/observation |
 
+**Plus three temporal-organization types** (additive — use only if the graph warrants them):
+
+| Type | Meaning | When to use |
+|---|---|---|
+| `now` | Singleton orienting node (`id: NOW`) | When the graph has grown past ~50 nodes and needs a "where do I start" anchor |
+| `theme` | Cross-time organizing packet (Schank TOP); binds ≥3 nodes from different periods by shared meaning | After ~6 months of building, when long-running threads are visible across decades |
+| `period` | Named lifetime span with start/end/tone (Conway SMS); nodes live inside | When the graph spans multiple distinct life stretches |
+
 Novel nodes MUST carry `tentative: true` and a `caveats:` field listing how they could be wrong. Open questions stay open — do not collapse them into novel interpretations.
 
-> **Claim:** Eight typed node shapes are the only legal node kinds.
-> **Grounds:** Enumeration; matches SCHEMA.md's node-types section.
-> **Status:** stipulated
+> **Claim:** Eight core node shapes plus three temporal-organization types are the legal node kinds.
+> **Grounds:** Enumeration; matches SCHEMA.md's node-types and temporal-organization sections.
+> **Status:** stipulated (core eight); stipulated post-May 2026 (temporal three)
 > **Leans on:** Phases 1–6.5 (each phase produces nodes of specific types); SCHEMA.md.
 
 ## Edge relations — the eight typed connections
