@@ -2,7 +2,7 @@
 
 **Turn an LLM's memory of you into a structured graph that knows what it knows — and what it's just guessing.**
 
-A flat memory list treats a claim repeated five times as five pieces of evidence. It isn't. This scaffold restructures that list into typed nodes — fact, episode, pattern, interpretation, open question — where every claim carries provenance *(attribution, evidence, derivation)* and confidence accumulates only from independent derivations.
+A flat memory list treats a claim repeated five times as five pieces of evidence. It isn't. This scaffold restructures that list into typed nodes — fact, episode, pattern, interpretation, open question — where every claim carries a paper trail (*who said it, what it rests on, how it follows from prior claims*) and confidence accumulates only from independent derivations.
 
 > Companion essay: **[Know Thyself](https://parrik.com/essays/know-thyself/)** — the full argument lives there.
 

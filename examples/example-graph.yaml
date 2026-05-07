@@ -20,33 +20,33 @@
   statement: |
     Born and raised in a town of ~8,000 people. Rural, close-knit community.
     Left at 18 for university in a large city.
-  provenance:
-    attribution: { source: "Alex, self-report", date: "2025" }
-    evidence: { type: self-report }
-    derivation: { from: [], method: "direct" }
-
+  said_by: "Alex, self-report"
+  said_when: "2025"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 - id: R02-career
   type: reference
   name: "20 years in publishing — editor then senior editor"
   statement: |
     Career arc: trade publishing 2005-2015, then academic publishing
     2015-2024. Senior editor at the last role, managing a small team.
-  provenance:
-    attribution: { source: "Alex, self-report + LinkedIn", date: "2025" }
-    evidence: { type: external-record }
-    derivation: { from: [], method: "direct" }
-
+  said_by: "Alex, self-report + LinkedIn"
+  said_when: "2025"
+  evidence_kind: external-record
+  derives_from: []
+  how_it_follows: "direct"
 - id: R03-family
   type: reference
   name: "Single parent; teenage child (age 14)"
   statement: |
     Divorced 2019. Primary caregiver for a 14-year-old. Ex-partner lives
     in the previous city; shared custody is possible but practically rare.
-  provenance:
-    attribution: { source: "Alex, self-report", date: "2025" }
-    evidence: { type: self-report }
-    derivation: { from: [], method: "direct" }
-
+  said_by: "Alex, self-report"
+  said_when: "2025"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 - id: R04-move
   type: reference
   name: "Moved to a new city in August 2024 for a new job"
@@ -54,11 +54,11 @@
     Relocated ~800 miles for a director-level role at a smaller publishing
     house. The move involved selling the old house, renting in the new city,
     enrolling the child in a new school.
-  provenance:
-    attribution: { source: "Alex, self-report", date: "2025" }
-    evidence: { type: self-report }
-    derivation: { from: [], method: "direct" }
-
+  said_by: "Alex, self-report"
+  said_when: "2025"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 # ──────────────────────────────────────────────────────────────────────────────
 #  OBSERVATIONS — specific episodes
 # ──────────────────────────────────────────────────────────────────────────────
@@ -71,11 +71,12 @@
     as the hardest stretch. Working long hours at the new job, child
     struggling at the new school, no friends yet. Minimal sleep. Stopped
     the running routine that had been daily for years.
-  provenance:
-    attribution: { source: "Alex, self-report", date: "2024-12" }
-    evidence: { type: self-report }
-    derivation: { from: [R04-move], method: "direct" }
-
+  said_by: "Alex, self-report"
+  said_when: "2024-12"
+  evidence_kind: self-report
+  derives_from:
+    - R04-move
+  how_it_follows: "direct"
 - id: O02-running-group
   type: observation
   name: "Joined a local running group December 2024"
@@ -84,11 +85,12 @@
     community app. First weeks felt awkward. By week four had a regular
     conversation with two members. The routine restarted naturally around
     the social anchor.
-  provenance:
-    attribution: { source: "Alex, self-report", date: "2025-01" }
-    evidence: { type: self-report }
-    derivation: { from: [O01-first-three-months], method: "direct; causal relation to prior state" }
-
+  said_by: "Alex, self-report"
+  said_when: "2025-01"
+  evidence_kind: self-report
+  derives_from:
+    - O01-first-three-months
+  how_it_follows: "direct; causal relation to prior state"
 - id: O03-therapist-referral
   type: observation
   name: "Started seeing a therapist Feb 2025"
@@ -98,11 +100,11 @@
     month three, beginning to notice repeating patterns in own reactions.
     HANDLING: Alex is private about the content of therapy. Do not ask
     about session specifics unless Alex raises them.
-  provenance:
-    attribution: { source: "Alex, self-report", date: "2025-05" }
-    evidence: { type: self-report }
-    derivation: { from: [], method: "direct" }
-
+  said_by: "Alex, self-report"
+  said_when: "2025-05"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 - id: O04-daughter-grades-recovered
   type: observation
   name: "Child's grades recovered in spring semester"
@@ -111,11 +113,13 @@
     move, recovered to pre-move levels by April. Alex attributes this to
     (a) a specific teacher the child connected with, and (b) more stability
     at home as Alex's own routine re-established.
-  provenance:
-    attribution: { source: "Alex, self-report + report cards", date: "2025-05" }
-    evidence: { type: external-record }
-    derivation: { from: [R03-family, R04-move], method: "direct" }
-
+  said_by: "Alex, self-report + report cards"
+  said_when: "2025-05"
+  evidence_kind: external-record
+  derives_from:
+    - R03-family
+    - R04-move
+  how_it_follows: "direct"
 - id: O05-workplace-conflict
   type: observation
   name: "Conflict with a senior colleague, March 2025"
@@ -124,11 +128,12 @@
     decision. Alex held the position, eventually persuaded the rest of the
     team, but the colleague has remained cool since. Alex reported feeling
     "stretched but not wrong."
-  provenance:
-    attribution: { source: "Alex, self-report", date: "2025-04" }
-    evidence: { type: self-report }
-    derivation: { from: [R02-career], method: "direct" }
-
+  said_by: "Alex, self-report"
+  said_when: "2025-04"
+  evidence_kind: self-report
+  derives_from:
+    - R02-career
+  how_it_follows: "direct"
 # ──────────────────────────────────────────────────────────────────────────────
 #  OVERLAPS — patterns grounded by 2+ independent episodes
 # ──────────────────────────────────────────────────────────────────────────────
@@ -142,16 +147,18 @@
     are harder to respond to, mood lowers. When it returns, the other
     things stabilize. This is not a preference — it appears to be
     structural.
-  provenance:
-    attribution: { source: "Pattern across episodes" }
-    evidence:
-      type: pattern-across-cases
-      references: [O01-first-three-months, O02-running-group, O04-daughter-grades-recovered]
-      description: "Three independent instances: routine-breakdown in Sep-Nov produced overwhelm; routine-restart in Dec produced stability return; child's recovery coincided with Alex's routine re-establishing"
-    derivation:
-      from: [O01-first-three-months, O02-running-group, O04-daughter-grades-recovered]
-      method: "induction across independent instances"
-
+  said_by: "Pattern across episodes"
+  evidence_kind: pattern-across-cases
+  evidence_refs:
+    - O01-first-three-months
+    - O02-running-group
+    - O04-daughter-grades-recovered
+  evidence_notes: "Three independent instances: routine-breakdown in Sep-Nov produced overwhelm; routine-restart in Dec produced stability return; child's recovery coincided with Alex's routine re-establishing"
+  derives_from:
+    - O01-first-three-months
+    - O02-running-group
+    - O04-daughter-grades-recovered
+  how_it_follows: "induction across independent instances"
 - id: P02-holds-positions-in-work
   type: overlap
   name: "Alex holds positions in work even when costly"
@@ -160,16 +167,16 @@
     persuade toward it, rather than yielding for social ease. This has
     both positive outcomes (successful acquisitions, team respect) and
     costs (cooled relationships with those overruled).
-  provenance:
-    attribution: { source: "Pattern across episodes" }
-    evidence:
-      type: pattern-across-cases
-      references: [R02-career, O05-workplace-conflict]
-      description: "The march 2025 conflict is one instance; the career history references multiple similar stretches"
-    derivation:
-      from: [R02-career, O05-workplace-conflict]
-      method: "induction; note: only two episodes detailed, so promotion to overlap is marginal"
-
+  said_by: "Pattern across episodes"
+  evidence_kind: pattern-across-cases
+  evidence_refs:
+    - R02-career
+    - O05-workplace-conflict
+  evidence_notes: "The march 2025 conflict is one instance; the career history references multiple similar stretches"
+  derives_from:
+    - R02-career
+    - O05-workplace-conflict
+  how_it_follows: "induction; note: only two episodes detailed, so promotion to overlap is marginal"
 # ──────────────────────────────────────────────────────────────────────────────
 #  NOVEL — single-derivation interpretations. TENTATIVE.
 # ──────────────────────────────────────────────────────────────────────────────
@@ -183,15 +190,14 @@
     don't simply feel neutral or quiet — they appear to be upstream of
     physical-routine breakdown and downstream effects. The first-three-
     months episode is the clearest case.
-  provenance:
-    attribution: { source: "Surfaced in conversation May 2025" }
-    evidence:
-      type: derived-inference
-      description: "Derived from a single detailed episode (O01) plus general theoretical framing"
-      references: [O01-first-three-months]
-    derivation:
-      from: [O01-first-three-months]
-      method: "inductive from one case; no counterfactual on record"
+  said_by: "Surfaced in conversation May 2025"
+  evidence_kind: derived-inference
+  evidence_notes: "Derived from a single detailed episode (O01) plus general theoretical framing"
+  evidence_refs:
+    - O01-first-three-months
+  derives_from:
+    - O01-first-three-months
+  how_it_follows: "inductive from one case; no counterfactual on record"
   caveats: |
     Could be wrong because:
     (1) O01 conflates isolation with several other changes (new job
@@ -211,14 +217,13 @@
     tool for self-observation, rather than as emotional processing of
     specific events. This may be appropriate for Alex's current stage or
     may be a way of staying at one remove.
-  provenance:
-    attribution: { source: "Surfaced May 2025" }
-    evidence:
-      type: derived-inference
-      references: [O03-therapist-referral]
-    derivation:
-      from: [O03-therapist-referral]
-      method: "interpretive; single source"
+  said_by: "Surfaced May 2025"
+  evidence_kind: derived-inference
+  evidence_refs:
+    - O03-therapist-referral
+  derives_from:
+    - O03-therapist-referral
+  how_it_follows: "interpretive; single source"
   caveats: |
     This is speculative. Alex has been private about session content
     (see O03 HANDLING) so the interpretation relies on brief described
@@ -238,23 +243,21 @@
     re-establishing physical routine. Neither alone produces the claim;
     together they do. Operational consequence: prioritizing Alex's
     routine is not self-indulgence — it's direct parenting infrastructure.
-  provenance:
-    attribution: { source: "Surfaced May 2025" }
-    evidence:
-      type: derived-inference
-      description: "Intersection-produced — not present in P01 alone or O04 alone"
-      references: [P01-routine-as-regulation, O04-daughter-grades-recovered]
-    derivation:
-      from: [P01-routine-as-regulation, O04-daughter-grades-recovered]
-      method: "Intersection: P01 alone says 'routine is load-bearing for Alex'; O04 alone says 'child's grades recovered'; together they say the downstream effect of Alex's routine extends to the child"
+  said_by: "Surfaced May 2025"
+  evidence_kind: derived-inference
+  evidence_notes: "Intersection-produced — not present in P01 alone or O04 alone"
+  evidence_refs:
+    - P01-routine-as-regulation
+    - O04-daughter-grades-recovered
+  derives_from:
+    - P01-routine-as-regulation
+    - O04-daughter-grades-recovered
+  how_it_follows: "Intersection: P01 alone says 'routine is load-bearing for Alex'; O04 alone says 'child's grades recovered'; together they say the downstream effect of Alex's routine extends to the child"
   edges:
     - to: P01-routine-as-regulation
       relation: emergent_from
-      provenance:
-        evidence:
-          type: derived-inference
-          description: "This node is produced by the intersection of P01 and O04"
-
+      evidence_kind: derived-inference
+      evidence_notes: "This node is produced by the intersection of P01 and O04"
 # ──────────────────────────────────────────────────────────────────────────────
 #  EQUIVALENCY — bridges to external theoretical frameworks (optional)
 # ──────────────────────────────────────────────────────────────────────────────
@@ -269,26 +272,18 @@
     regulation) is a personal instance of this broader framework. The
     equivalency is informational, not prescriptive — it names a thing
     Alex already has vocabulary for.
-  provenance:
-    attribution:
-      source: "General philosophical/contemplative literature on practice and ritual"
-    evidence:
-      type: external-record
-      description: "Framework is external and well-documented; the link to Alex's case is interpretive"
-    derivation:
-      from: []
-      method: "External framework bridged to P01"
+  said_by: "General philosophical/contemplative literature on practice and ritual"
+  evidence_kind: external-record
+  evidence_notes: "Framework is external and well-documented; the link to Alex's case is interpretive"
+  derives_from: []
+  how_it_follows: "External framework bridged to P01"
   edges:
     - to: P01-routine-as-regulation
       relation: grounds
-      provenance:
-        attribution: { source: "Interpretive link made in conversation" }
-        evidence:
-          type: derived-inference
-          description: "The external framework provides grounding vocabulary for P01"
-        derivation:
-          method: "External framework bridged to P01"
-
+      said_by: "Interpretive link made in conversation"
+      evidence_kind: derived-inference
+      evidence_notes: "The external framework provides grounding vocabulary for P01"
+      how_it_follows: "External framework bridged to P01"
 # ──────────────────────────────────────────────────────────────────────────────
 #  PRACTICES — operating rules derived from descriptive claims (optional)
 # ──────────────────────────────────────────────────────────────────────────────
@@ -301,16 +296,17 @@
     no family scheduling Sunday 8–10am. The routine is upstream of
     everything else, and the child's stability indexes off it, so
     protecting it is not self-indulgence but operational infrastructure.
-  provenance:
-    attribution: { source: "Alex, self-articulated rule", date: "2025-05" }
-    evidence:
-      type: pattern-across-cases
-      references: [P01-routine-as-regulation, E01-child-stability-depends-on-alex-stability]
-      description: "Rule derives from the established pattern + the intersection node that makes its stakes legible"
-    derivation:
-      from: [P01-routine-as-regulation, E01-child-stability-depends-on-alex-stability]
-      method: "normative rule derived from overlap + emergent node"
-
+  said_by: "Alex, self-articulated rule"
+  said_when: "2025-05"
+  evidence_kind: pattern-across-cases
+  evidence_refs:
+    - P01-routine-as-regulation
+    - E01-child-stability-depends-on-alex-stability
+  evidence_notes: "Rule derives from the established pattern + the intersection node that makes its stakes legible"
+  derives_from:
+    - P01-routine-as-regulation
+    - E01-child-stability-depends-on-alex-stability
+  how_it_follows: "normative rule derived from overlap + emergent node"
 # ──────────────────────────────────────────────────────────────────────────────
 #  OPEN QUESTIONS
 # ──────────────────────────────────────────────────────────────────────────────
@@ -323,11 +319,11 @@
     decisions (child's schooling, buying vs. renting, depth of community
     investment). Do not let this get quietly absorbed into an assumed
     answer — Alex should decide explicitly.
-  provenance:
-    attribution: { source: "Open as of May 2025" }
-    evidence: { type: derived-inference }
-    derivation: { from: [R04-move], method: "unresolved" }
-
+  said_by: "Open as of May 2025"
+  evidence_kind: derived-inference
+  derives_from:
+    - R04-move
+  how_it_follows: "unresolved"
 - id: OQ02-relationship-with-ex
   type: open
   name: "Is the cool relationship with ex-partner stable or in drift?"
@@ -336,7 +332,8 @@
     than formal custody anticipates. Unclear whether this is a stable
     equilibrium or a slow drift toward a more distant arrangement that
     Alex has feelings about but has not named.
-  provenance:
-    attribution: { source: "Open as of May 2025" }
-    evidence: { type: derived-inference }
-    derivation: { from: [R03-family], method: "unresolved" }
+  said_by: "Open as of May 2025"
+  evidence_kind: derived-inference
+  derives_from:
+    - R03-family
+  how_it_follows: "unresolved"

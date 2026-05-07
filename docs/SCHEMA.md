@@ -9,28 +9,31 @@ Formal spec for the memory graph. If a node or edge violates this spec, it's a b
 
 ---
 
-## Provenance triple — the invariant every node and edge must carry
+## Provenance — the paper trail every node and edge must carry
 
-Every node and every edge carries:
+Every node and every edge carries seven flat fields that together answer three questions about any claim: **who said it, what it rests on, how it follows from prior claims**. The fields are plain English at the YAML level; the concept "provenance" stays as the practice name.
 
 ```yaml
-provenance:
-  attribution:
-    source: "who stated this — a person, a document, a conversation"
-    date: "when (YYYY-MM-DD or approximate)"
-  evidence:
-    type: self-report | external-record | pattern-across-cases | natural-experiment | derived-inference
-    description: "what the claim rests on"
-    references: [list of node-ids, optional]
-  derivation:
-    from: [list of parent node-ids]
-    method: "how the claim follows from the parents — one short sentence"
+# WHO said it
+said_by: "who stated this — a person, a document, a conversation"
+said_when: "YYYY-MM-DD or approximate"
+
+# WHAT it rests on
+evidence_kind: self-report | external-record | pattern-across-cases | natural-experiment | derived-inference
+evidence_notes: "what the claim rests on (optional, free text)"
+evidence_refs: [list of node-ids that the claim cites]   # optional
+
+# HOW it follows from parents
+derives_from: [list of parent node-ids]
+how_it_follows: "how this claim follows from its parents — one short sentence"
 ```
 
-A node without this triple is not a node. Non-negotiable.
+A node without these fields is not a node. Non-negotiable.
 
-> **Claim:** Provenance is the schema invariant — without the triple, the unit is not a graph node.
-> **Grounds:** Definitional rule, traceable to PROV-O's typed-triplet shape.
+For root nodes (no parents): `derives_from: []` and `how_it_follows: "direct"` is fine.
+
+> **Claim:** Provenance is the schema invariant — without the seven fields, the unit is not a graph node.
+> **Grounds:** Definitional rule. The shape is structurally equivalent to PROV-O's three-tuple (attribution / evidence / derivation), flattened to plain English keys for readability. RDF/PROV-O compatibility is available by re-grouping; the schema's primary surface is human-editable YAML.
 > **Status:** stipulated
 > **Leans on:** every node type below; the validation rules; `know_thyself.render.graphviz`'s checks 1–6.
 
@@ -45,7 +48,11 @@ A node without this triple is not a node. Non-negotiable.
   name: "Short human-readable name"
   statement: |
     The fact itself. Single-source, verifiable in principle.
-  provenance: {...}               # Attribution usually "self-report"
+  said_by: "Self-report"
+  said_when: "2025"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 
 # Prefer pure references. If a reference accretes episode detail,
 # extract the episode as a separate observation that `derives_from`
@@ -61,7 +68,11 @@ A node without this triple is not a node. Non-negotiable.
   # Or inline: "HANDLING: do not raise unprompted" in the statement.
   # Structured form preferred when a tool reads it; inline is fine
   # for human-only reading.
-  provenance: {...}
+  said_by: "Self-report"
+  said_when: "2025-03-12"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 
 # ── Overlap: pattern across 2+ independent episodes ─────────────
 - id: P01-example
@@ -69,13 +80,12 @@ A node without this triple is not a node. Non-negotiable.
   name: "The pattern"
   statement: |
     The general claim, phrased so it could be falsified.
-  provenance:
-    evidence:
-      type: pattern-across-cases
-      references: [O01, O02, O03]       # ≥2 INDEPENDENT observations
-    derivation:
-      from: [O01, O02, O03]
-      method: "induction across independent instances"
+  said_by: "Self-report"
+  said_when: "2025"
+  evidence_kind: pattern-across-cases
+  evidence_refs: [O01, O02, O03]        # ≥2 INDEPENDENT observations
+  derives_from: [O01, O02, O03]
+  how_it_follows: "induction across independent instances"
   implication: |                        # Optional but recommended.
     The actionable payload. An overlap without an implication tends
     to drift back into a restated observation.
@@ -87,7 +97,11 @@ A node without this triple is not a node. Non-negotiable.
   name: "The interpretation"
   statement: |
     PROPOSED: the single-derivation reading.
-  provenance: {...}
+  said_by: "Self-articulated"
+  said_when: "2025"
+  evidence_kind: derived-inference
+  derives_from: [O01]
+  how_it_follows: "single-derivation interpretation"
   caveats: |                            # MANDATORY for novel
     How this could be wrong:
     (1) alternative reading one
@@ -100,14 +114,13 @@ A node without this triple is not a node. Non-negotiable.
   name: "The intersection-produced insight"
   statement: |
     The claim that doesn't exist in any single parent alone.
-  provenance:
-    evidence:
-      type: derived-inference
-      description: "Emerges only from the intersection of parents"
-      references: [parent1, parent2]
-    derivation:
-      from: [parent1, parent2]          # ≥2 parents
-      method: "Neither parent alone produces this claim"
+  said_by: "Self-articulated"
+  said_when: "2025"
+  evidence_kind: derived-inference
+  evidence_notes: "Emerges only from the intersection of parents"
+  evidence_refs: [parent1, parent2]
+  derives_from: [parent1, parent2]      # ≥2 parents
+  how_it_follows: "Neither parent alone produces this claim"
 
 # ── Equivalency: bridge to external theory ──────────────────────
 - id: EQ01-example
@@ -115,13 +128,12 @@ A node without this triple is not a node. Non-negotiable.
   name: "External framework — what it grounds here"
   statement: |
     How the external framework applies to this graph.
-  provenance:
-    attribution:
-      author: "External theorist name"
-      source: "Paper, book, framework title"
-    evidence:
-      type: external-record
-      description: "Where the formal grounding lives"
+  said_by: "External theorist name (Paper / book / framework title)"
+  said_when: "publication year if known"
+  evidence_kind: external-record
+  evidence_notes: "Where the formal grounding lives"
+  derives_from: []
+  how_it_follows: "external framework bridged to this graph"
 
 # ── Open: unresolved question, first-class ──────────────────────
 - id: OQ01-example
@@ -130,7 +142,11 @@ A node without this triple is not a node. Non-negotiable.
   statement: |
     What remains unresolved. Do not let this be quietly absorbed
     into a novel interpretation.
-  provenance: {...}
+  said_by: "Self-articulated"
+  said_when: "2025"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 
 # ── Practice: a normative operating rule ────────────────────────
 - id: PR01-example
@@ -140,14 +156,12 @@ A node without this triple is not a node. Non-negotiable.
     A commitment about how to operate, derived from descriptive
     claims. Not descriptive — normative.
     "Don't X before Y." "Always ask directly." "Finish threads."
-  provenance:
-    attribution: { source: "Self-articulated rule" }
-    evidence:
-      type: pattern-across-cases
-      references: [P01-example, O01-example]
-    derivation:
-      from: [P01-example]
-      method: "normative rule derived from descriptive overlap"
+  said_by: "Self-articulated rule"
+  said_when: "2025"
+  evidence_kind: pattern-across-cases
+  evidence_refs: [P01-example, O01-example]
+  derives_from: [P01-example]
+  how_it_follows: "normative rule derived from descriptive overlap"
 ```
 
 `practice` is a personal-graph extension. Use when the graph has grown rules the user explicitly lives by (a no-screens-after-X rule, a job-filter rule, a commitment to ask directly). A practice should `derive_from` a descriptive node so the normative claim stays traceable. Floating rules with no descriptive grounding belong in a sibling goals/actions doc, not here.
@@ -168,7 +182,11 @@ edges:
   - to: target-node-id
     relation: grounds | grounded_in | derives_from | generalizes |
               instantiates | qualifies | contradicts | emergent_from
-    provenance: {...}               # Edges carry provenance too
+    # Edges carry provenance too — the same flat fields as nodes
+    # (most often just evidence_kind + evidence_notes when the edge
+    # itself needs a justification beyond its endpoints):
+    evidence_kind: derived-inference
+    evidence_notes: "why this edge holds"
 ```
 
 | Relation | Direction | Meaning |
@@ -213,26 +231,26 @@ A `novel` grounded only in `derived-inference` is the weakest claim class in the
 A graph is well-formed iff:
 
 1. Every node has a unique `id`.
-2. Every node has a complete `provenance` triple.
-3. Every edge has a complete `provenance` triple.
-4. Every `derivation.from` references an existing node.
+2. Every node has the four required provenance fields: `said_by`, `evidence_kind`, `derives_from`, `how_it_follows`. (`said_when`, `evidence_notes`, `evidence_refs` are optional but recommended.)
+3. Every edge carries at least one provenance field — `evidence_kind`, `evidence_notes`, or `how_it_follows` — when the edge needs justification beyond its endpoints. (Edges between obviously-connected nodes may omit provenance; the rule is "if you'd have to explain the edge, write it down".)
+4. Every `derives_from` references an existing node.
 5. Every `edges[].to` references an existing node.
-6. Every `provenance.evidence.references` (if present) references existing nodes.
+6. Every `evidence_refs` (if present) references existing nodes.
 7. Every `novel` has `tentative: true` and a non-empty `caveats:`.
-8. Every `emergent` has ≥2 distinct entries in `derivation.from`.
-9. Every `overlap` has ≥2 distinct entries in `evidence.references`, not trivially the same event restated.
+8. Every `emergent` has ≥2 distinct entries in `derives_from`.
+9. Every `overlap` has ≥2 distinct entries in `evidence_refs`, not trivially the same event restated.
 10. Every `practice` derives from at least one descriptive node (overlap, novel, observation).
 
 If a graph uses the temporal-organization types (`now`, `theme`, `period`) the following also apply:
 
 11. There is at most one `type: now` node, with `id: NOW`.
-12. Every `theme` has ≥3 distinct entries in `binds:`, and `derivation.from` lists ≥2 distinct periods.
+12. Every `theme` has ≥3 distinct entries in `members:`, and `derives_from` lists ≥2 distinct periods.
 13. No two `period` nodes have overlapping `span:` ranges (a transition event may appear in `contains:` on both sides only when the event is *the* transition).
 
-`know_thyself.render.graphviz` checks 1–6 and 11 automatically. 7–10, 12, 13 require human judgment; verify during Phase 7.
+`know_thyself.render.graphviz` checks rules 1, 2, 4–11 automatically (structural form). Rule 3 is intentionally soft — edges between obviously-connected nodes may omit provenance. Rules 7–10 also require human judgment beyond the structural check (does the novel's caveats actually capture the failure modes? are the overlap's two references genuinely independent or restatements of the same event?). Rules 12–13 require human judgment.
 
 > **Claim:** Thirteen conditions are jointly necessary and sufficient for a well-formed graph (10 core + 3 conditional on temporal-type use).
-> **Grounds:** Enumerated; partition between machine-checkable (1–6, 11) and human-judgment (7–10, 12–13) is operationalized in `know_thyself.render.graphviz`.
+> **Grounds:** Enumerated; partition between structurally machine-checked (1, 2, 4–11), human-judgment-augmented machine checks (7–10), intentionally soft (3), and pure human judgment (12–13) is operationalized in `know_thyself.render.graphviz`.
 > **Status:** stipulated
 > **Leans on:** `know_thyself.render.graphviz` (machine-checkable subset); START_HERE.md Phase 7 (human-judgment subset).
 
@@ -323,13 +341,14 @@ A single node, `id: NOW`, `type: now`, holding the graph's current orienting fra
 
     ## Canaries — watch for
     • <signal threshold> → <downstream cascade>
-  provenance:
-    attribution: { source: "Self-articulated", date: "<YYYY-MM>" }
-    evidence: { type: self-report }
-    derivation: { from: [], method: "direct" }
+  said_by: "Self-articulated"
+  said_when: "<YYYY-MM>"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 ```
 
-There is exactly one `NOW`. Updating its content updates `attribution.date`. Other nodes may `derive_from` `NOW` for short-horizon forecasts (1-month, 90-day) — the `NOW` content is the cadence variables those forecasts extrapolate from.
+There is exactly one `NOW`. Updating its content updates `said_when`. Other nodes may `derives_from` `NOW` for short-horizon forecasts (1-month, 90-day) — the `NOW` content is the cadence variables those forecasts extrapolate from.
 
 ### `theme` (T-prefix) — cross-time organizing packet
 
@@ -346,26 +365,26 @@ A `theme` is a recurring shape of meaning that binds nodes from different *perio
     myself in, and only secondarily as encounters with another
     person. The theme is not a pattern I've earned by induction;
     it's a constellation I recognize across times.
-  binds:                              # ≥3 cross-period instances
+  members:                            # ≥3 cross-period instances
     - O11-college-roommate-conversation
     - O27-first-anniversary-surprise
     - O43-second-date-after-divorce
-  provenance:
-    attribution: { source: "Surfaced May 2026" }
-    evidence:
-      type: pattern-across-cases
-      description: "Theme recognized across lifetime periods, not derived"
-      references: [O11-..., O27-..., O43-...]
-    derivation:
-      from: [L-01-college, L-03-marriage, L-05-post-divorce]
-      method: "thematic recognition across periods (Schank TOP)"
+  said_by: "Surfaced May 2026"
+  said_when: "2026-05"
+  evidence_kind: pattern-across-cases
+  evidence_notes: "Theme recognized across lifetime periods, not derived"
+  evidence_refs: [O11-..., O27-..., O43-...]
+  derives_from: [L-01-college, L-03-marriage, L-05-post-divorce]
+  how_it_follows: "thematic recognition across periods (Schank TOP)"
 ```
 
 **Rules:**
 
 - A theme that binds fewer than three cross-period instances is just a label, not a theme. Promote with restraint.
 - A theme is not a pattern; do not extract an `implication`. The point is recognition, not prediction.
-- `binds:` enumerates the constituent nodes; `derivation.from` lists the periods spanned.
+- `members:` enumerates the constituent nodes; `derives_from` lists the periods spanned.
+
+The `members:` field for themes is the cross-time analog of `contains:` for periods — both group nodes by membership rather than derivation. They're separate fields because their semantics differ: `contains:` is calendar-bounded, `members:` is theme-bounded.
 
 ### `period` (L-prefix) — lifetime period container
 
@@ -388,10 +407,11 @@ A `period` is a named lifetime span with a start, an end, and a tone — what Ma
     - O22-daughter-born
     - O28-brooklyn-move
     - O35-divorce-finalized
-  provenance:
-    attribution: { source: "Self-articulated", date: "2026-05" }
-    evidence: { type: self-report }
-    derivation: { from: [], method: "lifetime-period demarcation (Conway SMS)" }
+  said_by: "Self-articulated"
+  said_when: "2026-05"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "lifetime-period demarcation (Conway SMS)"
 ```
 
 **Rules:**
@@ -403,7 +423,7 @@ A `period` is a named lifetime span with a start, an end, and a tone — what Ma
 
 ### Why these earned their own types instead of more reference sub-categories
 
-Periods and themes have **different cardinality** than references (a life has ~6–10 periods, not dozens), **different referential semantics** (`contains` and `binds` are not `derivation.from`), and **different validation rules** (themes need ≥3 cross-period bindings; periods must not overlap). A reference sub-category prefix can't express those constraints. The pattern from April's "use prefixes, not new types" rule still holds for *role-flavors of references* — but temporal organization is structurally a different shape, not a flavor.
+Periods and themes have **different cardinality** than references (a life has ~6–10 periods, not dozens), **different referential semantics** (`contains` and `members` are not `derives_from`), and **different validation rules** (themes need ≥3 cross-period bindings; periods must not overlap). A reference sub-category prefix can't express those constraints. The pattern from April's "use prefixes, not new types" rule still holds for *role-flavors of references* — but temporal organization is structurally a different shape, not a flavor.
 
 > **Claim:** `now`, `theme`, and `period` are first-class node types because their cardinality, referential semantics, and validation rules differ from references.
 > **Grounds:** Cited cognitive-science substrates (Schank's TOP for theme; Conway's Self-Memory System for period; the *NOW* singleton's empirical role as graph orienting frame); structural arguments above.

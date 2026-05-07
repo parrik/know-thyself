@@ -69,7 +69,14 @@ EDGE_STYLE = {
 #  Validation
 # ─────────────────────────────────────────────────────────────────────────
 def validate(nodes):
-    """Run schema-spec rules 1-6 + novel/emergent/overlap sanity checks."""
+    """Run schema-spec rules 1, 2, 4–11 (structural form).
+
+    Rule 3 (edge provenance) is a soft rule — not checked here.
+    Rules 7–10 are structural-only (cardinality, presence); semantic
+    quality (independence of overlap refs, caveats sufficiency, etc.)
+    needs human judgment.
+    Rules 12–13 require human judgment; not checked here.
+    """
     issues = []
     ids = [n.get('id') for n in nodes]
     id_set = set(ids)
@@ -79,37 +86,44 @@ def validate(nodes):
     for d in dupes:
         issues.append(f"DUPLICATE ID: {d}")
 
+    # Rule 11: at most one NOW node, with id NOW.
+    now_nodes = [n for n in nodes if n.get('type') == 'now']
+    if len(now_nodes) > 1:
+        issues.append(f"Rule 11: {len(now_nodes)} `type: now` nodes found; at most one allowed")
+    for n in now_nodes:
+        if n.get('id') != 'NOW':
+            issues.append(f"Rule 11: now-typed node has id `{n.get('id')}`; must be `NOW`")
+
     for n in nodes:
         nid = n.get('id', '<unknown>')
 
-        # Rule 2: provenance triple complete
-        prov = n.get('provenance') or {}
-        if not prov.get('attribution'):
-            issues.append(f"{nid}: missing provenance.attribution")
-        if not prov.get('evidence'):
-            issues.append(f"{nid}: missing provenance.evidence")
-        if not prov.get('derivation'):
-            issues.append(f"{nid}: missing provenance.derivation")
+        # Rule 2: provenance fields present (said_by, evidence_kind, derives_from / how_it_follows)
+        if not n.get('said_by'):
+            issues.append(f"{nid}: missing said_by")
+        if not n.get('evidence_kind'):
+            issues.append(f"{nid}: missing evidence_kind")
+        if 'derives_from' not in n:
+            issues.append(f"{nid}: missing derives_from")
+        if not n.get('how_it_follows'):
+            issues.append(f"{nid}: missing how_it_follows")
 
-        # Rule 4: derivation.from references exist
-        deriv = prov.get('derivation') or {}
-        for src in (deriv.get('from') or []):
+        # Rule 4: derives_from references exist
+        for src in (n.get('derives_from') or []):
             if src not in id_set:
-                issues.append(f"{nid}: derivation.from references missing node: {src}")
+                issues.append(f"{nid}: derives_from references missing node: {src}")
 
-        # Rule 6: evidence.references exist
-        refs = (prov.get('evidence') or {}).get('references') or []
-        for src in refs:
+        # Rule 6: evidence_refs exist
+        for src in (n.get('evidence_refs') or []):
             if src not in id_set:
-                issues.append(f"{nid}: evidence.references points to missing node: {src}")
+                issues.append(f"{nid}: evidence_refs points to missing node: {src}")
 
-        # Rule 5: edge targets exist; rule 3 edge provenance
+        # Rule 5: edge targets exist.
+        # Rule 3 (edge provenance) is a soft rule — edges between obviously-connected
+        # nodes may omit provenance. Human-judgment, not machine-checked here.
         for edge in (n.get('edges') or []):
             tgt = edge.get('to')
             if tgt and tgt not in id_set:
                 issues.append(f"{nid}: edge -> {tgt} points to missing node")
-            if not edge.get('provenance'):
-                issues.append(f"{nid}: edge -> {tgt} missing provenance")
 
         # Rule 7: novel must be tentative with caveats
         if n.get('type') == 'novel':
@@ -120,21 +134,21 @@ def validate(nodes):
 
         # Rule 8: emergent needs ≥2 parents
         if n.get('type') == 'emergent':
-            parents = deriv.get('from') or []
+            parents = n.get('derives_from') or []
             if len(set(parents)) < 2:
-                issues.append(f"{nid}: emergent node has <2 parents in derivation.from")
+                issues.append(f"{nid}: emergent node has <2 parents in derives_from")
 
         # Rule 9: overlap needs ≥2 independent references
         if n.get('type') == 'overlap':
-            refs = (prov.get('evidence') or {}).get('references') or []
+            refs = n.get('evidence_refs') or []
             if len(set(refs)) < 2:
-                issues.append(f"{nid}: overlap node has <2 references in evidence.references")
+                issues.append(f"{nid}: overlap node has <2 entries in evidence_refs")
 
-        # Rule 10: practice needs descriptive grounding in derivation.from
+        # Rule 10: practice needs descriptive grounding in derives_from
         if n.get('type') == 'practice':
-            parents = deriv.get('from') or []
+            parents = n.get('derives_from') or []
             if not parents:
-                issues.append(f"{nid}: practice node has no derivation.from — a floating rule belongs in goals.md, not the graph")
+                issues.append(f"{nid}: practice node has no derives_from — a floating rule belongs in goals.md, not the graph")
 
     return issues
 
@@ -157,8 +171,7 @@ def node_label(n, max_width=22, max_chars=48):
 def compute_indegree(nodes):
     indeg = defaultdict(int)
     for n in nodes:
-        deriv = n.get('provenance', {}).get('derivation', {}) or {}
-        for src in (deriv.get('from') or []):
+        for src in (n.get('derives_from') or []):
             indeg[src] += 1
         for edge in (n.get('edges') or []):
             if edge.get('to'):
@@ -185,8 +198,7 @@ def render_full(nodes, out_path_no_ext, title='Memory graph — full'):
         dot.node(n['id'], label=node_label(n), **style)
 
     for n in nodes:
-        deriv = n.get('provenance', {}).get('derivation', {}) or {}
-        for src in (deriv.get('from') or []):
+        for src in (n.get('derives_from') or []):
             if src in id_set and src != n['id']:
                 dot.edge(src, n['id'], color='#BBBBBB',
                          penwidth='0.5', arrowsize='0.4')
@@ -231,8 +243,7 @@ def render_spine(nodes, out_path_no_ext, title='Memory graph — load-bearing sp
         dot.node(n['id'], label=node_label(n, max_width=20, max_chars=44), **style)
 
     for n in spine_nodes:
-        deriv = n.get('provenance', {}).get('derivation', {}) or {}
-        for src in (deriv.get('from') or []):
+        for src in (n.get('derives_from') or []):
             if src in spine_ids and src != n['id']:
                 dot.edge(src, n['id'], color='#AAAAAA',
                          penwidth='0.6', arrowsize='0.5')
