@@ -532,6 +532,24 @@ The distinction comes from Endel Tulving's *autonoetic consciousness* (the subje
 > **Status:** stipulated
 > **Leans on:** RELATED_FRAMEWORKS.md (cognitive-science substrate); the `evidence` ladder (which tags claim *strength*, distinct from origin).
 
+### `valid_at:` — temporal validity (when the claim was last grounded)
+
+```yaml
+valid_at: YYYY-MM-DD
+# OR for less-precise grounding:
+valid_at: YYYY-MM        # month-precision
+valid_at: YYYY           # year-precision (range-grounded claims)
+```
+
+`valid_at` records **when the claim was last grounded** in lived experience. It overlaps semantically with `said_when` (the provenance attribution date) but answers a different question: not "when was this claim first stated?" but "when was the underlying experience last refreshed?" For freshly-disclosed claims they're the same date; for claims that have been re-grounded by later episodes, `valid_at` advances while `said_when` stays at the original disclosure.
+
+The decay-without-regrounding posture: a personal claim's epistemic standing weakens as `valid_at` ages. New episodes refresh the claim; absence does not refresh. Rendering tools may surface "stale" nodes (those with old `valid_at`) for re-grounding review.
+
+> **Claim:** `valid_at` is a temporal-validity stamp distinct from `said_when` (provenance-attribution date); it tracks lived-experience freshness, not disclosure history.
+> **Grounds:** Personal claims aren't permanently true; the stamp lets a graph express "still grounded" vs "potentially stale" without forcing premature retraction.
+> **Status:** stipulated
+> **Leans on:** README.md's "valid_at decays unless re-grounded" framing; `said_when` (the provenance-fields foreground date).
+
 ---
 
 ## Extensions for personal memory — the seven deliberate departures from scientific-claims schemas
@@ -558,6 +576,105 @@ I make seven deliberate extensions beyond scientific-claims provenance schemas:
 > **Grounds:** Enumerated, each tied to a specific constraint (no replication, no ground truth, fuzzy validity, node-dense growth).
 > **Status:** stipulated
 > **Leans on:** README.md's "What I built"; each extension's corresponding schema element above.
+
+---
+
+## Personal-graph reserved fields — fields the schema permits but doesn't require
+
+Long-running personal graphs accumulate fields beyond the seven required provenance fields. These have emerged from real use; the schema reserves them so a personal graph using them is still well-formed. Tools may render or ignore them.
+
+### Lifecycle (graph hygiene over time)
+
+```yaml
+shelved: true                          # node demoted but kept for reference
+shelved_on: "YYYY-MM-DD"               # when shelved
+retire_note: "Why this is shelved..."  # short prose explaining the demotion
+```
+
+Shelving is the soft form of node retirement — the node stays referenced from history but is excluded from "live" views. Use when a claim turns out to be wrong, or a stretch ends, or a frame retires.
+
+### Associative graph (relationships not captured by typed edges)
+
+```yaml
+related_to:
+  - <node-id>      # associative; lighter than a typed edge
+  - <node-id>
+```
+
+`related_to` lets a graph express "see also" associations that don't fit one of the eight typed edge predicates. Render tools should treat `related_to` entries as undirected, untyped associations. (For directed, typed claim-relationships, use the `edges` block.)
+
+### Free-text grounding (prose evidence not yet extracted to nodes)
+
+```yaml
+grounded_by:
+  - <node-id>          # if the grounding is a real node, list it here
+  - "Episode prose..." # if it isn't yet extracted, prose works as a placeholder
+```
+
+`grounded_by` is the field for "this claim's evidence" in mixed shape: node-IDs where evidence is structured, prose where it hasn't been extracted yet. Cleaner long-term: extract prose entries into observation nodes, link via `evidence_refs`. `grounded_by` is the working surface during graph construction.
+
+### Forecast and review scheduling
+
+```yaml
+review_cadence: weekly | monthly | quarterly | yearly
+next_review: "YYYY-MM-DD"
+review_by: "Self" | "<other party>"
+```
+
+Useful on `emergent` forecast nodes — formal recurrence reminder.
+
+### Watch and counter-evidence
+
+```yaml
+watchpoints:
+  - "Specific signal that would falsify or qualify this claim"
+
+counter_evidence:
+  - <node-id>          # observation that runs against the pattern
+  - "Prose about counter-evidence"
+```
+
+`watchpoints` is the falsifier-watch list. `counter_evidence` is the explicit counter — the schema's `contradicts` typed edge does the same job structurally; `counter_evidence` is the human-friendly inline form.
+
+### Practice extensions
+
+```yaml
+governs:
+  - <domain or node-id>    # what the practice governs
+```
+
+### Period extensions
+
+```yaml
+sample_residents:
+  - <node-id>             # a sampling of nodes whose timeframe falls inside the period
+themes:
+  - <theme-id>             # themes this period intersects
+```
+
+`sample_residents` is the lighter form of `contains:` — when listing every node-in-period would be too many, list a representative sample.
+
+### Source caveat (evidence-quality narrative)
+
+```yaml
+source_caveat: "Evidence-source caveat as a short prose hint."
+```
+
+This overlaps with `evidence_notes` in the provenance fields. Personal graphs may keep both during transition; new authoring should prefer `evidence_notes`.
+
+### Partial grounding
+
+```yaml
+grounded_by_partial:
+  - <node-id>             # grounded but acknowledged as incomplete
+```
+
+For nodes that are partially grounded — the link is real but doesn't carry the full weight of evidence_refs.
+
+> **Claim:** Personal-graph reserved fields document the working surfaces a long-running graph accumulates; tools may render or ignore them.
+> **Grounds:** Empirical — fields surfaced after months of personal-graph use; each ties to a specific operational need (lifecycle, associative graph, prose-staging, scheduled review, falsifier-watch, period-sampling, evidence-quality narrative).
+> **Status:** stipulated
+> **Leans on:** the seven required provenance fields above (these reserved fields complement, do not replace); render tools that read these fields (dashboards, audit reports).
 
 ---
 
