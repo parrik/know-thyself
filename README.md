@@ -23,13 +23,15 @@ docs/
 ├── SAFETY.md              read first (5 min)
 ├── START_HERE.md          the prompt
 ├── SCHEMA.md              formal spec — node types, edges, validation
-├── RELATED_FRAMEWORKS.md  PROV-O, Toulmin, Zettelkasten, PKG, Aura, Graphiti
-└── SCHEMA_DEPRECIATION.md why typed graphs decay
+├── RELATED_FRAMEWORKS.md  PROV-O, Toulmin, Zettelkasten, epistemic-status, PKG
+└── DEPRECATION.md         why typed graphs decay
 examples/
 ├── example-graph.yaml             18-node minimal
 └── example-graph-extended.yaml    87-node case study
 skill.md                            Claude Code slash-command definition
 ```
+
+*The repo also currently includes an in-tree `know_thyself/` Python package (retrieval + render) duplicating the canonical home at [know-thyself-search](https://github.com/parrik/know-thyself-search). It is being removed in a follow-up; use the canonical repo for tooling.*
 
 ## what's different
 
@@ -39,7 +41,7 @@ Three schema-level moves no other personal-memory project ships together:
 2. **Observation kept separate from interpretation.** Episodes don't collapse into the patterns derived from them. The first three months mean one thing in November and another in May; both readings live as distinct nodes.
 3. **`valid_at` decays unless re-grounded.** Personal claims aren't permanently true. New episodes refresh; absence doesn't.
 
-Anthropic Memory ships none — synthesizes prose every 24 hours. Mem0, Cognee, Letta also no. Graphiti has stronger validity windows but contradiction-driven, not decay-driven. [Aura SDK](https://github.com/teolex2020/AuraSDK) is the closest cousin (autonomous-adaptive vs hand-curated here). Anthropic users have asked for this primitive ([claude-code#30039](https://github.com/anthropics/claude-code/issues/30039)); Anthropic punted to the application layer. This is that layer.
+None ship the three primitives together. Anthropic Memory synthesizes a prose profile every 24 hours — no typed observation/interpretation, no independence check, no decay. Mem0 attaches metadata but doesn't track independence. Cognee has source lineage but doesn't check independence. Letta has agentic memory blocks without temporal-validity decay. Graphiti has stronger validity windows but contradiction-driven invalidation, not decay-without-regrounding. [Aura SDK](https://github.com/teolex2020/AuraSDK) is the closest cousin (autonomous-adaptive vs hand-curated here). Anthropic users have asked for this primitive ([claude-code#30039](https://github.com/anthropics/claude-code/issues/30039)); Anthropic punted to the application layer. This is that layer.
 
 ## ack
 

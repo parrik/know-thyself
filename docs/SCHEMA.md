@@ -32,11 +32,11 @@ A node without this triple is not a node. Non-negotiable.
 > **Claim:** Provenance is the schema invariant — without the triple, the unit is not a graph node.
 > **Grounds:** Definitional rule, traceable to PROV-O's typed-triplet shape.
 > **Status:** stipulated
-> **Leans on:** every node type below; the validation rules; `know_thyself.render.graphviz`'s checks 1–6.
+> **Leans on:** every node type below; the validation rules; the validator's mechanical checks (rules 1–5, 10).
 
 ---
 
-## Node types — the eight typed shapes a claim can take
+## Node types — eight core typed shapes for claims, plus three temporal-organization types
 
 ```yaml
 # ── Reference: a biographical fact ──────────────────────────────
@@ -185,7 +185,7 @@ edges:
 > **Claim:** Eight typed edge relations cover the structural moves the graph needs to express.
 > **Grounds:** Enumerated relation table with directionality and meaning.
 > **Status:** stipulated
-> **Leans on:** validation rule 5 (every `edges[].to` resolves); the renderers' adjacency computations.
+> **Leans on:** validation rule 4 (every `edges[].to` resolves); the renderers' adjacency computations.
 
 ---
 
@@ -214,27 +214,28 @@ A graph is well-formed iff:
 
 1. Every node has a unique `id`.
 2. Every node has a complete `provenance` triple.
-3. Every edge has a complete `provenance` triple.
-4. Every `derivation.from` references an existing node.
-5. Every `edges[].to` references an existing node.
-6. Every `provenance.evidence.references` (if present) references existing nodes.
-7. Every `novel` has `tentative: true` and a non-empty `caveats:`.
-8. Every `emergent` has ≥2 distinct entries in `derivation.from`.
-9. Every `overlap` has ≥2 distinct entries in `evidence.references`, not trivially the same event restated.
-10. Every `practice` derives from at least one descriptive node (overlap, novel, observation).
+3. Every `derivation.from` references an existing node.
+4. Every `edges[].to` references an existing node.
+5. Every `provenance.evidence.references` (if present) references existing nodes.
+6. Every `novel` has `tentative: true` and a non-empty `caveats:`.
+7. Every `emergent` has ≥2 distinct entries in `derivation.from`.
+8. Every `overlap` has ≥2 distinct entries in `evidence.references`, not trivially the same event restated.
+9. Every `practice` derives from at least one descriptive parent (`overlap`, `novel`, `observation`, or a `reference` whose role-prefix is `R-experiment-` / `R-lens-` / `R-filter-`).
 
 If a graph uses the temporal-organization types (`now`, `theme`, `period`) the following also apply:
 
-11. There is at most one `type: now` node, with `id: NOW`.
-12. Every `theme` has ≥3 distinct entries in `binds:`, and `derivation.from` lists ≥2 distinct periods.
-13. No two `period` nodes have overlapping `span:` ranges (a transition event may appear in `contains:` on both sides only when the event is *the* transition).
+10. There is at most one `type: now` node, with `id: NOW`.
+11. Every `theme` has ≥3 distinct entries in `binds:`, and `derivation.from` lists ≥2 distinct periods.
+12. No two `period` nodes have overlapping `span:` ranges (a transition event may appear in `contains:` on both sides only when the event is *the* transition).
 
-`know_thyself.render.graphviz` checks 1–6 and 11 automatically. 7–10, 12, 13 require human judgment; verify during Phase 7.
+Edges carry `to:` and `relation:` only — they inherit provenance from the parent node's `derivation.from` when the edge mirrors that derivation. Explicit edge provenance is allowed but not required.
 
-> **Claim:** Thirteen conditions are jointly necessary and sufficient for a well-formed graph (10 core + 3 conditional on temporal-type use).
-> **Grounds:** Enumerated; partition between machine-checkable (1–6, 11) and human-judgment (7–10, 12–13) is operationalized in `know_thyself.render.graphviz`.
+Rules 1–5 and 10 are mechanically checkable from the YAML alone; 6–9, 11, 12 require human judgment and are verified during Phase 7 of START_HERE.md.
+
+> **Claim:** Twelve conditions are jointly necessary and sufficient for a well-formed graph (9 core + 3 conditional on temporal-type use).
+> **Grounds:** Enumerated; the partition between mechanical (1–5, 10) and human-judgment (6–9, 11–12) is the partition between syntactic and semantic verification. Rule 9 broadened to admit role-prefixed references after empirical use showed practices regularly derive from `R-lens-` / `R-experiment-` / `R-filter-` nodes. The edge-provenance requirement was dropped after empirical use showed essentially no edges in long-running graphs carry provenance — edges encode structural relationships whose justification lives on the parent node.
 > **Status:** stipulated
-> **Leans on:** `know_thyself.render.graphviz` (machine-checkable subset); START_HERE.md Phase 7 (human-judgment subset).
+> **Leans on:** the rule enumeration above; START_HERE.md Phase 7 (human-judgment subset).
 
 ---
 
@@ -266,24 +267,24 @@ Use descriptive slugs: `O01-first-day-of-job` over `O01`. Helps when the YAML is
 
 ---
 
-## Sub-categories of `reference` (added April 2026) — five role prefixes plus `forecast`
+## Sub-categories of `reference` — role prefixes
 
-After several weeks of building on a real graph, five patterns emerged as useful **sub-categories of `reference`** — not new node types. Extending the core type list is fragile (see `SCHEMA_DEPRECIATION.md`); descriptive prefixes keep the schema small while making common roles legible.
+Five role-prefix patterns keep common reference flavors legible without minting new top-level types. Extending the core type list is fragile (see `DEPRECATION.md`); prefixes keep the schema small.
 
-| Prefix / role | What it is | Example |
+| Prefix | Role | Example |
 |---|---|---|
 | `R-canary-*` | Evidence-backed leading indicator | *Sleep-onset latency >30 min for 3 nights predicts relapse* |
 | `R-lens-*` | Mental-model frame applied to other nodes | *Circuit breakers, Ulysses pact, Chesterton's Fence* |
 | `R-experiment-*` | Runnable method with an evidence base | *Implementation intentions* |
 | `R-filter-*` | Anti-pattern frame for a decision domain | *Revenue-line reverse interview* |
-| `type: forecast` | Time-horizon inference, flagged tentative | 1 month · 90 days · 1 year · 10 years · 30 years |
+| `R-forecast-*` *(or `E-forecast-*` for intersection-derived forecasts)* | Time-horizon inference, flagged tentative | A 90-day forecast about a deadline; a 5-year forecast about a career arc |
 
-`example-graph-extended.yaml` demonstrates these.
+`example-graph-extended.yaml` demonstrates these. Forecasts may live as prefixed `reference` nodes (`R-forecast-*`) when they extrapolate from a single source, or as prefixed `emergent` nodes (`E-forecast-*`) when they come from the intersection of two or more parents. Either way, mark `tentative: true`.
 
 > **Claim:** Common reference roles are best expressed as descriptive prefixes, not new top-level node types.
-> **Grounds:** Empirical — patterns observed after weeks of use; rationale grounded in SCHEMA_DEPRECIATION.md's argument against type-list bloat.
+> **Grounds:** Empirical — patterns observed after weeks of use; rationale grounded in DEPRECATION.md's argument against type-list bloat.
 > **Status:** tentative (introduced April 2026; could deprecate)
-> **Leans on:** SCHEMA_DEPRECIATION.md; example-graph-extended.yaml as the demonstrating instance.
+> **Leans on:** DEPRECATION.md; example-graph-extended.yaml as the demonstrating instance.
 
 ---
 
@@ -408,7 +409,7 @@ Periods and themes have **different cardinality** than references (a life has ~6
 > **Claim:** `now`, `theme`, and `period` are first-class node types because their cardinality, referential semantics, and validation rules differ from references.
 > **Grounds:** Cited cognitive-science substrates (Schank's TOP for theme; Conway's Self-Memory System for period; the *NOW* singleton's empirical role as graph orienting frame); structural arguments above.
 > **Status:** stipulated (introduced May 2026 after ~6 months of long-running graph use)
-> **Leans on:** SCHEMA_DEPRECIATION.md (the rule: extend types only when prefixes won't work); the validation-rules section below for the well-formedness conditions.
+> **Leans on:** DEPRECATION.md (the rule: extend types only when prefixes won't work); the validation-rules section below for the well-formedness conditions.
 
 ---
 

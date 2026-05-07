@@ -1729,7 +1729,7 @@
     - to: P07-care-real-and-substitute
       relation: emergent_from
     - to: OQ04-partner-or-enough
-      relation: informs
+      relation: qualifies
 
 - id: E07-helen-shapes-commissioning
   type: emergent

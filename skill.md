@@ -74,14 +74,13 @@ Operating rules derived from the patterns above? ("No X after Y." "Only work on 
 
 ### 7 — Validate and emit
 - unique id + complete provenance triple per node
-- provenance triple per edge
 - every `derivation.from` points to existing node
 - every `edges[].to` points to existing node
 - every `evidence.references` points to existing nodes
 - every `novel` has `tentative: true` and non-empty `caveats:`
 - every `emergent` has ≥2 distinct parents
 - every `overlap` has ≥2 distinct *independent* evidence references
-- every `practice` derives from at least one descriptive node
+- every `practice` derives from at least one descriptive parent (overlap, novel, observation, or a role-prefixed reference: `R-experiment-` / `R-lens-` / `R-filter-`)
 
 Compute in-degree per node. Tell the user which observations are most load-bearing — those are where a correction would cascade.
 
