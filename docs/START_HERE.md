@@ -81,6 +81,15 @@ For sensitive content that's structurally load-bearing but shouldn't be casually
 > **Status:** stipulated
 > **Leans on:** Phase 1 (ask which observations need HANDLING); SAFETY.md.
 
+## `source_kind` — distinguish lived from told from inferred from imagined
+
+Every node may carry an optional `source_kind:` field with one of `lived | told | inferred | imagined`. Lived = experienced first-hand. Told = heard from someone else (family, friend, document). Inferred = pattern derived from observations. Imagined = counterfactual / hypothetical / future-projection. The distinction prevents told-by-others content from collapsing into the lived register — a known failure mode in personal-memory work (Tulving 1985, Johnson 1993).
+
+> **Claim:** Tagging origin-of-content prevents the four registers from collapsing into one another.
+> **Grounds:** Tulving's autonoetic-consciousness frame; Johnson's source-monitoring research.
+> **Status:** stipulated
+> **Leans on:** SCHEMA.md `source_kind` definition; SAFETY.md (lived ≠ inferred is load-bearing for safety-relevant content).
+
 ---
 
 ## Phases — do not jump ahead
@@ -97,19 +106,19 @@ For sensitive content that's structurally load-bearing but shouldn't be casually
 > **Claim:** A pattern qualifies as `overlap` only when grounded in ≥2 independent episodes.
 > **Grounds:** Phase rule; restates the core attribution-≠-confidence rule.
 > **Status:** stipulated
-> **Leans on:** Phase 1's inventory; SCHEMA.md validation rule 9.
+> **Leans on:** Phase 1's inventory; SCHEMA.md validation rule 8.
 
 **3. Novels — single-derivation interpretations, marked tentative with caveats.** Single-derivation interpretations get `novel`, with `tentative: true` and `caveats:`. Include claims I've repeated often that actually rest on one episode — they feel settled and aren't.
 
 > **Claim:** Single-derivation interpretations are `novel`, mandatory `tentative: true` and `caveats:`.
-> **Grounds:** Phase rule; matches SCHEMA.md validation rule 7.
+> **Grounds:** Phase rule; matches SCHEMA.md validation rule 6.
 > **Status:** stipulated
 > **Leans on:** the felt-settled-but-isn't failure mode; Phase 8's reflection step.
 
 **4. Emergents — claims that only appear at the intersection of ≥2 parents.** Claims not present in any single observation but precipitating only when 2+ nodes are held together. Both parents go in `derivation.from`. If one parent alone produces the claim, it's not emergent.
 
 > **Claim:** Emergent claims require ≥2 parents and disappear if any one parent alone could produce them.
-> **Grounds:** Phase rule; matches SCHEMA.md validation rule 8.
+> **Grounds:** Phase rule; matches SCHEMA.md validation rule 7.
 > **Status:** stipulated
 > **Leans on:** Phases 1–3 (which produce the parents); SCHEMA.md emergent definition.
 
@@ -130,14 +139,14 @@ For sensitive content that's structurally load-bearing but shouldn't be casually
 **6.5. Practices (optional) — operating rules that derive from descriptive claims.** Have I adopted operating rules derived from the patterns? Each must `derive_from` a descriptive node — a floating rule belongs in goals.md, not here. Skip if none apply.
 
 > **Claim:** Practices are normative rules that must trace to a descriptive parent; floating rules are out of scope.
-> **Grounds:** Phase rule; matches SCHEMA.md validation rule 10.
+> **Grounds:** Phase rule; matches SCHEMA.md validation rule 9.
 > **Status:** stipulated
 > **Leans on:** Phases 2–4 (the descriptive parents); SCHEMA.md practice definition.
 
-**7. Validate — produce the YAML and check well-formedness.** Produce the YAML. Check: every node has provenance, every edge has provenance, every `derivation.from` points to an existing node, every HANDLING-flagged observation carries its directive. Compute in-degree — tell me which observations are most load-bearing.
+**7. Validate — produce the YAML and check well-formedness.** Produce the YAML. Check: every node has provenance, every `derivation.from` points to an existing node, every `edges[].to` resolves, every HANDLING-flagged observation carries its directive. Compute in-degree — tell me which observations are most load-bearing.
 
 > **Claim:** Validation enforces the well-formedness rules and surfaces load-bearing observations by in-degree.
-> **Grounds:** Phase rule; corresponds to SCHEMA.md validation rules 1–10.
+> **Grounds:** Phase rule; corresponds to SCHEMA.md validation rules 1–9 (core well-formedness).
 > **Status:** stipulated
 > **Leans on:** SCHEMA.md validation section.
 
