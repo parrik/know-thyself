@@ -136,12 +136,12 @@ Every node may carry an optional `source_kind:` field with one of `lived | told 
 > **Status:** stipulated
 > **Leans on:** SCHEMA.md's repurposed-equivalency extension.
 
-**6.5. Practices (optional) — operating rules that derive from descriptive claims.** Have I adopted operating rules derived from the patterns? Each must `derive_from` a descriptive node — a floating rule belongs in goals.md, not here. Skip if none apply.
+**6.5. Practices (optional) — operating rules that derive from descriptive claims.** Have I adopted operating rules derived from the patterns? Each must `derive_from` a descriptive node — a floating rule belongs in goals.md, not here. Skip if none apply. Practices are human-gated: draft each candidate, show it to me, and include it in the final YAML only after I say yes to that specific rule. Every other node type you write without asking.
 
-> **Claim:** Practices are normative rules that must trace to a descriptive parent; floating rules are out of scope.
-> **Grounds:** Phase rule; matches SCHEMA.md validation rule 9.
+> **Claim:** Practices are normative rules that must trace to a descriptive parent and enter the graph only on explicit human acceptance; floating rules are out of scope.
+> **Grounds:** Phase rule; matches SCHEMA.md validation rule 9 and SCHEMA.md's write gate (a wrong node is cheap to fix; a wrong rule is acted on).
 > **Status:** stipulated
-> **Leans on:** Phases 2–4 (the descriptive parents); SCHEMA.md practice definition.
+> **Leans on:** Phases 2–4 (the descriptive parents); SCHEMA.md practice definition; SCHEMA.md write gate.
 
 **7. Validate — produce the YAML and check well-formedness.** Produce the YAML. Check: every node has the four required provenance fields (`said_by`, `evidence_kind`, `derives_from`, `how_it_follows`), every `derives_from` points to an existing node, every `edges[].to` resolves, every HANDLING-flagged observation carries its directive. Compute in-degree — tell me which observations are most load-bearing.
 

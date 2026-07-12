@@ -2,13 +2,51 @@
 # example-graph.yaml — a small fictional example demonstrating the schema
 #
 # This is a composite persona (not a real person) designed to show every node
-# type and evidence type in use. Use it as a reference when building your own
-# graph. Your graph will be larger, more specific, and will include things this
-# example doesn't cover.
+# type and evidence type in use — including the temporal-organization types
+# (now / theme / period). Use it as a reference when building your own graph.
+# Your graph will be larger, more specific, and will include things this
+# example doesn't cover (a real life has ~6–10 periods, not three).
 #
 # Persona: "Alex," mid-40s, recently moved to a new city after a long career in
 # publishing, managing the transition while raising a teenage child.
 # ==============================================================================
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  NOW — the singleton orienting node. Read this first; everything else is
+#  context for what's in here.
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: NOW
+  type: now
+  name: "NOW — current moves"
+  statement: |
+    Read this first. Everything else is context for what's in this node.
+    Last updated: May 2025.
+
+    ## Frame
+    Nine months into the new city. The acute transition is over; the
+    question has shifted from "will this hold?" to "what is this
+    chapter for?" Routine re-established and load-bearing (P01).
+
+    ## This month
+    • Decide summer arrangements for the child with the ex-partner.
+    • Keep therapy weekly; pattern-finding phase (O03).
+
+    ## This quarter
+    • Answer OQ01 explicitly: is this move a 2-3 year plan or permanent?
+      Schooling and housing decisions queue behind it.
+
+    ## Standing rules
+    • Sunday 8–10am protected for the running group (PR01).
+
+    ## Canaries — watch for
+    • Running routine slipping for >1 week → check isolation and work
+      hours before anything else (P01, N01).
+  said_by: "Alex, self-articulated"
+  said_when: "2025-05"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "direct"
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  REFERENCES — biographical facts
@@ -133,6 +171,36 @@
   evidence_kind: self-report
   derives_from:
     - R02-career
+  how_it_follows: "direct"
+- id: O06-daily-runs-previous-city
+  type: observation
+  name: "Daily morning runs through the previous-city years (~2016–2024)"
+  statement: |
+    For roughly the last eight years in the previous city, Alex ran most
+    mornings before work — the routine O01 describes stopping at the
+    move. Alex has called it, in passing, "the thing that kept the
+    divorce years survivable." The routine did not survive the
+    relocation and did not restart until the running group (O02).
+  said_by: "Alex, self-report"
+  said_when: "2025-01"
+  evidence_kind: self-report
+  derives_from:
+    - R02-career
+  how_it_follows: "direct; recalled while describing what stopped at the move"
+- id: O07-cross-country-in-school
+  type: observation
+  name: "Cross-country as the high-school stabilizer"
+  statement: |
+    In high school in the small town, Alex ran cross-country all four
+    years. Described it as the fixed point of those years — not
+    competitive ambition but the structure itself: same route, same
+    early hour, in every season. The practice ended when Alex left
+    for university and did not resume until adulthood.
+  said_by: "Alex, self-report (recalled Apr 2025)"
+  said_when: "2025-04"
+  evidence_kind: self-report
+  derives_from:
+    - R01-origin
   how_it_follows: "direct"
 # ──────────────────────────────────────────────────────────────────────────────
 #  OVERLAPS — patterns grounded by 2+ independent episodes
@@ -285,7 +353,9 @@
       evidence_notes: "The external framework provides grounding vocabulary for P01"
       how_it_follows: "External framework bridged to P01"
 # ──────────────────────────────────────────────────────────────────────────────
-#  PRACTICES — operating rules derived from descriptive claims (optional)
+#  PRACTICES — operating rules derived from descriptive claims (optional).
+#  Human-gated: the one type the model may draft but not save — a practice
+#  enters the graph only on the user's explicit yes (SCHEMA.md, write gate).
 # ──────────────────────────────────────────────────────────────────────────────
 
 - id: PR01-protect-sunday-run
@@ -337,3 +407,102 @@
   derives_from:
     - R03-family
   how_it_follows: "unresolved"
+# ──────────────────────────────────────────────────────────────────────────────
+#  PERIODS — lifetime spans (Conway Self-Memory System containers).
+#  Three shown here for the example; a real life has ~6–10. Spans do not
+#  overlap; transition events belong to one side.
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: L-01-small-town-childhood
+  type: period
+  name: "Small-town childhood (1980–1998)"
+  span: [1980, 1998]
+  tone: "rooted-then-leaving"
+  statement: |
+    Eighteen years in the town of ~8,000 (R01). Reading-heavy household;
+    cross-country all four high-school years (O07). Left at 18 for
+    university in a large city and did not move back.
+  contains:
+    - R01-origin
+    - O07-cross-country-in-school
+  said_by: "Alex, self-articulated"
+  said_when: "2025-05"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "lifetime-period demarcation (Conway SMS)"
+- id: L-02-publishing-years-previous-city
+  type: period
+  name: "Publishing career in the previous city (2005–2024)"
+  span: [2005, 2024]
+  tone: "building-then-holding"
+  statement: |
+    Nineteen years: editor to senior editor (R02), marriage and divorce
+    (R03, divorced 2019), the child's early years, the daily-run routine
+    of the back half (O06). The period ends at the August 2024 move.
+  contains:
+    - R02-career
+    - R03-family
+    - O06-daily-runs-previous-city
+  said_by: "Alex, self-articulated"
+  said_when: "2025-05"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "lifetime-period demarcation (Conway SMS)"
+- id: L-03-new-city
+  type: period
+  name: "New city (Aug 2024–present)"
+  span: [2024, 2025]
+  tone: "rebuilding-with-stakes"
+  statement: |
+    Nine months as of NOW. Director-level role at the smaller publishing
+    house (R04). Most of the graph's observations (O01–O05) and all of
+    its open questions live here.
+  contains:
+    - R04-move
+    - O01-first-three-months
+    - O02-running-group
+    - O03-therapist-referral
+    - O04-daughter-grades-recovered
+    - O05-workplace-conflict
+  said_by: "Alex, self-articulated"
+  said_when: "2025-05"
+  evidence_kind: self-report
+  derives_from: []
+  how_it_follows: "lifetime-period demarcation (Conway SMS)"
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  THEMES — cross-time organizing packets (Schank TOP). A theme does not
+#  generalize (that's what overlaps do); it binds ≥3 instances across
+#  different periods and says: these are one long-running thread.
+# ──────────────────────────────────────────────────────────────────────────────
+
+- id: T-01-running-as-anchor-practice
+  type: theme
+  name: "Running as anchor practice — one thread across three periods"
+  statement: |
+    The same shape recurs in three otherwise-unrelated containers:
+    high-school cross-country (L-01, O07), the daily runs of the
+    previous-city years (L-02, O06), and the Sunday running group
+    (L-03, O02). In each, a fixed physical practice carries load that
+    nothing else in the period carries. This is not the generalization
+    P01 makes by induction (routine is load-bearing); the theme binds
+    the constellation — that the same practice re-forms in every
+    chapter of the life says something earlier than any one instance.
+    The recognition is the point; do not extract an implication.
+  members:
+    - O07-cross-country-in-school
+    - O06-daily-runs-previous-city
+    - O02-running-group
+  said_by: "Surfaced May 2025 in a graph-review conversation"
+  said_when: "2025-05"
+  evidence_kind: pattern-across-cases
+  evidence_notes: "Theme recognized across lifetime periods, not derived by induction"
+  evidence_refs:
+    - O07-cross-country-in-school
+    - O06-daily-runs-previous-city
+    - O02-running-group
+  derives_from:
+    - L-01-small-town-childhood
+    - L-02-publishing-years-previous-city
+    - L-03-new-city
+  how_it_follows: "thematic recognition across periods (Schank TOP)"

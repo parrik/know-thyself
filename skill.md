@@ -72,6 +72,8 @@ If the user works within a formal framework, note the bridge as `equivalency`. D
 ### 6.5 — Practices (optional)
 Operating rules derived from the patterns above? ("No X after Y." "Only work on things I use." "Ask directly rather than hope to be seen.") Each must `derive_from` an `overlap`, `novel`, or `observation`. Floating commitments belong in goals, not here. Skip if none apply.
 
+Practices are human-gated: draft each candidate, show it, and include it in the emitted YAML only after the user says yes to that specific rule. Every other type you may write without asking (see SCHEMA.md's write gate).
+
 ### 7 — Validate and emit
 - unique id + four required provenance fields per node (`said_by`, `evidence_kind`, `derives_from`, `how_it_follows`)
 - every `derives_from` points to existing node
