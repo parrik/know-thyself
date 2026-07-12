@@ -80,6 +80,7 @@
   statement: |
     Divorced 2019. Primary caregiver for a 14-year-old. Ex-partner lives
     in the previous city; shared custody is possible but practically rare.
+  valid_at: 2025-05          # person-state reference — decays; re-ground within ~a year
   said_by: "Alex, self-report"
   said_when: "2025"
   evidence_kind: self-report
@@ -138,6 +139,7 @@
     month three, beginning to notice repeating patterns in own reactions.
     HANDLING: Alex is private about the content of therapy. Do not ask
     about session specifics unless Alex raises them.
+  handling: do-not-raise-unprompted   # structured form of the inline directive above
   said_by: "Alex, self-report"
   said_when: "2025-05"
   evidence_kind: self-report
@@ -189,6 +191,7 @@
   how_it_follows: "direct; recalled while describing what stopped at the move"
 - id: O07-cross-country-in-school
   type: observation
+  source_kind: lived         # first-person re-experienced (Tulving's autonoetic register)
   name: "Cross-country as the high-school stabilizer"
   statement: |
     In high school in the small town, Alex ran cross-country all four
@@ -252,6 +255,7 @@
 - id: N01-isolation-is-early-warning
   type: novel
   tentative: true
+  valid_at: 2025-05          # person-state novel — flag for re-grounding if still ungrounded by ~Nov 2025
   name: "Isolation is an early warning signal, not a neutral state"
   statement: |
     PROPOSED: for Alex, extended periods without meaningful social contact
@@ -302,6 +306,32 @@
 #  EMERGENT — produced by intersection
 # ──────────────────────────────────────────────────────────────────────────────
 
+- id: E02-move-as-natural-experiment
+  type: emergent
+  name: "The move was a natural experiment on the routine-stability link"
+  statement: |
+    The relocation removed the routine in an otherwise-changed context
+    (O01) and stability deteriorated across the board; restoring the
+    routine in that same new context (O02) restored stability (O04).
+    Same variable, different environment, different outcome — the move
+    is evidence that the routine is causal for stability, not merely
+    coincident with the previous city's environment. Neither episode
+    alone produces the claim; the before/after pair does.
+  said_by: "Surfaced May 2025"
+  said_when: "2025-05"
+  evidence_kind: natural-experiment
+  evidence_notes: "Context change as the intervention: routine removed → deterioration; routine restored in same context → recovery"
+  evidence_refs:
+    - O01-first-three-months
+    - O02-running-group
+    - O04-daughter-grades-recovered
+  derives_from:
+    - O01-first-three-months
+    - O02-running-group
+  how_it_follows: "before/after contrast across the same context change"
+  edges:
+    - to: P01-routine-as-regulation
+      relation: grounds
 - id: E01-child-stability-depends-on-alex-stability
   type: emergent
   name: "Child's stability in the new city depends on Alex's routine stability"
@@ -478,6 +508,7 @@
 
 - id: T-01-running-as-anchor-practice
   type: theme
+  source_kind: inferred      # pattern claim; no single experienced moment
   name: "Running as anchor practice — one thread across three periods"
   statement: |
     The same shape recurs in three otherwise-unrelated containers:
