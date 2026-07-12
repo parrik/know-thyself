@@ -5,7 +5,7 @@ Formal spec for the memory graph. If a node or edge violates this spec, it's a b
 > **Claim:** This document is the formal spec; deviations are bugs, not variants.
 > **Grounds:** Stated as the file's purpose.
 > **Status:** stipulated
-> **Leans on:** every renderer and validator in the repo; START_HERE.md (which paraphrases this spec for the LLM).
+> **Leans on:** the renderers and validator at [know-thyself-search](https://github.com/parrik/know-thyself-search); START_HERE.md (which paraphrases this spec for the LLM).
 
 ---
 
@@ -28,11 +28,11 @@ derives_from: [list of parent node-ids]
 how_it_follows: "how this claim follows from its parents — one short sentence"
 ```
 
-A node without these fields is not a node. Non-negotiable.
+Four of the seven are required on every node — `said_by`, `evidence_kind`, `derives_from`, `how_it_follows` (validation rule 2); `said_when`, `evidence_notes`, and `evidence_refs` are optional but recommended. A node without the required four is not a node. Non-negotiable.
 
 For root nodes (no parents): `derives_from: []` and `how_it_follows: "direct"` is fine.
 
-> **Claim:** Provenance is the schema invariant — without the seven fields, the unit is not a graph node.
+> **Claim:** Provenance is the schema invariant — without the four required fields, the unit is not a graph node.
 > **Grounds:** Definitional rule. The shape is structurally equivalent to PROV-O's three-tuple (attribution / evidence / derivation), flattened to plain English keys for readability. RDF/PROV-O compatibility is available by re-grouping; the schema's primary surface is human-editable YAML.
 > **Status:** stipulated
 > **Leans on:** every node type below; the validation rules; the validator's mechanical checks (rules 1–10).
@@ -596,13 +596,13 @@ I make seven deliberate extensions beyond scientific-claims provenance schemas:
 > **Claim:** Seven deliberate extensions adapt the scientific-claims provenance shape to the constraints of personal memory.
 > **Grounds:** Enumerated, each tied to a specific constraint (no replication, no ground truth, fuzzy validity, node-dense growth).
 > **Status:** stipulated
-> **Leans on:** README.md's "What I built"; each extension's corresponding schema element above.
+> **Leans on:** README.md's "what's different"; each extension's corresponding schema element above.
 
 ---
 
 ## Personal-graph reserved fields — fields the schema permits but doesn't require
 
-Long-running personal graphs accumulate fields beyond the seven required provenance fields. These have emerged from real use; the schema reserves them so a personal graph using them is still well-formed. Tools may render or ignore them.
+Long-running personal graphs accumulate fields beyond the seven provenance fields. These have emerged from real use; the schema reserves them so a personal graph using them is still well-formed. Tools may render or ignore them.
 
 ### Lifecycle (graph hygiene over time)
 

@@ -1,8 +1,5 @@
+# Schema-only repo. For tooling (renderers, retrieval, MCP server)
+# see https://github.com/parrik/know-thyself-search.
 .venv/
-case-study/
 *.pyc
 __pycache__/
-
-# Generated index — regenerate with
-# `python -m know_thyself.retrieval.embed <graph.yaml>`
-graph-embeddings.json

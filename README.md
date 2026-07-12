@@ -26,7 +26,7 @@ docs/
 ├── RELATED_FRAMEWORKS.md  PROV-O, Toulmin, Zettelkasten, epistemic-status, PKG
 └── DEPRECATION.md         why typed graphs decay
 examples/
-└── example-graph.yaml             25-node fictional example — every node type in use
+└── example-graph.yaml             26-node fictional example — every node and evidence type in use
 skill.md                            Claude Code slash-command definition
 ```
 

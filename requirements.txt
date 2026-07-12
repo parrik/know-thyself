@@ -1,4 +1,0 @@
-pyyaml>=6.0
-
-# Schema-only repo. For tooling (renderers, retrieval, MCP server)
-# see https://github.com/parrik/know-thyself-search.
