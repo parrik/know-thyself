@@ -149,6 +149,9 @@ For root nodes (no parents): `derives_from: []` and `how_it_follows: "direct"` i
   how_it_follows: "direct"
 
 # ── Practice: a normative operating rule ────────────────────────
+# HUMAN-GATED: the one type the model must not save on its own.
+# Draft it, then wait for the user's explicit yes (see "The write
+# gate" section below).
 - id: PR01-example
   type: practice
   name: "The rule"
@@ -170,6 +173,24 @@ For root nodes (no parents): `derives_from: []` and `how_it_follows: "direct"` i
 > **Grounds:** Enumerated definitions above; each carries a YAML template and a discriminating rule.
 > **Status:** stipulated
 > **Leans on:** the validation rules below (which enforce per-type constraints); the IDs section; START_HERE.md's node-type table.
+
+---
+
+## The write gate — who writes what
+
+Every type except `practice` is model-writable: the model authors and saves references, observations, overlaps, novels, emergents, equivalencies, opens, themes, periods, and `NOW` updates on its own. A `practice` is the one type that waits for the human: the model may *draft* a practice candidate, but the node enters the graph only on the user's explicit yes.
+
+| Types | Who saves |
+|---|---|
+| R / O / P / N / E / EQ / OQ / T- / L- / NOW | model, autonomously |
+| PR (`practice`) | human-in-the-loop — explicit yes required |
+
+The asymmetry is deliberate and narrow. A wrong descriptive node is cheap: it sits in the record, marked with its provenance, and gets corrected or contradicted later. A wrong practice is the thing you go and act on. Gating everything doesn't scale (the record stops filling in); gating nothing hands the model your operating rules. Gating exactly the normative layer keeps the human at the one point where an error is expensive.
+
+> **Claim:** Descriptive and organizational nodes are model-writable; practices require explicit human acceptance before entering the graph.
+> **Grounds:** Asymmetric cost of error (a wrong node is corrected later; a wrong rule is acted on); ~6 months of two-ring operation on a long-running graph after an earlier gate-everything policy failed to scale.
+> **Status:** stipulated (write policy adopted May 2026, superseding full hand-curation)
+> **Leans on:** the `practice` type definition above; DEPRECATION.md (the durable thing is the discipline — here, the discipline is the gate).
 
 ---
 
@@ -297,12 +318,12 @@ Five role-prefix patterns keep common reference flavors legible without minting 
 | `R-filter-*` | Anti-pattern frame for a decision domain | *Revenue-line reverse interview* |
 | `R-forecast-*` *(or `E-forecast-*` for intersection-derived forecasts)* | Time-horizon inference, flagged tentative | A 90-day forecast about a deadline; a 5-year forecast about a career arc |
 
-`example-graph-extended.yaml` demonstrates these. Forecasts may live as prefixed `reference` nodes (`R-forecast-*`) when they extrapolate from a single source, or as prefixed `emergent` nodes (`E-forecast-*`) when they come from the intersection of two or more parents. Either way, mark `tentative: true`.
+Forecasts may live as prefixed `reference` nodes (`R-forecast-*`) when they extrapolate from a single source, or as prefixed `emergent` nodes (`E-forecast-*`) when they come from the intersection of two or more parents. Either way, mark `tentative: true`.
 
 > **Claim:** Common reference roles are best expressed as descriptive prefixes, not new top-level node types.
 > **Grounds:** Empirical — patterns observed after weeks of use; rationale grounded in DEPRECATION.md's argument against type-list bloat.
 > **Status:** tentative (introduced April 2026; could deprecate)
-> **Leans on:** DEPRECATION.md; example-graph-extended.yaml as the demonstrating instance.
+> **Leans on:** DEPRECATION.md.
 
 ---
 
@@ -368,13 +389,13 @@ A `theme` is a recurring shape of meaning that binds nodes from different *perio
     it's a constellation I recognize across times.
   members:                            # ≥3 cross-period instances
     - O11-college-roommate-conversation
-    - O27-first-anniversary-surprise
-    - O43-second-date-after-divorce
+    - O12-first-anniversary-surprise
+    - O13-second-date-after-divorce
   said_by: "Surfaced May 2026"
   said_when: "2026-05"
   evidence_kind: pattern-across-cases
   evidence_notes: "Theme recognized across lifetime periods, not derived"
-  evidence_refs: [O11-..., O27-..., O43-...]
+  evidence_refs: [O11-..., O12-..., O13-...]
   derives_from: [L-01-college, L-03-marriage, L-05-post-divorce]
   how_it_follows: "thematic recognition across periods (Schank TOP)"
 ```
@@ -402,10 +423,10 @@ A `period` is a named lifetime span with a start, an end, and a tone — what Ma
     the household stayed legible from outside throughout but the
     inside register changed in 2014.
   contains:                            # nodes whose timeframe falls inside
-    - O20-wedding
-    - O22-daughter-born
-    - O28-brooklyn-move
-    - O35-divorce-finalized
+    - O08-wedding
+    - O09-daughter-born
+    - O10-brooklyn-move
+    - O14-divorce-finalized
   said_by: "Self-articulated"
   said_when: "2026-05"
   evidence_kind: self-report
